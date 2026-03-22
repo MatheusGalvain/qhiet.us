@@ -1,0 +1,206 @@
+import HermesBot from '@/components/layout/HermesBot'
+import Link from 'next/link'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Membros',
+  description: 'Conheça os planos do QHIETHUS — Profano (gratuito) e Iniciado (R$29/mês).',
+}
+
+const PLAN_FEATURES = {
+  profano: [
+    { check: true,  text: 'Acesso a todas as transmissões de <strong>Leitura Livre</strong>' },
+    { check: true,  text: '<strong>1 livro mensal</strong> por e-mail' },
+    { check: true,  text: 'Perfil com XP e ranking global' },
+    { check: false, text: 'Transmissões exclusivas Iniciado' },
+    { check: false, text: 'Quiz de IA Hermes com XP bônus' },
+    { check: false, text: '4 livros mensais curados' },
+    { check: false, text: 'Acesso antecipado a novos conteúdos' },
+  ],
+  iniciado: [
+    { check: true, text: 'Tudo do plano Profano' },
+    { check: true, text: '<strong>Todas as transmissões</strong> — inclusive exclusivas' },
+    { check: true, text: 'Quiz de <strong>IA Hermes</strong> ao final de cada artigo' },
+    { check: true, text: '<strong>4 livros mensais</strong> curados por e-mail' },
+    { check: true, text: 'XP bônus por quiz e leitura exclusiva' },
+    { check: true, text: 'Acesso antecipado a novos conteúdos' },
+    { check: true, text: 'Badge exclusiva no perfil' },
+  ],
+}
+
+const COMPARE_ROWS = [
+  { label: 'Transmissões de Leitura Livre',        profano: true,     iniciado: true },
+  { label: 'Transmissões Exclusivas Iniciado',      profano: false,    iniciado: true },
+  { label: 'Quiz de IA Hermes',                     profano: false,    iniciado: true },
+  { label: 'XP por leitura',                        profano: true,     iniciado: true },
+  { label: 'XP bônus por quiz',                     profano: false,    iniciado: true },
+  { label: 'Livros mensais por e-mail',             profano: '1 livro', iniciado: '4 livros' },
+  { label: 'Ranking global',                        profano: true,     iniciado: true },
+  { label: 'Badge de assinante no perfil',          profano: false,    iniciado: true },
+]
+
+export default function MembrosPage() {
+  return (
+    <>
+      {/* HERO */}
+      <div className="membros-hero">
+        <div style={{ padding: 'clamp(40px,6vw,72px) var(--px)', borderRight: '1px solid var(--faint)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 24 }}>
+          <div>
+            <p className="eyebrow" style={{ marginBottom: 20 }}>Portal Oculto · Planos de Acesso</p>
+            <h1 className="hero-title-xl">
+              A PORTA<br /><span style={{ color: 'var(--red)' }}>ESTÁ</span><br />ABERTA
+            </h1>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(14px,1.5vw,19px)', color: 'var(--muted)', lineHeight: 1.8, maxWidth: 480, marginTop: 20 }}>
+              Escolha como deseja percorrer o caminho. O conhecimento aguarda — a profundidade do acesso é sua escolha.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <Link href="/login?tab=register" className="btn-primary">Criar conta grátis</Link>
+            <CheckoutButton label="Assinar R$29/mês" />
+          </div>
+        </div>
+
+        {/* Hero right (hidden on mobile via .page-hero / .hero-right) */}
+        <div className="hero-right" style={{ padding: 'clamp(40px,6vw,72px) var(--px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 32 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
+            {[
+              { n: '212', l: 'Transmissões' },
+              { n: '87',  l: 'Livros' },
+              { n: '6',   l: 'Domínios' },
+              { n: '∞',   l: 'Conhecimento' },
+            ].map(({ n, l }, i) => (
+              <div key={l} style={{ padding: 20, borderRight: i % 2 === 0 ? '1px solid var(--faint)' : 'none', borderBottom: i < 2 ? '1px solid var(--faint)' : 'none' }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,4vw,52px)', color: 'var(--cream)', letterSpacing: 2, display: 'block', lineHeight: 1 }}>{n}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginTop: 4, display: 'block' }}>{l}</span>
+              </div>
+            ))}
+          </div>
+          <blockquote style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 17, color: 'var(--muted)', lineHeight: 1.75, borderLeft: '1px solid var(--red-dim)', paddingLeft: 16 }}>
+            "A iniciação não é um evento — é um processo contínuo de transformação interior."
+            <cite style={{ display: 'block', marginTop: 8, fontStyle: 'normal', fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--faint)' }}>— Tradição Hermética</cite>
+          </blockquote>
+        </div>
+      </div>
+
+      {/* O QUE É */}
+      <div className="section-div"><div className="sdiv-line" /><span className="sdiv-sym">◉</span><span className="sdiv-text">O que é o QHIETHUS</span><div className="sdiv-line" /></div>
+
+      <div className="what-grid">
+        {[
+          { n: '01', title: 'Transmissões', desc: 'Artigos aprofundados sobre hermetismo, cabala, gnosticismo, alquimia, tarot e rosacruz — organizados em categorias temáticas.' },
+          { n: '02', title: 'Quiz Hermes',  desc: 'Ao final de cada transmissão, a IA Hermes gera questões de compreensão. Acerte para ganhar XP bônus e subir no ranking.' },
+          { n: '03', title: 'Livros Mensais', desc: 'Todo mês, livros de referência chegam direto no seu e-mail. Profanos recebem 1 — Iniciados recebem 4 títulos curados.' },
+        ].map(({ n, title, desc }) => (
+          <div key={n} className="what-col" style={{ padding: 'clamp(28px,4vw,48px) clamp(20px,3vw,40px)', borderRight: '1px solid var(--faint)' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 64, color: 'var(--faint)', lineHeight: 1, marginBottom: 12 }}>{n}</div>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,2.5vw,28px)', letterSpacing: 2, color: 'var(--cream)', marginBottom: 14 }}>{title}</h3>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--muted)', lineHeight: 1.8 }}>{desc}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* PLANOS */}
+      <div style={{ borderBottom: '1px solid var(--faint)' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, padding: '20px var(--px)', borderBottom: '1px solid var(--faint)' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px,6vw,64px)', letterSpacing: 3, color: 'var(--cream)' }}>PLANOS</h2>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--muted)' }}>Sem fidelidade. Cancele quando quiser.</p>
+        </div>
+
+        <div className="plans-grid">
+          {/* PROFANO */}
+          <div className="plan-col">
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 20, display: 'block' }}>Acesso Livre</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(48px,6vw,72px)', color: 'var(--cream)', letterSpacing: 2, lineHeight: 1 }}>R$0</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: 2 }}>/mês</span>
+            </div>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,32px)', letterSpacing: 4, color: 'var(--muted)', marginBottom: 24 }}>PROFANO</p>
+            <div style={{ height: 1, background: 'var(--faint)', margin: '24px 0' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1 }}>
+              {PLAN_FEATURES.profano.map(({ check, text }, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontFamily: 'var(--font-body)', fontSize: 'clamp(14px,1.5vw,16px)', color: 'var(--muted)', lineHeight: 1.5 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', flexShrink: 0, marginTop: 3 }}>{check ? '◉' : '○'}</span>
+                  <span dangerouslySetInnerHTML={{ __html: text }} />
+                </div>
+              ))}
+            </div>
+            <Link href="/login?tab=register" style={{ display: 'block', width: '100%', marginTop: 32, padding: 16, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 4, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)', textDecoration: 'none', transition: 'all .2s' }}>
+              Criar conta grátis
+            </Link>
+          </div>
+
+          {/* INICIADO */}
+          <div className="plan-col" style={{ background: 'linear-gradient(135deg,var(--surface),rgba(176,42,30,.04))' }}>
+            <div style={{ position: 'relative', marginBottom: 20 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--red)', border: '1px solid var(--red-dim)', padding: '4px 12px', display: 'inline-block', position: 'relative' }}>
+                <span style={{ position: 'absolute', top: -10, right: 0, fontFamily: 'var(--font-mono)', fontSize: 7, letterSpacing: 2, background: 'var(--red)', color: '#fff', padding: '2px 8px' }}>MAIS POPULAR</span>
+                ◈ Assinante
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(48px,6vw,72px)', color: 'var(--cream)', letterSpacing: 2, lineHeight: 1 }}>R$29</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: 2 }}>/mês</span>
+            </div>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,32px)', letterSpacing: 4, color: 'var(--red)', marginBottom: 24 }}>INICIADO</p>
+            <div style={{ height: 1, background: 'var(--faint)', margin: '24px 0' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1 }}>
+              {PLAN_FEATURES.iniciado.map(({ check, text }, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontFamily: 'var(--font-body)', fontSize: 'clamp(14px,1.5vw,16px)', color: 'var(--muted)', lineHeight: 1.5 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--red)', flexShrink: 0, marginTop: 3 }}>◉</span>
+                  <span dangerouslySetInnerHTML={{ __html: text }} />
+                </div>
+              ))}
+            </div>
+            <CheckoutButton label="Assinar Iniciado →" fullWidth />
+          </div>
+        </div>
+      </div>
+
+      {/* COMPARE TABLE — horizontal scroll on mobile */}
+      <div style={{ borderBottom: '1px solid var(--faint)' }}>
+        <div className="section-div"><div className="sdiv-line" /><span className="sdiv-sym">◈</span><span className="sdiv-text">Comparação Detalhada</span><div className="sdiv-line" /></div>
+
+        <div className="compare-scroll">
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 540 }}>
+            <thead>
+              <tr>
+                <th style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)', padding: '16px var(--px)', borderBottom: '1px solid var(--faint)', textAlign: 'left' }}>Recurso</th>
+                <th style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)', padding: '16px 40px', borderBottom: '1px solid var(--faint)', textAlign: 'center', width: 160 }}>Profano</th>
+                <th style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--red)', padding: '16px 40px', borderBottom: '1px solid var(--faint)', textAlign: 'center', width: 160 }}>Iniciado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARE_ROWS.map(({ label, profano, iniciado }, i) => (
+                <tr key={i}>
+                  <td style={{ padding: '14px var(--px)', borderBottom: '1px solid var(--faint)', fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--muted)' }}>{label}</td>
+                  <td style={{ padding: '14px 40px', borderBottom: '1px solid var(--faint)', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                    {typeof profano === 'boolean'
+                      ? <span style={{ color: profano ? 'var(--red)' : 'var(--faint)' }}>{profano ? '◉' : '○'}</span>
+                      : <span style={{ color: 'var(--cream)' }}>{profano}</span>}
+                  </td>
+                  <td style={{ padding: '14px 40px', borderBottom: '1px solid var(--faint)', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                    {typeof iniciado === 'boolean'
+                      ? <span style={{ color: iniciado ? 'var(--red)' : 'var(--faint)' }}>{iniciado ? '◉' : '○'}</span>
+                      : <span style={{ color: 'var(--cream)' }}>{iniciado}</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <HermesBot message="Dúvidas sobre os planos? O Iniciado oferece acesso completo — transmissões, quiz e 4 livros/mês." />
+    </>
+  )
+}
+
+function CheckoutButton({ label = 'Assinar →', fullWidth = false }: { label?: string; fullWidth?: boolean }) {
+  return (
+    <form action="/api/checkout" method="POST" style={{ marginTop: fullWidth ? 32 : 0, width: fullWidth ? '100%' : 'auto', display: 'inline-block' }}>
+      <button type="submit" className="btn-primary" style={{ display: 'block', width: fullWidth ? '100%' : 'auto', textAlign: 'center' }}>
+        {label}
+      </button>
+    </form>
+  )
+}
