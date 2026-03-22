@@ -13,6 +13,7 @@ export default function TransmissaoCard({ transmissao: t, isSubscriber }: Transm
   return (
     <Link href={`/artigo/${t.slug}`} style={{ textDecoration: 'none' }}>
       <article
+        className="transmissao-card"
         style={{
           padding: 'clamp(20px, 2.5vw, 32px) clamp(16px, 2vw, 28px)',
           borderRight: '1px solid var(--faint)',
@@ -23,8 +24,6 @@ export default function TransmissaoCard({ transmissao: t, isSubscriber }: Transm
           position: 'relative',
           minHeight: 0,
         }}
-        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(176,42,30,.025)')}
-        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
       >
         {/* Top row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>

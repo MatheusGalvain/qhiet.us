@@ -951,3 +951,6 @@ body {
 .home-post-card:hover {
   background: rgba(176, 42, 30, 0.025);
 }
+
+.transmissao-card { transition: background .3s; }
+.transmissao-card:hover { background: rgba(176, 42, 30, 0.025); }
