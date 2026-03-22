@@ -48,3 +48,19 @@ export function estimateReadTime(content: string): number {
   const words = content.trim().split(/\s+/).length
   return Math.ceil(words / 200) // avg 200 wpm
 }
+
+export const RANK_THRESHOLDS = [
+  { name: 'Profano', min: 0, symbol: 'I' },
+  { name: 'Neófito', min: 500, symbol: 'II' },
+  { name: 'Iniciado', min: 2000, symbol: 'III' },
+  { name: 'Adepto', min: 5000, symbol: 'IV' },
+  { name: 'Mestre', min: 10000, symbol: 'V' },
+]
+
+export function getRank(xp: number) {
+  return [...RANK_THRESHOLDS].reverse().find(r => xp >= r.min) || RANK_THRESHOLDS[0]
+}
+
+export function getNextRank(xp: number) {
+  return RANK_THRESHOLDS.find(r => xp < r.min) || null
+}

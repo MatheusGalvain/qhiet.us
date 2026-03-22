@@ -52,10 +52,12 @@ export default async function PerfilPage() {
       <aside className="profile-sidebar">
         {/* Identity */}
         <div className="profile-identity-mobile-hide" style={{ padding: '0 32px 32px', borderBottom: '1px solid var(--faint)', marginBottom: 8 }}>
-          <Avatar name={profile.name} size="lg" style={{ marginBottom: 14 }} />
+          <div style={{ marginBottom: 14 }}>
+          <Avatar name={profile.name} size="lg" />
+        </div>
           <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, letterSpacing: 3, color: 'var(--cream)' }}>{profile.name}</p>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: profile.is_subscriber ? 'var(--red)' : 'var(--muted)', textTransform: 'uppercase', marginTop: 4 }}>
-            {rank.symbol} {rank.name} · {profile.is_subscriber ? 'Iniciado' : 'Profano'}
+             {(rank as any).symbol} {rank.name} · {profile.is_subscriber ? 'Iniciado' : 'Profano'}
           </span>
         </div>
 

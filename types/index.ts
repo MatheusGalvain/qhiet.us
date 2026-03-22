@@ -30,6 +30,7 @@ export interface Profile {
   name: string
   plan: Plan
   is_subscriber: boolean
+  is_admin: boolean
   stripe_customer_id: string | null
   stripe_subscription_id: string | null
   xp_total: number
@@ -39,6 +40,8 @@ export interface Profile {
 }
 
 /* ─── Transmissão (Article) ─── */
+export type TransmissaoStatus = 'draft' | 'published'
+
 export interface Transmissao {
   id: string
   slug: string
@@ -48,6 +51,7 @@ export interface Transmissao {
   content: string          // MDX / rich text
   categories: Category[]
   access: AccessLevel
+  status: TransmissaoStatus
   read_time_minutes: number
   xp_reward: number
   published_at: string

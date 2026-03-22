@@ -1,12 +1,13 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useState, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Sigil from '@/components/ui/Sigil'
 import type { Metadata } from 'next'
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') ?? '/perfil'
@@ -228,5 +229,13 @@ function GoogleButton({ onClick, label }: { onClick: () => void; label: string }
       </svg>
       {label}
     </button>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginContent />
+    </Suspense>
   )
 }
