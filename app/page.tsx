@@ -126,16 +126,14 @@ function HomePostCard({ post }: { post: Transmissao }) {
   return (
     <Link href={`/artigo/${post.slug}`} style={{ textDecoration: 'none' }}>
       <article
+        className="home-post-card"
         style={{
           padding: 'clamp(20px, 2.5vw, 32px) clamp(16px, 2vw, 28px)',
           borderRight: '1px solid var(--faint)',
           borderBottom: '1px solid var(--faint)',
           cursor: 'pointer',
           display: 'flex', flexDirection: 'column', gap: 10,
-          transition: 'background .3s',
         }}
-        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(176,42,30,.025)')}
-        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: post.access === 'free' ? 'var(--red-dim)' : 'var(--gold)' }}>

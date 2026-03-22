@@ -15,7 +15,15 @@ function LoginContent() {
 
   const [tab, setTab] = useState<'login' | 'register'>(defaultTab)
   const [plan, setPlan] = useState<'profano' | 'iniciado'>('profano')
-  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const urlError = searchParams.get('error')
+  const [error, setError] = useState<string | null>(
+    urlError === 'schema_missing'
+      ? 'O banco de dados ainda não foi configurado. Rode o arquivo supabase/schema.sql no SQL Editor do Supabase.'
+      : urlError === 'auth_failed'
+      ? 'Falha na autenticação. Tente novamente.'
+      : null
+  )
   const [, startTransition] = useTransition()
 
   const supabase = createClient()
@@ -37,8 +45,9 @@ function LoginContent() {
     e.preventDefault()
     const form = new FormData(e.currentTarget)
     setError(null)
+    setSuccess(null)
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: form.get('email') as string,
       password: form.get('password') as string,
       options: {
@@ -50,7 +59,14 @@ function LoginContent() {
     })
     if (error) { setError(error.message); return }
 
-    // If Iniciado, redirect to Stripe after signup
+    // Supabase requires email confirmation by default.
+    // If there's no session yet, the user needs to confirm their email first.
+    if (data.user && !data.session) {
+      setSuccess('Conta criada! Verifique seu e-mail e clique no link de confirmação para ativar o acesso.')
+      return
+    }
+
+    // Session created immediately (email confirmation disabled in Supabase)
     if (plan === 'iniciado') {
       router.push('/api/checkout')
     } else {
@@ -116,6 +132,12 @@ function LoginContent() {
             </button>
           ))}
         </div>
+
+        {success && (
+          <div style={{ border: '1px solid var(--gold)', background: 'rgba(200,150,10,0.08)', padding: '12px 16px', marginBottom: 20, fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--gold)' }}>
+            {success}
+          </div>
+        )}
 
         {error && (
           <div style={{ border: '1px solid var(--red-dim)', background: 'var(--red-faint)', padding: '12px 16px', marginBottom: 20, fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--red)' }}>

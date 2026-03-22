@@ -941,3 +941,13 @@ body {
   .grid-3col { grid-template-columns: 1fr 1fr; }
 }
 
+
+/* ═══════════════════════════════════════
+   HOME POST CARD — hover via CSS (Server Component safe)
+═══════════════════════════════════════ */
+.home-post-card {
+  transition: background .3s;
+}
+.home-post-card:hover {
+  background: rgba(176, 42, 30, 0.025);
+}

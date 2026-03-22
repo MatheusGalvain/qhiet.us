@@ -13,8 +13,29 @@ async function getData() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  let { data: profile } = await supabase
     .from('profiles').select('*').eq('id', user.id).single()
+
+  // Auto-create profile if it doesn't exist (e.g. trigger not fired, or first login)
+  if (!profile) {
+    const { data: created, error: createError } = await supabase
+      .from('profiles')
+      .upsert({
+        id:    user.id,
+        email: user.email ?? '',
+        name:  user.user_metadata?.name ?? (user.email ?? 'Usuário').split('@')[0],
+        plan:  user.user_metadata?.plan ?? 'profano',
+      }, { onConflict: 'id' })
+      .select()
+      .single()
+
+    if (createError || !created) {
+      // Schema provavelmente não foi aplicado — redireciona com mensagem
+      redirect('/login?error=schema_missing')
+    }
+
+    profile = created
+  }
 
   const { data: xpEvents } = await supabase
     .from('xp_events')

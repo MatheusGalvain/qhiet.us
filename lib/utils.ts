@@ -15,13 +15,18 @@ export function getInitials(name: string): string {
     .join('')
 }
 
-/** Format date to Portuguese short format */
+/** Format date to Portuguese short format — uses UTC to stay consistent
+ *  between server (Node.js) and client (browser) and avoid hydration mismatch */
+const PT_MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun',
+                   'jul', 'ago', 'set', 'out', 'nov', 'dez']
 export function formatDatePT(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
+  if (!dateString) return '—'
+  const d = new Date(dateString)
+  if (isNaN(d.getTime())) return '—'
+  const day   = String(d.getUTCDate()).padStart(2, '0')
+  const month = PT_MONTHS[d.getUTCMonth()]
+  const year  = d.getUTCFullYear()
+  return `${day} ${month} ${year}`
 }
 
 /** Zero-pad transmissão number */

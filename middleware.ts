@@ -1,17 +1,28 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-/** Routes that require authentication */
-const AUTH_ROUTES = ['/perfil', '/admin']
+/** Routes that require authentication (admin auth is handled in its own layout) */
+const AUTH_ROUTES = ['/perfil']
 /** Routes that require Iniciado subscription */
 const SUBSCRIBER_ROUTES: string[] = [] // enforced at page level via RLS
 
 export async function middleware(request: NextRequest) {
+  // Guard: if env vars are missing (e.g. during first deploy before vars are set),
+  // allow the request through rather than crashing every page.
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    const res = NextResponse.next({ request })
+    res.headers.set('x-pathname', request.nextUrl.pathname)
+    return res
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -49,6 +60,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/perfil', request.url))
   }
 
+  // Expose pathname to Server Components via header (used by admin layout)
+  supabaseResponse.headers.set('x-pathname', pathname)
   return supabaseResponse
 }
 
