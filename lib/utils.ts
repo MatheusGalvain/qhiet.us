@@ -48,6 +48,11 @@ export function getCategorySymbol(cat: Category | string): string {
   return CAT_SYMBOLS[cat] ?? '◉'
 }
 
+/** Format integer with thousands separator — deterministic on server + client */
+export function formatNumber(n: number): string {
+  return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
 /** Estimate read time from content length */
 export function estimateReadTime(content: string): number {
   const words = content.trim().split(/\s+/).length

@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Avatar from '@/components/ui/Avatar'
 import Link from 'next/link'
 import type { Profile } from '@/types'
-import { getRank, getNextRank, RANK_THRESHOLDS, formatDatePT, getCategorySymbol, padNumber } from '@/lib/utils'
+import { getRank, getNextRank, RANK_THRESHOLDS, formatDatePT, formatNumber, getCategorySymbol, padNumber } from '@/lib/utils'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Perfil' }
@@ -149,7 +149,7 @@ export default async function PerfilPage() {
               </p>
               <div>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 4 }}>XP Total</p>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px,4vw,40px)', color: 'var(--gold)', letterSpacing: 2 }}>{profile.xp_total.toLocaleString()}</p>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px,4vw,40px)', color: 'var(--gold)', letterSpacing: 2 }}>{formatNumber(profile.xp_total)}</p>
               </div>
               {nextRank && (
                 <div>
@@ -196,7 +196,7 @@ export default async function PerfilPage() {
               <div key={cat} style={{ padding: 'clamp(14px,2vw,20px) clamp(14px,2vw,24px)', borderRight: i % 3 !== 2 ? '1px solid var(--faint)' : 'none', borderBottom: i < 3 ? '1px solid var(--faint)' : 'none' }}>
                 <p style={{ fontSize: 18, color: 'var(--gold)', opacity: 0.5, marginBottom: 6 }}>{getCategorySymbol(cat)}</p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>{cat}</p>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,28px)', color: 'var(--cream)', letterSpacing: 2 }}>{Number(xp).toLocaleString()}</p>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,28px)', color: 'var(--cream)', letterSpacing: 2 }}>{formatNumber(Number(xp))}</p>
                 <div style={{ height: 2, background: 'var(--faint)', marginTop: 8 }}>
                   <div style={{ height: '100%', width: `${Math.min((Number(xp) / Math.max(profile.xp_total, 1)) * 100, 100)}%`, background: 'var(--red)' }} />
                 </div>
