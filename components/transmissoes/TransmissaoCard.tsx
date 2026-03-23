@@ -11,7 +11,7 @@ export default function TransmissaoCard({ transmissao: t, isSubscriber }: Transm
   const isLocked = t.access === 'locked' && !isSubscriber
 
   return (
-    <Link href={`/artigo/${t.slug}`} style={{ textDecoration: 'none' }}>
+    <Link href={`/artigo/${t.slug}`} style={{ textDecoration: 'none', display: 'flex', height: '100%' }}>
       <article
         className="transmissao-card"
         style={{
@@ -22,7 +22,7 @@ export default function TransmissaoCard({ transmissao: t, isSubscriber }: Transm
           transition: 'background .3s',
           display: 'flex', flexDirection: 'column', gap: 10,
           position: 'relative',
-          minHeight: 0,
+          width: '100%',
         }}
       >
         {/* Top row */}

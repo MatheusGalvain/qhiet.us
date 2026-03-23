@@ -71,7 +71,7 @@ export default async function CategoriasPage() {
           <blockquote style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 16, color: 'var(--muted)', lineHeight: 1.7, borderLeft: '1px solid var(--red-dim)', paddingLeft: 16 }}>
             "Conhece a ti mesmo e conhecerás o universo e os deuses."
             <br />
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)', fontStyle: 'normal' }}>— Inscrição no Templo de Delfos</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--cream)', fontStyle: 'normal' }}>— Inscrição no Templo de Delfos</span>
           </blockquote>
         </div>
       </div>

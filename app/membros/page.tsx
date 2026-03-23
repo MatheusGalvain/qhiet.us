@@ -133,7 +133,7 @@ export default function MembrosPage() {
           <div className="plan-col" style={{ background: 'linear-gradient(135deg,var(--surface),rgba(176,42,30,.04))' }}>
             <div style={{ position: 'relative', marginBottom: 20 }}>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--red)', border: '1px solid var(--red-dim)', padding: '4px 12px', display: 'inline-block', position: 'relative' }}>
-                <span style={{ position: 'absolute', top: -10, right: 0, fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, background: 'var(--red)', color: '#fff', padding: '2px 8px' }}>MAIS POPULAR</span>
+                <span style={{ position: 'absolute', top: -20, right: 0, fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, background: 'var(--red)', color: '#fff', padding: '2px 8px' }}>POPULAR</span>
                 ◈ Assinante
               </span>
             </div>

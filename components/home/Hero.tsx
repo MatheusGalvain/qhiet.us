@@ -29,7 +29,7 @@ export default function Hero() {
             </span>
           </div>
 
-          <span className="hl-giant">QHIETH</span>
+          <span className="hl-giant">QHIETH-</span>
           <div style={{ display: 'flex', alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <span className="hl-red">US</span>
             {/* Hide outline text on mobile — too cramped */}

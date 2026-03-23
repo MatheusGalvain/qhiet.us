@@ -16,7 +16,7 @@ export default function DeleteButton({ id, title }: { id: string; title: string 
 
   if (confirming) {
     return (
-      <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+      <span style={{ display: 'flex',  gap: 6, alignItems: 'start', flexDirection: 'column' }}>
         <button
           onClick={handleDelete}
           disabled={loading}
@@ -37,9 +37,9 @@ export default function DeleteButton({ id, title }: { id: string; title: string 
   return (
     <button
       onClick={() => setConfirming(true)}
-      style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, opacity: 0.5 }}
+      style={{ fontFamily: 'var(--font-mono)', display:'flex', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, opacity: 0.5 }}
     >
-      Deletar
+      delete
     </button>
   )
 }

@@ -13,8 +13,8 @@ interface CategoryContent {
   category: string
   desc_col1_html: string
   desc_col2_html: string
-  timeline: Array<{ year: string; event: string }>
-  figures: Array<{ name: string; era: string; contribution: string }>
+  timeline: Array<{ title: string; date: string; desc: string }>
+  figures: Array<{ name: string; period: string; desc: string; symbol: string; }>
 }
 
 export async function generateStaticParams() {
@@ -64,11 +64,12 @@ async function getData(slug: string) {
   }
 }
 
+
 export default async function CategoriaPage({ params }: PageProps) {
   const data = await getData(params.slug)
   if (!data) notFound()
-
-  const { meta, transmissoes, total, isSubscriber, content } = data
+    
+    const { meta, transmissoes, total, isSubscriber, content } = data
 
   return (
     <>
@@ -138,11 +139,16 @@ export default async function CategoriaPage({ params }: PageProps) {
                 alignItems: 'flex-start',
               }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--red)', letterSpacing: 2 }}>
-                  {item.year}
+                  {item?.date}
                 </div>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                  {item.event}
-                </p>
+                <div>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                    {item?.title}
+                  </p>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                    {item?.desc}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -165,14 +171,17 @@ export default async function CategoriaPage({ params }: PageProps) {
                 borderRight: '1px solid var(--faint)',
                 borderBottom: '1px solid var(--faint)',
               }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 25, letterSpacing: 2, color: 'var(--gold)', marginBottom: 4 }}>
+                  {fig?.symbol}
+                </p>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 2, color: 'var(--cream)', marginBottom: 4 }}>
-                  {fig.name}
+                  {fig?.name}
                 </p>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--red)', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>
-                  {fig.era}
+                  {fig?.period}
                 </span>
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.65 }}>
-                  {fig.contribution}
+                  {fig?.desc}
                 </p>
               </div>
             ))}
@@ -191,6 +200,7 @@ export default async function CategoriaPage({ params }: PageProps) {
         {transmissoes.map(t => (
           <TransmissaoCard key={t.id} transmissao={t} isSubscriber={isSubscriber} />
         ))}
+
         {transmissoes.length === 0 && (
           <div style={{ gridColumn: '1/-1', padding: '64px 0', textAlign: 'center' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase' }}>

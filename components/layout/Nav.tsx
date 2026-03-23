@@ -33,23 +33,25 @@ export default function Nav({ profile }: NavProps) {
   return (
     <>
       <nav className="nav">
-        {/* LEFT — wordmark */}
-        <Wordmark />
+        {/* LEFT cluster — wordmark + links together */}
+        <div className="nav-left-cluster">
+          <Wordmark />
 
-        {/* CENTER — desktop links */}
-        <div className="nav-links-wrapper" style={{ display: 'flex', justifyContent: 'center' }}>
-          <ul className="nav-links">
-            {NAV_LINKS.map(({ href, label }) => (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className={`nav-link ${pathname.startsWith(href) ? 'active' : ''}`}
-                >
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {/* Desktop links */}
+          <div className="nav-links-wrapper">
+            <ul className="nav-links">
+              {NAV_LINKS.map(({ href, label }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className={`nav-link ${pathname.startsWith(href) ? 'active' : ''}`}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         {/* RIGHT — desktop auth + hamburger */}

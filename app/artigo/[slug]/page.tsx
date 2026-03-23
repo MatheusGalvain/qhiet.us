@@ -4,6 +4,7 @@ import ReadingProgress from '@/components/artigo/ReadingProgress'
 import ReadingCompleteButton from '@/components/artigo/ReadingCompleteButton'
 import PaywallOverlay from '@/components/artigo/PaywallOverlay'
 import HermesQuiz from '@/components/artigo/HermesQuiz'
+import ArticleSidebarClient from '@/components/artigo/ArticleSidebarClient'
 import HermesBot from '@/components/layout/HermesBot'
 import CategoryTag from '@/components/ui/CategoryTag'
 import Link from 'next/link'
@@ -138,19 +139,20 @@ export default async function ArtigoPage({ params }: PageProps) {
             <ReadingCompleteButton transmissaoId={t.id} xpReward={readingXP} />
           )}
 
-          {/* Quiz */}
-          {hasAccess && quiz && (
+          {/* Quiz — shown always when quiz exists; locked state for non-subscribers */}
+          {quiz && (
             <HermesQuiz
               transmissaoId={t.id}
               questions={quiz.questions as QuizQuestion[]}
               xpReward={quiz.xp_reward}
+              hasAccess={hasAccess}
             />
           )}
         </article>
 
         {/* SIDEBAR — sticky on desktop, inline on mobile */}
         <aside className="article-sidebar">
-          <ArticleSidebar transmissao={t} hasAccess={hasAccess} />
+          <ArticleSidebarClient transmissao={t} hasAccess={hasAccess} />
         </aside>
       </div>
 
@@ -163,52 +165,4 @@ function getPreview(html: string): string {
   const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
   const words = text.split(' ').slice(0, 80).join(' ')
   return `<p>${words}…</p>`
-}
-
-function ArticleSidebar({ transmissao: t, hasAccess }: { transmissao: Transmissao; hasAccess: boolean }) {
-  return (
-    <>
-      {/* Access status */}
-      <div style={{ border: '1px solid var(--faint)', padding: 20, marginBottom: 20 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: t.access === 'free' ? 'var(--red-dim)' : 'var(--gold)', textTransform: 'uppercase', marginBottom: 8 }}>
-          {t.access === 'free' ? '◉ Leitura Livre' : '◈ Exclusivo Iniciados'}
-        </p>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(18px, 2vw, 28px)', letterSpacing: 2, color: 'var(--cream)', lineHeight: 1.1 }}>
-          {t.title}
-        </p>
-      </div>
-
-      {/* XP info */}
-      <div style={{ border: '1px solid var(--faint)', padding: 20, marginBottom: 20 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 12 }}>Recompensas</p>
-        {[
-          ['Leitura', Math.round(t.xp_reward * 0.6)],
-          ['Quiz completo', Math.round(t.xp_reward * 0.4)],
-        ].map(([label, xp]) => (
-          <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)' }}>{label}</span>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--gold)', letterSpacing: 2 }}>+{xp} XP</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Categories */}
-      <div style={{ border: '1px solid var(--faint)', padding: 20, marginBottom: 20 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 12 }}>Categorias</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {t.categories.map(cat => (
-            <Link key={cat} href={`/categorias/${cat}`} style={{ textDecoration: 'none' }}>
-              <CategoryTag category={cat} />
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {!hasAccess && (
-        <Link href="/membros" className="btn-primary" style={{ display: 'block', textAlign: 'center' }}>
-          Desbloquear →
-        </Link>
-      )}
-    </>
-  )
 }

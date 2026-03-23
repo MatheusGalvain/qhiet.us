@@ -57,7 +57,14 @@ function LoginContent() {
         },
       },
     })
-    if (error) { setError(error.message); return }
+    if (error) {
+      if (error.message.toLowerCase().includes('sending confirmation email') || error.message.toLowerCase().includes('email')) {
+        setError('Erro ao enviar e-mail de confirmação. Limite do serviço atingido. Vá em Supabase Dashboard → Authentication → Settings e desative "Enable email confirmations" (ou configure um SMTP como o Resend).')
+      } else {
+        setError(error.message)
+      }
+      return
+    }
 
     // Supabase requires email confirmation by default.
     // If there's no session yet, the user needs to confirm their email first.

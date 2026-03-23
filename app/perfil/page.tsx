@@ -320,11 +320,8 @@ export default async function PerfilPage() {
           </div>
         </section>
 
-        {/* Mobile logout */}
-        <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--faint)', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          {!profile.is_subscriber && (
-            <Link href="/membros" className="btn-primary" style={{ fontSize: 12, padding: '10px 20px' }}>Upgrade → Iniciado</Link>
-          )}
+        {/* Mobile-only logout (sidebar is hidden on mobile) */}
+        <div className="profile-mobile-actions">
           <LogoutButton />
         </div>
 
@@ -336,8 +333,8 @@ export default async function PerfilPage() {
 function LogoutButton() {
   return (
     <form action="/api/auth/logout" method="POST">
-      <button type="submit" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)', padding: '10px 20px', cursor: 'pointer', transition: 'all .2s' }}>
-        Sair
+      <button type="submit" className="btn-historico-cta" style={{ width: '100%' }}>
+        Sair →
       </button>
     </form>
   )

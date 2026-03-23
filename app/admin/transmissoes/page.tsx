@@ -70,7 +70,7 @@ export default async function AdminTransmissoesPage() {
             style={{
               display: 'grid',
               gridTemplateColumns: '56px 1fr 160px 100px 90px 100px 100px',
-              gap: 0,
+              gap: 15,
               padding: '14px 20px',
               borderBottom: i < list.length - 1 ? '1px solid var(--faint)' : 'none',
               alignItems: 'center',
@@ -115,11 +115,11 @@ export default async function AdminTransmissoesPage() {
             </span>
 
             {/* Actions */}
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-start', flexDirection: 'column' }}>
               <Link href={`/admin/transmissoes/${t.id}/editar`} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
-                Editar
+                Edit.
               </Link>
-              <DeleteButton id={t.id} title={t.title} />
+              <DeleteButton id={t.id} title={t.title}/>
             </div>
           </div>
         ))}
