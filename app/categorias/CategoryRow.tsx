@@ -2,30 +2,45 @@
 
 import Link from 'next/link'
 
-// Sci-fi accent palette per category
-const CAT_COLORS: Record<string, { text: string; border: string; bg: string }> = {
-  hermetismo:  { text: '#c8960a', border: 'rgba(200,150,10,0.4)',  bg: 'rgba(200,150,10,0.08)'  },
-  cabala:      { text: '#7eb8d4', border: 'rgba(126,184,212,0.4)', bg: 'rgba(126,184,212,0.08)' },
-  gnosticismo: { text: '#9b7fd4', border: 'rgba(155,127,212,0.4)', bg: 'rgba(155,127,212,0.08)' },
-  alquimia:    { text: '#6db87e', border: 'rgba(109,184,126,0.4)', bg: 'rgba(109,184,126,0.08)' },
-  tarot:       { text: '#d47eb0', border: 'rgba(212,126,176,0.4)', bg: 'rgba(212,126,176,0.08)' },
-  rosacruz:    { text: '#d47e7e', border: 'rgba(212,126,126,0.4)', bg: 'rgba(212,126,126,0.08)' },
+// Fallback colors for categories not yet in DB (keyed by slug)
+const FALLBACK_COLORS: Record<string, string> = {
+  hermetismo:  '#c8960a',
+  cabala:      '#7eb8d4',
+  gnosticismo: '#9b7fd4',
+  alquimia:    '#6db87e',
+  tarot:       '#d47eb0',
+  rosacruz:    '#d47e7e',
 }
 
-export default function CategoryRow({ slug, label, symbol, count, tags }: {
-  slug: string; label: string; symbol: string; count: number; tags: string[]
+/** Convert a hex color to rgba string with given alpha (0-1) */
+function hexAlpha(hex: string, alpha: number): string {
+  const h = hex.replace('#', '')
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return `rgba(176,42,30,${alpha})`
+  return `rgba(${r},${g},${b},${alpha})`
+}
+
+export default function CategoryRow({ slug, label, symbol, count, tags, color }: {
+  slug: string
+  label: string
+  symbol: string
+  count: number
+  tags: string[]
+  color?: string
 }) {
-  const accent = CAT_COLORS[slug] ?? CAT_COLORS.hermetismo
+  const hex = color || FALLBACK_COLORS[slug] || '#b02a1e'
 
   return (
     <Link href={`/categorias/${slug}`} style={{ textDecoration: 'none' }}>
       <div
         className="category-row"
-        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(176,42,30,.025)')}
+        onMouseEnter={e => (e.currentTarget.style.background = hexAlpha(hex, 0.04))}
         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
       >
         {/* Symbol */}
-        <span style={{ fontSize: 'clamp(20px,3vw,28px)', color: accent.text, opacity: 0.7, lineHeight: 1 }}>
+        <span style={{ fontSize: 'clamp(20px,3vw,28px)', color: hex, opacity: 0.7, lineHeight: 1 }}>
           {symbol}
         </span>
 
@@ -41,16 +56,16 @@ export default function CategoryRow({ slug, label, symbol, count, tags }: {
             {label}
           </span>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-            {tags.slice(0, 2).map(tag => (
+            {tags.map(tag => (
               <span
                 key={tag}
                 style={{
                   fontFamily: 'var(--font-mono)',
                   fontSize: 11,
                   letterSpacing: 2,
-                  color: accent.text,
-                  border: `1px solid ${accent.border}`,
-                  background: accent.bg,
+                  color: hex,
+                  border: `1px solid ${hexAlpha(hex, 0.4)}`,
+                  background: hexAlpha(hex, 0.08),
                   padding: '3px 10px',
                   textTransform: 'uppercase',
                   whiteSpace: 'nowrap',
@@ -68,7 +83,7 @@ export default function CategoryRow({ slug, label, symbol, count, tags }: {
             <span style={{
               fontFamily: 'var(--font-display)',
               fontSize: 'clamp(28px,4vw,42px)',
-              color: accent.text,
+              color: hex,
               opacity: 0.5,
               letterSpacing: 2,
               lineHeight: 1,
@@ -78,7 +93,7 @@ export default function CategoryRow({ slug, label, symbol, count, tags }: {
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>textos</span>
           </div>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: accent.text, letterSpacing: 2 }}>→</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: hex, letterSpacing: 2 }}>→</span>
         </div>
       </div>
     </Link>

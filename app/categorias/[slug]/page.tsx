@@ -1,11 +1,13 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import TransmissaoCard from '@/components/transmissoes/TransmissaoCard'
 import HermesBot from '@/components/layout/HermesBot'
 import Link from 'next/link'
 import { CATEGORY_META } from '@/types'
 import type { Transmissao } from '@/types'
 import type { Metadata } from 'next'
+
+export const revalidate = 0
 
 interface PageProps { params: { slug: string } }
 
@@ -18,18 +20,38 @@ interface CategoryContent {
 }
 
 export async function generateStaticParams() {
+  try {
+    const service = createServiceClient()
+    const { data } = await service.from('categories').select('slug')
+    if (data && data.length > 0) return data.map(({ slug }) => ({ slug }))
+  } catch {}
   return Object.keys(CATEGORY_META).map(slug => ({ slug }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  try {
+    const service = createServiceClient()
+    const { data } = await service.from('categories').select('label').eq('slug', params.slug).single()
+    if (data) return { title: data.label, description: `Transmissões sobre ${data.label} no portal QHIETHUS.` }
+  } catch {}
   const meta = CATEGORY_META[params.slug as keyof typeof CATEGORY_META]
   if (!meta) return { title: 'Categoria não encontrada' }
   return { title: meta.label, description: `Transmissões sobre ${meta.label} no portal QHIETHUS.` }
 }
 
 async function getData(slug: string) {
-  const meta = CATEGORY_META[slug as keyof typeof CATEGORY_META]
-  if (!meta) return null
+  // Try fetching category from DB first, fall back to CATEGORY_META
+  let meta: { label: string; symbol: string; slug: string } | null = null
+  try {
+    const service = createServiceClient()
+    const { data } = await service.from('categories').select('slug,label,symbol').eq('slug', slug).single()
+    if (data) meta = data
+  } catch {}
+  if (!meta) {
+    const fallback = CATEGORY_META[slug as keyof typeof CATEGORY_META]
+    if (!fallback) return null
+    meta = { slug, label: fallback.label, symbol: fallback.symbol }
+  }
 
   const supabase = await createClient()
 

@@ -597,6 +597,13 @@ body {
   .nav-desktop-right { display: none; }
 }
 
+@media (max-width: 499px) {
+  .wordmark {
+    font-size: 10px;
+    letter-spacing: 7px;
+  }
+}
+
 /* ═══════════════════════════════════════
    HERO RESPONSIVE
 ═══════════════════════════════════════ */
@@ -1003,6 +1010,16 @@ body {
 @media (max-width: 767px) {
   .books-grid { grid-template-columns: repeat(2, 1fr); }
 }
+.book-card-link {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(16px,2vw,24px) clamp(14px,2vw,20px);
+  border-right: 1px solid var(--faint);
+  border-bottom: 1px solid var(--faint);
+  transition: background .2s;
+}
+.book-card-link:hover { background: var(--surface); }
 
 /* History list on mobile */
 @media (max-width: 767px) {
@@ -1272,6 +1289,24 @@ body {
 }
 .article-prose a { color: var(--red); text-decoration: none; }
 .article-prose a:hover { text-decoration: underline; }
+
+/* ═══════════════════════════════════════
+   READING LIGHT THEME
+═══════════════════════════════════════ */
+#article-content.reading-light {
+  background: #f8f4ef;
+}
+#article-content.reading-light h1,
+#article-content.reading-light .article-prose h2,
+#article-content.reading-light .article-prose h3 {
+  color: #1a1208;
+}
+#article-content.reading-light .article-prose {
+  color: #2d2416;
+}
+#article-content.reading-light .article-prose strong { color: #1a1208; }
+#article-content.reading-light .article-prose blockquote { color: #5a4a30; }
+#article-content.reading-light .article-prose a { color: #8b1a14; }
 
 /* ═══════════════════════════════════════
    CATEGORY PAGE — description 2-col

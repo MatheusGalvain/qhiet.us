@@ -25,7 +25,7 @@ export default function Hero() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 'clamp(24px, 4vw, 48px)' }}>
             <div style={{ flex: 1, height: 1, background: 'var(--muted)', opacity: 0.35 }} />
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 8, color: 'var(--muted)', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-              Gnosis · Hermes · Luz
+              Pax et Lux.
             </span>
           </div>
 
@@ -45,7 +45,7 @@ export default function Hero() {
             marginTop: 20, letterSpacing: 0.5,
             maxWidth: 480,
           }}>
-            Conhecimento além do véu — gnóstico, cabalístico e hermético
+            Conhecimento além do véu — sabedorias mundanas e superiores para o seu ser evoluir.
           </p>
         </div>
 
@@ -54,10 +54,10 @@ export default function Hero() {
           <p style={{
             fontFamily: 'var(--font-body)', fontSize: 'clamp(14px, 1.5vw, 18px)',
             color: 'var(--muted)', lineHeight: 1.75,
-            maxWidth: 380, minWidth: 0,
+            maxWidth: 400, minWidth: 0,
             borderLeft: '1px solid var(--red-dim)', paddingLeft: 16,
           }}>
-            Para os que buscam além da superfície das coisas — um portal de transmissões sobre hermetismo, cabala, gnosticismo e os mistérios da existência.
+            Para os que buscam além da superfície das coisas — um portal de transmissões sobre hermetismo, Kaballah/Cabala, gnosticismo e dentre outros mistérios da existência.
           </p>
 
           <div className="hero-stats-row">

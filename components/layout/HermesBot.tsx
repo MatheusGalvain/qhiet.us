@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface HermesBotProps {
   message?: string
@@ -9,7 +9,31 @@ interface HermesBotProps {
 export default function HermesBot({
   message = 'Explore o portal. O conhecimento aguarda.',
 }: HermesBotProps) {
-  const [hidden, setHidden] = useState(false)
+  const [hidden, setHidden] = useState(true)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    const closed = localStorage.getItem('hermes-closed')
+    const isMobile = window.innerWidth < 768
+    // Desktop: show unless user already closed this session
+    if (!isMobile && closed !== '1') {
+      setHidden(false)
+    }
+    // Mobile: always starts hidden
+  }, [])
+
+  function toggle() {
+    const next = !hidden
+    setHidden(next)
+    if (next) {
+      localStorage.setItem('hermes-closed', '1')
+    } else {
+      localStorage.removeItem('hermes-closed')
+    }
+  }
+
+  if (!mounted) return null
 
   return (
     <div className="bot-wrap">
@@ -19,7 +43,7 @@ export default function HermesBot({
       </div>
       <button
         className="bot-btn"
-        onClick={() => setHidden(h => !h)}
+        onClick={toggle}
         aria-label={hidden ? 'Mostrar Hermes' : 'Ocultar Hermes'}
       >
         <HermesIcon />
@@ -28,9 +52,7 @@ export default function HermesBot({
   )
 }
 
-/* 10-pointed star SVG */
 function HermesIcon() {
-  // Generate 10-point star path
   const points = 10
   const outerR = 9
   const innerR = 4.2
@@ -49,7 +71,7 @@ function HermesIcon() {
 
   return (
     <svg width="22" height="22" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d={starPath} stroke="#ede5d8" strokeWidth="1.2" fill="none" />
+      <path d={starPath} stroke="#ede5d8" strokeWidth="1.6" fill="rgba(237,229,216,0.08)" />
       <circle cx="10" cy="10" r="2.5" fill="#b02a1e" />
     </svg>
   )

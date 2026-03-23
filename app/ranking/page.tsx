@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import HermesBot from '@/components/layout/HermesBot'
 import type { Metadata } from 'next'
 
@@ -49,30 +49,52 @@ async function getData() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    const { data, error } = await supabase.rpc('get_ranking', { p_limit: 50 })
-    if (error) throw error
+    // Use service client so ranking is always visible (even without login / RLS)
+    const service = createServiceClient()
 
-    const entries = (data ?? []) as RankEntry[]
+    // Try RPC first; fall back to direct query so it works even without the function
+    let entries: RankEntry[] = []
+    const { data: rpcData, error: rpcError } = await service.rpc('get_ranking', { p_limit: 50 })
+    if (!rpcError && rpcData) {
+      entries = rpcData as RankEntry[]
+    } else {
+      // Direct query fallback — includes everyone with ≥10 XP
+      const { data: rows } = await service
+        .from('profiles')
+        .select('id, name, nick, xp_total, xp_by_domain, is_subscriber')
+        .gte('xp_total', 10)
+        .order('xp_total', { ascending: false })
+        .limit(50)
+      entries = (rows ?? []).map((r, i) => ({
+        rank: i + 1,
+        name: r.name,
+        nick: r.nick ?? '',
+        xp_total: r.xp_total,
+        xp_by_domain: r.xp_by_domain ?? {},
+        is_subscriber: r.is_subscriber,
+      }))
+    }
 
-    // Find current user's rank if logged in
+    // Find current user's rank if logged in (match by user id, not name)
     let myRank: number | null = null
     if (user) {
-      const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single()
-      console.log(user)
-      if (profile) {
-        const idx = entries.findIndex(e => e.name === profile.name)
+      const { data: myProfile } = await service.from('profiles').select('nick, name').eq('id', user.id).single()
+      if (myProfile) {
+        const idx = entries.findIndex(e =>
+          (myProfile.nick && e.nick === myProfile.nick) || e.name === myProfile.name
+        )
         if (idx >= 0) myRank = entries[idx].rank
       }
     }
 
-    return { entries, myRank }
+    return { entries, myRank, isLoggedIn: !!user }
   } catch {
-    return { entries: [], myRank: null }
+    return { entries: [], myRank: null, isLoggedIn: false }
   }
 }
 
 export default async function RankingPage() {
-  const { entries, myRank } = await getData()
+  const { entries, myRank, isLoggedIn } = await getData()
 
   const top3 = entries.slice(0, 3)
   const rest = entries.slice(3)
@@ -303,10 +325,15 @@ export default async function RankingPage() {
           )}
 
           {/* Footer note */}
-          <div style={{ padding: '24px var(--px)', borderTop: '1px solid var(--faint)' }}>
+          <div style={{ padding: '24px var(--px)', borderTop: '1px solid var(--faint)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-              XP acumulado por leituras concluídas e quizzes completados · Atualizado a cada 5 minutos
+              XP acumulado por leituras e quizzes · mínimo 10 XP para aparecer
             </p>
+            {!isLoggedIn && (
+              <a href="/login" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--red)', textTransform: 'uppercase', textDecoration: 'none', border: '1px solid var(--red-dim)', padding: '6px 14px' }}>
+                Entrar para ver sua posição →
+              </a>
+            )}
           </div>
         </>
       )}

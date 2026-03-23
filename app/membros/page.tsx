@@ -105,7 +105,7 @@ export default async function MembrosPage() {
       </div>
 
       {/* O QUE É */}
-      <div className="section-div"><div className="sdiv-line" /><span className="sdiv-sym">◉</span><span className="sdiv-text">O que é o QHIETHUS</span><div className="sdiv-line" /></div>
+      <div className="section-div"><div className="sdiv-line" /><span className="sdiv-sym">◉</span><span className="sdiv-text">O que disponibilizamos</span><div className="sdiv-line" /></div>
 
       <div className="what-grid">
         {[
@@ -180,7 +180,7 @@ export default async function MembrosPage() {
 
       {/* COMPARE TABLE — horizontal scroll on mobile */}
       <div style={{ borderBottom: '1px solid var(--faint)' }}>
-        <div className="section-div"><div className="sdiv-line" /><span className="sdiv-sym">◈</span><span className="sdiv-text">Comparação Detalhada</span><div className="sdiv-line" /></div>
+        <div className="section-div"><div className="sdiv-line" /><span className="sdiv-sym">◈</span><span className="sdiv-text">Comparação mais Detalhada</span><div className="sdiv-line" /></div>
 
         <div className="compare-scroll">
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 540 }}>

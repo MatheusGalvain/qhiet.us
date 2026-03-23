@@ -1,16 +1,19 @@
 import Link from 'next/link'
 import HermesBot from '@/components/layout/HermesBot'
 import { CATEGORY_META } from '@/types'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
 import CategoryRow from './CategoryRow'
 
+export const revalidate = 0
+
 export const metadata: Metadata = {
   title: 'Categorias',
-  description: 'Navegue pelos 6 domínios do conhecimento oculto: Hermetismo, Cabala, Gnosticismo, Alquimia, Tarot e Rosacruz.',
+  description: 'Navegue pelos domínios do conhecimento oculto: Hermetismo, Cabala, Gnosticismo, Alquimia, Tarot e Rosacruz.',
 }
 
-const CAT_TAGS: Record<string, string[]> = {
+// Fallback tags used only if `categories` table has no `tags` data yet
+const FALLBACK_TAGS: Record<string, string[]> = {
   hermetismo:  ['Tábua de Esmeralda', 'Kybalion', 'Corpus Hermeticum'],
   cabala:      ['Árvore da Vida', 'Sefirot', 'Gematria'],
   gnosticismo: ['Nag Hammadi', 'Demiurgo', 'Pneuma'],
@@ -19,27 +22,27 @@ const CAT_TAGS: Record<string, string[]> = {
   rosacruz:    ['Manifestos', 'Fraternidade', 'Christian Rosenkreuz'],
 }
 
-async function getCounts(): Promise<Record<string, number>> {
-  try {
-    const supabase = await createClient()
-    const results: Record<string, number> = {}
-    await Promise.all(
-      Object.keys(CATEGORY_META).map(async (cat) => {
-        const { count } = await supabase
-          .from('transmissoes')
-          .select('*', { count: 'exact', head: true })
-          .contains('categories', [cat])
-        results[cat] = count ?? 0
-      })
-    )
-    return results
-  } catch {
-    return { hermetismo: 28, cabala: 41, gnosticismo: 33, alquimia: 19, tarot: 55, rosacruz: 14 }
-  }
-}
-
 export default async function CategoriasPage() {
-  const counts = await getCounts()
+  const service = createServiceClient()
+
+  const [{ data: dbCats }, { data: transmissoes }] = await Promise.all([
+    service.from('categories').select('*').order('sort_order'),
+    service.from('transmissoes').select('categories'),
+  ])
+
+  // Fall back to CATEGORY_META if table not yet migrated
+  const cats: Array<{ slug: string; label: string; symbol: string; color?: string; tags?: string[] }> =
+    dbCats && dbCats.length > 0
+      ? dbCats
+      : Object.entries(CATEGORY_META).map(([slug, m]) => ({ slug, label: m.label, symbol: m.symbol }))
+
+  // Count transmissões per category slug
+  const counts: Record<string, number> = {}
+  for (const t of (transmissoes ?? [])) {
+    for (const cat of (t.categories ?? [])) {
+      counts[cat] = (counts[cat] ?? 0) + 1
+    }
+  }
 
   return (
     <>
@@ -49,7 +52,7 @@ export default async function CategoriasPage() {
       >
         <div style={{ padding: 'clamp(32px,5vw,56px) var(--px) clamp(32px,5vw,48px)', borderRight: '1px solid var(--faint)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 20 }}>
           <div>
-            <p className="eyebrow" style={{ marginBottom: 16 }}>Portal Oculto · 6 domínios</p>
+            <p className="eyebrow" style={{ marginBottom: 16 }}>Portal Oculto · {cats.length} domínios</p>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(48px,8vw,80px)', letterSpacing: 4, color: 'var(--cream)', lineHeight: 1 }}>
               CATE<span style={{ color: 'var(--red)' }}>GO</span>RIAS
             </h1>
@@ -61,7 +64,7 @@ export default async function CategoriasPage() {
 
         <div className="hero-right" style={{ padding: 'clamp(32px,5vw,56px) var(--px) clamp(32px,5vw,48px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 32 }}>
           <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap' }}>
-            {[{ n: '212', l: 'Transmissões' }, { n: '6', l: 'Domínios' }, { n: '87', l: 'Livros' }].map(({ n, l }, i) => (
+            {[{ n: '212', l: 'Transmissões' }, { n: String(cats.length), l: 'Domínios' }, { n: '87', l: 'Livros' }].map(({ n, l }, i) => (
               <div key={l} style={{ padding: `0 ${i > 0 ? 32 : 0}px 0 0`, paddingRight: i < 2 ? 32 : 0, borderRight: i < 2 ? '1px solid var(--faint)' : 'none', paddingLeft: i > 0 ? 32 : 0 }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,4vw,52px)', color: 'var(--cream)', letterSpacing: 2, display: 'block' }}>{n}</span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>{l}</span>
@@ -78,14 +81,15 @@ export default async function CategoriasPage() {
 
       {/* CATEGORY LIST — rows on desktop, cards on mobile */}
       <div style={{ borderBottom: '1px solid var(--faint)' }}>
-        {Object.entries(CATEGORY_META).map(([key, { label, symbol }]) => (
+        {cats.map(({ slug, label, symbol, color, tags }) => (
           <CategoryRow
-            key={key}
-            slug={key}
+            key={slug}
+            slug={slug}
             label={label}
             symbol={symbol}
-            count={counts[key] ?? 0}
-            tags={CAT_TAGS[key] ?? []}
+            color={color}
+            count={counts[slug] ?? 0}
+            tags={(tags && tags.length > 0) ? tags : (FALLBACK_TAGS[slug] ?? [])}
           />
         ))}
       </div>
@@ -93,7 +97,7 @@ export default async function CategoriasPage() {
       {/* FOOTER STRIP */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, padding: '16px var(--px)', borderTop: '1px solid var(--faint)' }}>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-          212 transmissões · 6 domínios do conhecimento
+          {transmissoes?.length ?? 0} transmissões · {cats.length} domínios do conhecimento
         </p>
         <Link href="/transmissoes" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--red)', border: '1px solid var(--red-dim)', padding: '8px 20px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
           Ver todas →

@@ -58,11 +58,21 @@ function LoginContent() {
       },
     })
     if (error) {
-      if (error.message.toLowerCase().includes('sending confirmation email') || error.message.toLowerCase().includes('email')) {
-        setError('Erro ao enviar e-mail de confirmação. Limite do serviço atingido. Vá em Supabase Dashboard → Authentication → Settings e desative "Enable email confirmations" (ou configure um SMTP como o Resend).')
+      const msg = error.message.toLowerCase()
+      if (msg.includes('user already registered') || msg.includes('already been registered') || msg.includes('already exists')) {
+        setError('Este e-mail já possui uma conta. Faça login ou use outro endereço.')
+      } else if (msg.includes('sending confirmation email') || msg.includes('email rate limit')) {
+        setError('Erro ao enviar e-mail de confirmação. Limite do serviço atingido. Configure SMTP em Supabase → Authentication → Settings.')
       } else {
         setError(error.message)
       }
+      return
+    }
+
+    // When email confirmation is ON and email already exists, Supabase returns
+    // data.user with identities=[] (no error). Detect this case.
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+      setError('Este e-mail já possui uma conta. Faça login ou use outro endereço.')
       return
     }
 

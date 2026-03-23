@@ -7,9 +7,10 @@ import type { Transmissao } from '@/types'
 interface Props {
   transmissao: Transmissao
   hasAccess: boolean
+  isFree?: boolean
 }
 
-export default function ArticleSidebarClient({ transmissao: t, hasAccess }: Props) {
+export default function ArticleSidebarClient({ transmissao: t, hasAccess, isFree = false }: Props) {
   const [pct, setPct] = useState(0)
 
   useEffect(() => {
@@ -67,8 +68,8 @@ export default function ArticleSidebarClient({ transmissao: t, hasAccess }: Prop
         </p>
       </div>
 
-      {/* XP breakdown */}
-      <div style={{ border: '1px solid var(--faint)', padding: 20 }}>
+      {/* XP breakdown — only for subscriber-only articles */}
+      {!isFree && <div style={{ border: '1px solid var(--faint)', padding: 20 }}>
         <p style={{
           fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4,
           color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 16,
@@ -115,7 +116,7 @@ export default function ArticleSidebarClient({ transmissao: t, hasAccess }: Prop
             {t.xp_reward} xp
           </span>
         </div>
-      </div>
+      </div>}
 
       {/* Article meta */}
       <div style={{ border: '1px solid var(--faint)', padding: 20 }}>

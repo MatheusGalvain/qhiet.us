@@ -5,6 +5,7 @@ import ReadingCompleteButton from '@/components/artigo/ReadingCompleteButton'
 import PaywallOverlay from '@/components/artigo/PaywallOverlay'
 import HermesQuiz from '@/components/artigo/HermesQuiz'
 import ArticleSidebarClient from '@/components/artigo/ArticleSidebarClient'
+import ArticleReadingTheme from '@/components/artigo/ArticleReadingTheme'
 import HermesBot from '@/components/layout/HermesBot'
 import CategoryTag from '@/components/ui/CategoryTag'
 import Link from 'next/link'
@@ -74,10 +75,11 @@ export default async function ArtigoPage({ params }: PageProps) {
       <div className="article-layout">
 
         {/* MAIN CONTENT */}
-        <article style={{
+        <article id="article-content" style={{
           padding: 'clamp(32px, 5vw, 56px) clamp(20px, 5vw, 64px) 80px',
           position: 'relative',
           borderRight: '1px solid var(--faint)',
+          transition: 'background .3s, color .3s',
         }}>
           {/* Categories */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
@@ -98,24 +100,27 @@ export default async function ArtigoPage({ params }: PageProps) {
 
           {/* Meta strip */}
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap',
             padding: '16px 0',
             borderTop: '1px solid var(--faint)', borderBottom: '1px solid var(--faint)',
             marginBottom: 40,
           }}>
-            {[
-              ['Nº', padNumber(t.number)],
-              ['Publicado', formatDatePT(t.published_at)],
-              ['Leitura', `${t.read_time_minutes} min`],
-              ['XP', `+${t.xp_reward}`],
-            ].map(([label, value], i) => (
-              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                {i > 0 && <span style={{ width: 1, height: 12, background: 'var(--faint)', display: 'inline-block', flexShrink: 0 }} />}
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-                  {label}: <span style={{ color: 'var(--cream)' }}>{value}</span>
-                </span>
-              </div>
-            ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+              {[
+                ['Nº', padNumber(t.number)],
+                ['Publicado', formatDatePT(t.published_at)],
+                ['Leitura', `${t.read_time_minutes} min`],
+                ['XP', `+${t.xp_reward}`],
+              ].map(([label, value], i) => (
+                <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  {i > 0 && <span style={{ width: 1, height: 12, background: 'var(--faint)', display: 'inline-block', flexShrink: 0 }} />}
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                    {label}: <span style={{ color: 'var(--cream)' }}>{value}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+            <ArticleReadingTheme />
           </div>
 
           {/* Body */}
@@ -155,7 +160,7 @@ export default async function ArtigoPage({ params }: PageProps) {
 
         {/* SIDEBAR — sticky on desktop, inline on mobile */}
         <aside className="article-sidebar">
-          <ArticleSidebarClient transmissao={t} hasAccess={hasAccess} />
+          <ArticleSidebarClient transmissao={t} hasAccess={hasAccess} isFree={t.access === 'free'} />
         </aside>
       </div>
 
