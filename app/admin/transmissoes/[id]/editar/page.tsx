@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import TransmissaoForm from '@/components/admin/TransmissaoForm'
+import QuizEditor from '@/components/admin/QuizEditor'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -7,11 +8,11 @@ export const revalidate = 0
 
 export default async function EditarTransmissaoPage({ params }: { params: { id: string } }) {
   const supabase = createServiceClient()
-  const { data: transmissao } = await supabase
-    .from('transmissoes')
-    .select('*')
-    .eq('id', params.id)
-    .single()
+
+  const [{ data: transmissao }, { data: quiz }] = await Promise.all([
+    supabase.from('transmissoes').select('*').eq('id', params.id).single(),
+    supabase.from('quizzes').select('*').eq('transmissao_id', params.id).maybeSingle(),
+  ])
 
   if (!transmissao) notFound()
 
@@ -33,7 +34,13 @@ export default async function EditarTransmissaoPage({ params }: { params: { id: 
           {transmissao.title}
         </p>
       </div>
+
       <TransmissaoForm mode="edit" initial={transmissao} />
+
+      <QuizEditor
+        transmissaoId={params.id}
+        initialQuiz={quiz ?? null}
+      />
     </div>
   )
 }

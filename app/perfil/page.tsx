@@ -6,6 +6,7 @@ import type { Profile } from '@/types'
 import { getRank, getNextRank, RANK_THRESHOLDS, formatDatePT, formatNumber, getCategorySymbol, padNumber } from '@/lib/utils'
 import type { Metadata } from 'next'
 import ActivityHeatmap from '@/components/perfil/ActivityHeatmap'
+import NickForm from '@/components/perfil/NickForm'
 
 export const metadata: Metadata = { title: 'Perfil' }
 
@@ -102,7 +103,7 @@ export default async function PerfilPage() {
         </div>
 
         {/* Mobile identity strip (visible on mobile only) */}
-        <div style={{ padding: '16px var(--px-sm) 16px', borderBottom: '1px solid var(--faint)', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="profile-mobile-identity" style={{ padding: '16px var(--px-sm) 16px', borderBottom: '1px solid var(--faint)' }}>
           <Avatar name={profile.name} size="sm" />
           <div>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 2, color: 'var(--cream)' }}>{profile.name}</p>
@@ -317,6 +318,23 @@ export default async function PerfilPage() {
                 </p>
               </div>
             )}
+          </div>
+        </section>
+
+        {/* ═══ CONFIGURAÇÕES ═══ */}
+        <section id="config" style={{ marginBottom: 56, scrollMarginTop: 'calc(var(--nav-h) + 8px)' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 28 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}>CONFIGURAÇÕES</h2>
+          </div>
+
+          <div style={{ maxWidth: 480 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>
+              <span style={{ color: 'var(--red-dim)' }}>// </span>Identidade no Ranking
+            </p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', marginBottom: 24 }}>
+              Conta: {profile.email}
+            </p>
+            <NickForm currentNick={profile.nick ?? null} currentName={profile.name} nickUpdatedAt={profile.nick_updated_at ?? null} />
           </div>
         </section>
 

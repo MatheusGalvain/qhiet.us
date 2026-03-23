@@ -1,10 +1,29 @@
 import HermesBot from '@/components/layout/HermesBot'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Membros',
   description: 'Conheça os planos do QHIETHUS — Profano (gratuito) e Iniciado (R$29/mês).',
+}
+
+async function getStats() {
+  const supabase = await createClient()
+  const [{ count: transmissoesCount }, { count: livrosCount }, { data: ranking }] = await Promise.all([
+    supabase.from('transmissoes').select('*', { count: 'exact', head: true }),
+    supabase.from('monthly_books').select('*', { count: 'exact', head: true }),
+    supabase
+      .from('profiles')
+      .select('id, name, nick, xp_total, is_subscriber')
+      .order('xp_total', { ascending: false })
+      .limit(10),
+  ])
+  return {
+    transmissoesCount: transmissoesCount ?? 0,
+    livrosCount: livrosCount ?? 0,
+    ranking: (ranking ?? []) as Array<{ id: string; name: string; nick: string | null; xp_total: number; is_subscriber: boolean }>,
+  }
 }
 
 const PLAN_FEATURES = {
@@ -39,7 +58,8 @@ const COMPARE_ROWS = [
   { label: 'Badge de assinante no perfil',          profano: false,    iniciado: true },
 ]
 
-export default function MembrosPage() {
+export default async function MembrosPage() {
+  const { transmissoesCount, livrosCount, ranking } = await getStats()
   return (
     <>
       {/* HERO */}
@@ -64,8 +84,8 @@ export default function MembrosPage() {
         <div className="hero-right" style={{ padding: 'clamp(40px,6vw,72px) var(--px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 32 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
             {[
-              { n: '212', l: 'Transmissões' },
-              { n: '87',  l: 'Livros' },
+              { n: String(transmissoesCount), l: 'Transmissões' },
+              { n: String(livrosCount || '∞'), l: 'Livros' },
               { n: '6',   l: 'Domínios' },
               { n: '∞',   l: 'Conhecimento' },
             ].map(({ n, l }, i) => (
@@ -77,7 +97,7 @@ export default function MembrosPage() {
           </div>
           <blockquote style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 17, color: 'var(--muted)', lineHeight: 1.75, borderLeft: '1px solid var(--red-dim)', paddingLeft: 16 }}>
             "A iniciação não é um evento — é um processo contínuo de transformação interior."
-            <cite style={{ display: 'block', marginTop: 8, fontStyle: 'normal', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)' }}>— Tradição Hermética</cite>
+            <cite style={{ display: 'block', marginTop: 8, fontStyle: 'normal', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--cream)' }}>— Tradição Hermética</cite>
           </blockquote>
         </div>
       </div>
@@ -189,6 +209,67 @@ export default function MembrosPage() {
           </table>
         </div>
       </div>
+
+      {/* RANKING GLOBAL */}
+      {ranking.length > 0 && (
+        <div style={{ borderBottom: '1px solid var(--faint)' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, padding: '20px var(--px)', borderBottom: '1px solid var(--faint)' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}>RANKING GLOBAL</h2>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
+              Por XP acumulado
+            </p>
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
+              <thead>
+                <tr>
+                  {['#', 'Nick', 'Plano', 'XP'].map((h, i) => (
+                    <th key={h} style={{
+                      fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3,
+                      textTransform: 'uppercase', color: 'var(--muted)',
+                      padding: '14px var(--px)', borderBottom: '1px solid var(--faint)',
+                      textAlign: i === 3 ? 'right' : 'left',
+                    }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {ranking.map((user, i) => {
+                  const pos = i + 1
+                  const posColor = pos === 1 ? 'var(--gold)' : pos === 2 ? 'var(--cream)' : pos === 3 ? 'var(--red-dim)' : 'var(--faint)'
+                  return (
+                    <tr key={user.id} style={{ borderBottom: '1px solid var(--faint)' }}>
+                      <td style={{ padding: '16px var(--px)', fontFamily: 'var(--font-display)', fontSize: 28, color: posColor, letterSpacing: 2, width: 60 }}>
+                        {pos < 10 ? `0${pos}` : pos}
+                      </td>
+                      <td style={{ padding: '16px 0', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: user.nick ? 'var(--cream)' : 'var(--faint)', textTransform: 'uppercase' }}>
+                        {pos === 1 ? '◆ ' : pos <= 3 ? '◉ ' : '○ '}
+                        {user.nick ?? <span style={{ fontStyle: 'italic', letterSpacing: 1, fontSize: 11 }}>sem nick</span>}
+                      </td>
+                      <td style={{ padding: '16px 0', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: user.is_subscriber ? 'var(--red)' : 'var(--muted)', textTransform: 'uppercase' }}>
+                        {user.is_subscriber ? 'Iniciado' : 'Profano'}
+                      </td>
+                      <td style={{ padding: '16px var(--px)', fontFamily: 'var(--font-display)', fontSize: 24, color: pos === 1 ? 'var(--gold)' : 'var(--cream)', letterSpacing: 2, textAlign: 'right' }}>
+                        {user.xp_total}
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', marginLeft: 4 }}>xp</span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ padding: '20px var(--px)', borderTop: '1px solid var(--faint)' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
+              Define seu nick em{' '}
+              <Link href="/perfil#config" style={{ color: 'var(--red)', textDecoration: 'none' }}>
+                Perfil → Configurações →
+              </Link>
+            </p>
+          </div>
+        </div>
+      )}
 
       <HermesBot message="Dúvidas sobre os planos? O Iniciado oferece acesso completo — transmissões, quiz e 4 livros/mês." />
     </>

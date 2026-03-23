@@ -5,6 +5,8 @@ import Nav from '@/components/layout/Nav'
 import Footer from '@/components/layout/Footer'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/types'
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   title: {

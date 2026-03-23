@@ -126,31 +126,71 @@ export default async function CategoriaPage({ params }: PageProps) {
 
       {/* TIMELINE */}
       {content?.timeline && content.timeline.length > 0 && (
-        <section style={{ borderBottom: '1px solid var(--faint)', padding: 'clamp(32px,4vw,56px) var(--px)' }}>
-          <p className="eyebrow" style={{ marginBottom: 32 }}>Linha do Tempo</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {content.timeline.map((item, i) => (
-              <div key={i} style={{
-                display: 'grid',
-                gridTemplateColumns: '120px 1fr',
-                gap: 24,
-                padding: '20px 0',
-                borderBottom: i < content.timeline.length - 1 ? '1px solid var(--faint)' : 'none',
-                alignItems: 'flex-start',
-              }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--red)', letterSpacing: 2 }}>
-                  {item?.date}
-                </div>
-                <div>
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text-primary)', lineHeight: 1.7 }}>
-                    {item?.title}
-                  </p>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--text-primary)', lineHeight: 1.7 }}>
-                    {item?.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
+        <section style={{ borderBottom: '1px solid var(--faint)' }}>
+          {/* Section header */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '18px var(--px)', borderBottom: '1px solid var(--faint)',
+          }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 13, letterSpacing: 6, color: 'var(--muted)', textTransform: 'uppercase' }}>
+              <span style={{ color: 'var(--red-dim)' }}>// </span>Linha do Tempo
+            </p>
+          </div>
+          {/* Track */}
+          <div style={{ padding: '40px var(--px)', position: 'relative' }}>
+            {/* Vertical line at 120px */}
+            <div style={{
+              position: 'absolute', left: 'calc(var(--px) + 120px)',
+              top: 0, bottom: 0, width: 1, background: 'var(--faint)',
+            }} />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {content.timeline.map((item, i) => {
+                const isKey = i === 0 || i === content.timeline.length - 1
+                return (
+                  <div key={i} style={{
+                    display: 'grid',
+                    gridTemplateColumns: '120px 1fr',
+                    gap: 32,
+                    padding: '22px 0',
+                    borderBottom: i < content.timeline.length - 1 ? '1px solid var(--faint)' : 'none',
+                    position: 'relative',
+                    alignItems: 'flex-start',
+                  }}>
+                    {/* Dot on the vertical line */}
+                    <div style={{
+                      position: 'absolute',
+                      left: 'calc(120px - 5px)',
+                      top: 30,
+                      width: isKey ? 11 : 9,
+                      height: isKey ? 11 : 9,
+                      borderRadius: '50%',
+                      background: isKey ? 'var(--red-faint)' : 'var(--ink)',
+                      border: `1px solid ${isKey ? 'var(--red-dim)' : 'var(--faint)'}`,
+                      zIndex: 1,
+                    }} />
+                    <div style={{
+                      fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 2,
+                      color: isKey ? 'var(--red)' : 'var(--muted)',
+                      textAlign: 'right', paddingRight: 16, paddingTop: 4,
+                      lineHeight: 1.2,
+                    }}>
+                      {item?.date}
+                    </div>
+                    <div>
+                      <p style={{
+                        fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 2,
+                        color: 'var(--cream)', marginBottom: 6, lineHeight: 1.2,
+                      }}>
+                        {item?.title}
+                      </p>
+                      <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--muted)', lineHeight: 1.7 }}>
+                        {item?.desc}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </section>
       )}

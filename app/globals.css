@@ -842,6 +842,12 @@ body {
   .profile-identity-mobile-hide { display: none; }
 }
 
+/* Mobile identity strip — hidden on desktop (sidebar has big identity block) */
+.profile-mobile-identity { display: none !important; }
+@media (max-width: 767px) {
+  .profile-mobile-identity { display: flex !important; align-items: center; gap: 12px; }
+}
+
 /* Mobile-only logout row — hidden on desktop (sidebar handles it) */
 .profile-mobile-actions {
   display: none;

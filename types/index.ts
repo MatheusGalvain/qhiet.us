@@ -28,6 +28,8 @@ export interface Profile {
   id: string
   email: string
   name: string
+  nick: string | null             // Display name used in ranking table
+  nick_updated_at: string | null  // ISO timestamp of last nick change (20-day cooldown)
   plan: Plan
   is_subscriber: boolean
   is_admin: boolean
