@@ -1,6 +1,9 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
+interface DbCategory { slug: string; label: string; symbol: string; color: string; sort_order: number }
+interface DbTransmissao { categories: string[] | null; status: string; access: string }
+
 export const revalidate = 0
 
 export default async function AdminCategoriasPage() {
@@ -11,9 +14,9 @@ export default async function AdminCategoriasPage() {
     supabase.from('categories').select('*').order('sort_order'),
   ])
 
-  const list = transmissoes ?? []
+  const list: DbTransmissao[] = (transmissoes ?? []) as DbTransmissao[]
   // Fall back to empty array if categories table doesn't exist yet
-  const cats = dbCategories ?? []
+  const cats: DbCategory[] = (dbCategories ?? []) as DbCategory[]
 
   // Count per category slug
   const counts: Record<string, { total: number; published: number; free: number; locked: number }> = {}
@@ -30,8 +33,9 @@ export default async function AdminCategoriasPage() {
     }
   }
 
-  const sorted = cats.map(c => ({ ...c, ...(counts[c.slug] ?? { total: 0, published: 0, free: 0, locked: 0 }) }))
-  const maxCount = Math.max(...sorted.map(c => c.total), 1)
+  interface SortedCat extends DbCategory { total: number; published: number; free: number; locked: number }
+  const sorted: SortedCat[] = cats.map(c => ({ ...c, ...(counts[c.slug] ?? { total: 0, published: 0, free: 0, locked: 0 }) }))
+  const maxCount = Math.max(...sorted.map((c: SortedCat) => c.total), 1)
 
   return (
     <div>

@@ -65,7 +65,7 @@ async function getData() {
         .gte('xp_total', 10)
         .order('xp_total', { ascending: false })
         .limit(50)
-      entries = (rows ?? []).map((r, i) => ({
+      entries = (rows ?? []).map((r: { id: string; name: string; nick: string | null; xp_total: number; xp_by_domain: Record<string, number> | null; is_subscriber: boolean }, i: number) => ({
         rank: i + 1,
         name: r.name,
         nick: r.nick ?? '',

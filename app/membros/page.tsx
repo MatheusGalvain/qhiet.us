@@ -60,10 +60,22 @@ const COMPARE_ROWS = [
   { label: 'Ranking global',                        profano: true,     iniciado: true },
 ]
 
-export default async function MembrosPage() {
+export default async function MembrosPage({ searchParams }: { searchParams: { error?: string } }) {
   const { transmissoesCount, livrosCount, ranking } = await getStats()
   return (
     <>
+      {/* Stripe error banner */}
+      {searchParams.error === 'stripe' && (
+        <div style={{ background: 'var(--red-faint)', border: '1px solid var(--red-dim)', borderLeft: '3px solid var(--red)', padding: '14px var(--px)', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--cream)', textTransform: 'uppercase' }}>
+          ⚠ Erro ao conectar com o Stripe. Verifique as variáveis de ambiente no Vercel e tente novamente.
+        </div>
+      )}
+      {searchParams.error === 'config' && (
+        <div style={{ background: 'var(--red-faint)', border: '1px solid var(--red-dim)', borderLeft: '3px solid var(--red)', padding: '14px var(--px)', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--cream)', textTransform: 'uppercase' }}>
+          ⚠ Configuração do Stripe incompleta. Adicione STRIPE_SECRET_KEY e STRIPE_PRICE_INICIADO nas variáveis do Vercel.
+        </div>
+      )}
+
       {/* HERO */}
       <div className="membros-hero">
         <div style={{ padding: 'clamp(40px,6vw,72px) var(--px)', borderRight: '1px solid var(--faint)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 24 }}>

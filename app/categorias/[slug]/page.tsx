@@ -23,7 +23,7 @@ export async function generateStaticParams() {
   try {
     const service = createServiceClient()
     const { data } = await service.from('categories').select('slug')
-    if (data && data.length > 0) return data.map(({ slug }) => ({ slug }))
+    if (data && data.length > 0) return data.map((row: { slug: string }) => ({ slug: row.slug }))
   } catch {}
   return Object.keys(CATEGORY_META).map(slug => ({ slug }))
 }
