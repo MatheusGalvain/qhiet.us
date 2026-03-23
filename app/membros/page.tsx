@@ -36,14 +36,13 @@ const PLAN_FEATURES = {
     { check: true,  text: 'Perfil com XP e ranking global' },
     { check: false, text: 'Transmissões exclusivas Iniciado' },
     { check: false, text: 'Quiz de IA Hermes com XP bônus' },
-    { check: false, text: '4 livros mensais curados' },
-    { check: false, text: 'Acesso antecipado a novos conteúdos' },
+    { check: false, text: '1 livros mensal' },
   ],
   iniciado: [
     { check: true, text: 'Tudo do plano Profano' },
     { check: true, text: '<strong>Todas as transmissões</strong> — inclusive exclusivas' },
     { check: true, text: 'Quiz de <strong>IA Hermes</strong> ao final de cada artigo' },
-    { check: true, text: '<strong>4 livros mensais</strong> curados por e-mail' },
+    { check: true, text: '<strong>4 livros mensais</strong> curados por e-mail/ebook' },
     { check: true, text: 'XP bônus por quiz e leitura exclusiva' },
     { check: true, text: 'Acesso antecipado a novos conteúdos' },
     { check: true, text: 'Badge exclusiva no perfil' },
@@ -51,14 +50,14 @@ const PLAN_FEATURES = {
 }
 
 const COMPARE_ROWS = [
-  { label: 'Transmissões de Leitura Livre',        profano: true,     iniciado: true },
   { label: 'Transmissões Exclusivas Iniciado',      profano: false,    iniciado: true },
-  { label: 'Quiz de IA Hermes',                     profano: false,    iniciado: true },
-  { label: 'XP por leitura',                        profano: true,     iniciado: true },
+  { label: 'Badge de assinante no perfil',          profano: false,    iniciado: true },
   { label: 'Quiz liberado em artigos com bônus de xp',                     profano: false,    iniciado: true },
+  { label: 'Transmissões de Leitura Livre',        profano: true,     iniciado: true },
+  { label: 'Quiz de IA Hermes',                     profano: true,    iniciado: true },
+  { label: 'XP por leitura',                        profano: true,     iniciado: true },
   { label: 'Livros mensais por e-mail',             profano: '1 livro', iniciado: '4 livros' },
   { label: 'Ranking global',                        profano: true,     iniciado: true },
-  { label: 'Badge de assinante no perfil',          profano: false,    iniciado: true },
 ]
 
 export default async function MembrosPage() {
@@ -212,67 +211,6 @@ export default async function MembrosPage() {
           </table>
         </div>
       </div>
-
-      {/* RANKING GLOBAL */}
-      {ranking.length > 0 && (
-        <div style={{ borderBottom: '1px solid var(--faint)' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, padding: '20px var(--px)', borderBottom: '1px solid var(--faint)' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}>RANKING GLOBAL</h2>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-              Por XP acumulado
-            </p>
-          </div>
-
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
-              <thead>
-                <tr>
-                  {['#', 'Nick', 'Plano', 'XP'].map((h, i) => (
-                    <th key={h} style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3,
-                      textTransform: 'uppercase', color: 'var(--muted)',
-                      padding: '14px var(--px)', borderBottom: '1px solid var(--faint)',
-                      textAlign: i === 3 ? 'right' : 'left',
-                    }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {ranking.map((user, i) => {
-                  const pos = i + 1
-                  const posColor = pos === 1 ? 'var(--gold)' : pos === 2 ? 'var(--cream)' : pos === 3 ? 'var(--red-dim)' : 'var(--faint)'
-                  return (
-                    <tr key={user.id} style={{ borderBottom: '1px solid var(--faint)' }}>
-                      <td style={{ padding: '16px var(--px)', fontFamily: 'var(--font-display)', fontSize: 28, color: posColor, letterSpacing: 2, width: 60 }}>
-                        {pos < 10 ? `0${pos}` : pos}
-                      </td>
-                      <td style={{ padding: '16px 0', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: user.nick ? 'var(--cream)' : 'var(--faint)', textTransform: 'uppercase' }}>
-                        {pos === 1 ? '◆ ' : pos <= 3 ? '◉ ' : '○ '}
-                        {user.nick ?? <span style={{ fontStyle: 'italic', letterSpacing: 1, fontSize: 11 }}>sem nick</span>}
-                      </td>
-                      <td style={{ padding: '16px 0', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: user.is_subscriber ? 'var(--red)' : 'var(--muted)', textTransform: 'uppercase' }}>
-                        {user.is_subscriber ? 'Iniciado' : 'Profano'}
-                      </td>
-                      <td style={{ padding: '16px var(--px)', fontFamily: 'var(--font-display)', fontSize: 24, color: pos === 1 ? 'var(--gold)' : 'var(--cream)', letterSpacing: 2, textAlign: 'right' }}>
-                        {user.xp_total}
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', marginLeft: 4 }}>xp</span>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-          <div style={{ padding: '20px var(--px)', borderTop: '1px solid var(--faint)' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-              Define seu nick em{' '}
-              <Link href="/perfil#config" style={{ color: 'var(--red)', textDecoration: 'none' }}>
-                Perfil → Configurações →
-              </Link>
-            </p>
-          </div>
-        </div>
-      )}
 
       <HermesBot message="Dúvidas sobre os planos? O Iniciado oferece acesso completo — transmissões, quiz e 4 livros/mês." />
     </>
