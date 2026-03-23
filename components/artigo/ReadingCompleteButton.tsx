@@ -78,7 +78,7 @@ export default function ReadingCompleteButton({ transmissaoId, xpReward = 50 }: 
       <div style={{
         display: 'flex',
         justifyContent: 'center',
-        margin: '48px 0 32px',
+        margin: '0px 0 32px',
       }}>
         <button
           onClick={handleComplete}

@@ -12,6 +12,7 @@ export const revalidate = 300 // 5 min cache
 interface RankEntry {
   rank: number
   name: string
+  nick: string
   xp_total: number
   xp_by_domain: Record<string, number>
   is_subscriber: boolean
@@ -56,8 +57,8 @@ async function getData() {
     // Find current user's rank if logged in
     let myRank: number | null = null
     if (user) {
-      const { data: profile } = await supabase
-        .from('profiles').select('name').eq('id', user.id).single()
+      const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single()
+      console.log(user)
       if (profile) {
         const idx = entries.findIndex(e => e.name === profile.name)
         if (idx >= 0) myRank = entries[idx].rank
@@ -75,6 +76,7 @@ export default async function RankingPage() {
 
   const top3 = entries.slice(0, 3)
   const rest = entries.slice(3)
+  const maxXP = Math.max(...entries.map(e => e.xp_total))
 
   return (
     <>
@@ -153,7 +155,7 @@ export default async function RankingPage() {
                       letterSpacing: 2,
                       color: 'var(--cream)',
                     }}>
-                      {entry.name || 'Anônimo'}
+                      {entry.nick || 'Anônimo'}
                       {isMe && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--red)', marginLeft: 12, textTransform: 'uppercase' }}>· Você</span>}
                     </span>
                   </div>
@@ -214,77 +216,89 @@ export default async function RankingPage() {
                 ))}
               </div>
 
-              {rest.map(entry => {
-                const fav = getFavoriteDomain(entry.xp_by_domain)
-                const isMe = entry.rank === myRank
-                return (
-                  <div
-                    key={entry.rank}
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '80px 1fr 120px 160px',
-                      padding: '16px var(--px)',
-                      borderBottom: '1px solid var(--faint)',
-                      alignItems: 'center',
-                      transition: 'background .2s',
-                      background: isMe ? 'rgba(176,42,30,0.04)' : 'transparent',
-                    }}
-                  >
-                    {/* Rank */}
-                    <span style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: 20,
-                      color: 'var(--muted)',
-                      letterSpacing: 2,
-                    }}>
-                      {toRoman(entry.rank)}
-                    </span>
+             {rest.map(entry => {
+  const percentage = (entry.xp_total / maxXP) * 100
+  const isMe = entry.rank === myRank
 
-                    {/* Name */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{
-                        fontFamily: 'var(--font-serif)',
-                        fontSize: 16,
-                        color: isMe ? 'var(--cream)' : 'var(--text-secondary)',
-                      }}>
-                        {entry.name || 'Anônimo'}
-                      </span>
-                      {isMe && (
-                        <span style={{
-                          fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3,
-                          color: 'var(--red)', border: '1px solid var(--red-dim)',
-                          padding: '2px 8px', textTransform: 'uppercase',
-                        }}>Você</span>
-                      )}
-                      {entry.is_subscriber && (
-                        <span style={{
-                          fontFamily: 'var(--font-mono)', fontSize: 12,
-                          color: 'var(--gold-dim)',
-                        }}>◈</span>
-                      )}
-                    </div>
+  return (
+    <div
+      key={entry.rank}
+      style={{
+        position: 'relative',
+        height: 48,
+        marginBottom: 6,
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid var(--faint)',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Barra de XP */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          height: '100%',
+          width: `${percentage}%`,
+          background: isMe
+            ? 'linear-gradient(90deg, rgba(176,42,30,0.6), rgba(176,42,30,0.2))'
+            : 'linear-gradient(90deg, rgba(40,120,60,0.7), rgba(40,120,60,0.2))',
+          transition: 'width .4s ease',
+        }}
+      />
 
-                    {/* XP */}
-                    <span style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: 18,
-                      color: 'var(--cream)',
-                      letterSpacing: 1,
-                    }}>
-                      {entry.xp_total.toLocaleString('pt-BR')}
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--muted)', marginLeft: 6 }}>XP</span>
-                    </span>
+      {/* Conteúdo */}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+        }}
+      >
+        {/* esquerda */}
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <span style={{
+            fontFamily: 'var(--font-mono)',
+            color: 'var(--muted)',
+            width: 40,
+          }}>
+            {entry.rank}
+          </span>
 
-                    {/* Domain */}
-                    <span style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2,
-                      color: 'var(--muted)', textTransform: 'uppercase',
-                    }}>
-                      {fav ? (DOMAIN_LABEL[fav] ?? fav) : '—'}
-                    </span>
-                  </div>
-                )
-              })}
+          <span style={{
+            fontFamily: 'var(--font-display)',
+            color: 'var(--cream)',
+          }}>
+            {entry.nick || entry.name}
+          </span>
+
+          {isMe && (
+            <span style={{
+              fontSize: 10,
+              color: 'var(--red)',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: 2,
+            }}>
+              VOCÊ
+            </span>
+          )}
+        </div>
+
+        {/* direita */}
+        <span style={{
+          fontFamily: 'var(--font-display)',
+          color: 'var(--cream)',
+        }}>
+          {entry.xp_total.toLocaleString('pt-BR')} XP
+        </span>
+      </div>
+    </div>
+  )
+})}
             </div>
           )}
 

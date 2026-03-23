@@ -7,12 +7,19 @@ export default function ReadingProgress() {
 
   useEffect(() => {
     function handleScroll() {
-      const el = document.documentElement
-      const scrollTop = el.scrollTop || document.body.scrollTop
-      const scrollHeight = el.scrollHeight - el.clientHeight
-      const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0
-      setProgress(pct)
-    }
+    const marker = document.getElementById('article-end')
+    if (!marker) return
+
+    const rect = marker.getBoundingClientRect()
+    const windowHeight = window.innerHeight
+
+    const total = rect.top + window.scrollY
+    const current = window.scrollY + windowHeight
+
+    const pct = total > 0 ? (current / total) * 100 : 0
+
+    setProgress(Math.min(pct, 100))
+  }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])

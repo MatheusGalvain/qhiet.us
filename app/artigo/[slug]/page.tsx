@@ -135,7 +135,7 @@ export default async function ArtigoPage({ params }: PageProps) {
           )}
 
           {/* Marker: progress tracks up to this point */}
-          <div id="article-end" />
+          <div id="article-end" style={{ height: 90 }} />
 
           {/* Concluir Leitura button — at the bottom of article content */}
           {hasAccess && (
