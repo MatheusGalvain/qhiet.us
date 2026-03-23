@@ -94,7 +94,7 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
 
   const labelStyle: React.CSSProperties = {
     fontFamily: 'var(--font-mono)',
-    fontSize: 8,
+    fontSize: 12,
     letterSpacing: 3,
     textTransform: 'uppercase' as const,
     color: 'var(--muted)',
@@ -105,7 +105,7 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
   return (
     <form onSubmit={handleSubmit}>
       {error && (
-        <div style={{ border: '1px solid var(--red-dim)', background: 'var(--red-faint)', padding: '12px 16px', marginBottom: 24, fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--red)' }}>
+        <div style={{ border: '1px solid var(--red-dim)', background: 'var(--red-faint)', padding: '12px 16px', marginBottom: 24, fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--red)' }}>
           {error}
         </div>
       )}
@@ -137,7 +137,7 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
               placeholder="o-grande-trabalho-alquimico"
               style={{ ...inputStyle, fontFamily: 'var(--font-mono)', fontSize: 13 }}
             />
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 1, color: 'var(--muted)', marginTop: 6 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 1, color: 'var(--muted)', marginTop: 6 }}>
               /artigo/{form.slug || '…'}
             </p>
           </div>
@@ -166,7 +166,7 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
               rows={24}
               style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.8, fontFamily: 'var(--font-mono)', fontSize: 13 }}
             />
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 1, color: 'var(--muted)', marginTop: 6 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 1, color: 'var(--muted)', marginTop: 6 }}>
               {form.content.split(/\s+/).filter(Boolean).length} palavras · ~{Math.max(1, Math.round(form.content.split(/\s+/).filter(Boolean).length / 200))} min de leitura
             </p>
           </div>
@@ -188,7 +188,7 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
                     flex: 1,
                     padding: '10px 0',
                     fontFamily: 'var(--font-mono)',
-                    fontSize: 8,
+                    fontSize: 12,
                     letterSpacing: 3,
                     textTransform: 'uppercase',
                     background: form.status === s ? (s === 'published' ? 'var(--gold)' : 'var(--red-faint)') : 'transparent',
@@ -218,7 +218,7 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
                     flex: 1,
                     padding: '10px 0',
                     fontFamily: 'var(--font-mono)',
-                    fontSize: 8,
+                    fontSize: 12,
                     letterSpacing: 3,
                     textTransform: 'uppercase',
                     background: form.access === a ? (a === 'free' ? 'rgba(255,255,255,0.06)' : 'var(--red-faint)') : 'transparent',
@@ -261,7 +261,7 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: selected ? 'var(--red)' : 'var(--muted)', width: 20 }}>
                       {meta.symbol}
                     </span>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, textTransform: 'uppercase', color: selected ? 'var(--cream)' : 'var(--muted)' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: selected ? 'var(--cream)' : 'var(--muted)' }}>
                       {meta.label}
                     </span>
                   </button>
@@ -312,7 +312,7 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
               href={`/artigo/${form.slug}`}
               target="_blank"
               rel="noreferrer"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', textDecoration: 'none', textAlign: 'center', display: 'block' }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', textDecoration: 'none', textAlign: 'center', display: 'block' }}
             >
               Ver no portal ↗
             </a>

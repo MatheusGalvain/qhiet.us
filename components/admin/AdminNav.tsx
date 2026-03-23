@@ -36,7 +36,7 @@ export default function AdminNav({ adminName, adminEmail }: Props) {
             QHIETH<span style={{ color: 'var(--red)' }}>US</span>
           </span>
         </Link>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 3, color: 'var(--red)', textTransform: 'uppercase', marginTop: 6 }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--red)', textTransform: 'uppercase', marginTop: 6 }}>
           Painel Admin
         </p>
       </div>
@@ -67,7 +67,7 @@ export default function AdminNav({ adminName, adminEmail }: Props) {
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: isActive ? 'var(--red)' : 'var(--muted)', width: 18, textAlign: 'center' }}>
                 {icon}
               </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: isActive ? 'var(--cream)' : 'var(--muted)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: isActive ? 'var(--cream)' : 'var(--muted)' }}>
                 {label}
               </span>
             </Link>
@@ -80,12 +80,12 @@ export default function AdminNav({ adminName, adminEmail }: Props) {
         <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--cream)', marginBottom: 2 }}>
           {adminName}
         </p>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 1, color: 'var(--muted)' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 1, color: 'var(--muted)' }}>
           {adminEmail}
         </p>
         <Link
           href="/api/auth/logout"
-          style={{ display: 'inline-block', marginTop: 12, fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', textDecoration: 'none' }}
+          style={{ display: 'inline-block', marginTop: 12, fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', textDecoration: 'none' }}
         >
           Sair →
         </Link>

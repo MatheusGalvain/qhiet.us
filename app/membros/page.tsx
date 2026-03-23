@@ -55,8 +55,8 @@ export default function MembrosPage() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <Link href="/login?tab=register" className="btn-primary">Criar conta grátis</Link>
-            <CheckoutButton label="Assinar R$29/mês" />
+            <CheckoutButton label="Assinar R$29/mês →" />
+            <Link href="/login?tab=register" className="btn-ghost">Criar conta grátis</Link>
           </div>
         </div>
 
@@ -71,13 +71,13 @@ export default function MembrosPage() {
             ].map(({ n, l }, i) => (
               <div key={l} style={{ padding: 20, borderRight: i % 2 === 0 ? '1px solid var(--faint)' : 'none', borderBottom: i < 2 ? '1px solid var(--faint)' : 'none' }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,4vw,52px)', color: 'var(--cream)', letterSpacing: 2, display: 'block', lineHeight: 1 }}>{n}</span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginTop: 4, display: 'block' }}>{l}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginTop: 4, display: 'block' }}>{l}</span>
               </div>
             ))}
           </div>
           <blockquote style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 17, color: 'var(--muted)', lineHeight: 1.75, borderLeft: '1px solid var(--red-dim)', paddingLeft: 16 }}>
             "A iniciação não é um evento — é um processo contínuo de transformação interior."
-            <cite style={{ display: 'block', marginTop: 8, fontStyle: 'normal', fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--faint)' }}>— Tradição Hermética</cite>
+            <cite style={{ display: 'block', marginTop: 8, fontStyle: 'normal', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)' }}>— Tradição Hermética</cite>
           </blockquote>
         </div>
       </div>
@@ -109,7 +109,7 @@ export default function MembrosPage() {
         <div className="plans-grid">
           {/* PROFANO */}
           <div className="plan-col">
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 20, display: 'block' }}>Acesso Livre</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 20, display: 'block' }}>Acesso Livre</span>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(48px,6vw,72px)', color: 'var(--cream)', letterSpacing: 2, lineHeight: 1 }}>R$0</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: 2 }}>/mês</span>
@@ -119,12 +119,12 @@ export default function MembrosPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1 }}>
               {PLAN_FEATURES.profano.map(({ check, text }, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontFamily: 'var(--font-body)', fontSize: 'clamp(14px,1.5vw,16px)', color: 'var(--muted)', lineHeight: 1.5 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', flexShrink: 0, marginTop: 3 }}>{check ? '◉' : '○'}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', flexShrink: 0, marginTop: 3 }}>{check ? '◉' : '○'}</span>
                   <span dangerouslySetInnerHTML={{ __html: text }} />
                 </div>
               ))}
             </div>
-            <Link href="/login?tab=register" style={{ display: 'block', width: '100%', marginTop: 32, padding: 16, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 4, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)', textDecoration: 'none', transition: 'all .2s' }}>
+            <Link href="/login?tab=register" style={{ display: 'block', width: '100%', marginTop: 32, padding: 16, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)', textDecoration: 'none', transition: 'all .2s' }}>
               Criar conta grátis
             </Link>
           </div>
@@ -132,8 +132,8 @@ export default function MembrosPage() {
           {/* INICIADO */}
           <div className="plan-col" style={{ background: 'linear-gradient(135deg,var(--surface),rgba(176,42,30,.04))' }}>
             <div style={{ position: 'relative', marginBottom: 20 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--red)', border: '1px solid var(--red-dim)', padding: '4px 12px', display: 'inline-block', position: 'relative' }}>
-                <span style={{ position: 'absolute', top: -10, right: 0, fontFamily: 'var(--font-mono)', fontSize: 7, letterSpacing: 2, background: 'var(--red)', color: '#fff', padding: '2px 8px' }}>MAIS POPULAR</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--red)', border: '1px solid var(--red-dim)', padding: '4px 12px', display: 'inline-block', position: 'relative' }}>
+                <span style={{ position: 'absolute', top: -10, right: 0, fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, background: 'var(--red)', color: '#fff', padding: '2px 8px' }}>MAIS POPULAR</span>
                 ◈ Assinante
               </span>
             </div>
@@ -146,7 +146,7 @@ export default function MembrosPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1 }}>
               {PLAN_FEATURES.iniciado.map(({ check, text }, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontFamily: 'var(--font-body)', fontSize: 'clamp(14px,1.5vw,16px)', color: 'var(--muted)', lineHeight: 1.5 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--red)', flexShrink: 0, marginTop: 3 }}>◉</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red)', flexShrink: 0, marginTop: 3 }}>◉</span>
                   <span dangerouslySetInnerHTML={{ __html: text }} />
                 </div>
               ))}
@@ -164,9 +164,9 @@ export default function MembrosPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 540 }}>
             <thead>
               <tr>
-                <th style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)', padding: '16px var(--px)', borderBottom: '1px solid var(--faint)', textAlign: 'left' }}>Recurso</th>
-                <th style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)', padding: '16px 40px', borderBottom: '1px solid var(--faint)', textAlign: 'center', width: 160 }}>Profano</th>
-                <th style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--red)', padding: '16px 40px', borderBottom: '1px solid var(--faint)', textAlign: 'center', width: 160 }}>Iniciado</th>
+                <th style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)', padding: '16px var(--px)', borderBottom: '1px solid var(--faint)', textAlign: 'left' }}>Recurso</th>
+                <th style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)', padding: '16px 40px', borderBottom: '1px solid var(--faint)', textAlign: 'center', width: 160 }}>Profano</th>
+                <th style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--red)', padding: '16px 40px', borderBottom: '1px solid var(--faint)', textAlign: 'center', width: 160 }}>Iniciado</th>
               </tr>
             </thead>
             <tbody>

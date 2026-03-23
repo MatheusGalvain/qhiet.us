@@ -9,6 +9,14 @@ import type { Metadata } from 'next'
 
 interface PageProps { params: { slug: string } }
 
+interface CategoryContent {
+  category: string
+  desc_col1_html: string
+  desc_col2_html: string
+  timeline: Array<{ year: string; event: string }>
+  figures: Array<{ name: string; era: string; contribution: string }>
+}
+
 export async function generateStaticParams() {
   return Object.keys(CATEGORY_META).map(slug => ({ slug }))
 }
@@ -29,32 +37,48 @@ async function getData(slug: string) {
   let isSubscriber = false
   if (user) {
     const { data: profile } = await supabase
-      .from('profiles').select('is_subscriber').eq('id', user.id).single()
-    isSubscriber = profile?.is_subscriber ?? false
+      .from('profiles').select('is_subscriber, is_admin').eq('id', user.id).single()
+    isSubscriber = profile?.is_subscriber ?? profile?.is_admin ?? false
   }
 
-  const { data, count } = await supabase
-    .from('transmissoes')
-    .select('*', { count: 'exact' })
-    .contains('categories', [slug])
-    .order('published_at', { ascending: false })
-    .limit(12)
+  const [{ data: transmissoesData, count }, { data: catContent }] = await Promise.all([
+    supabase
+      .from('transmissoes')
+      .select('*', { count: 'exact' })
+      .contains('categories', [slug])
+      .order('published_at', { ascending: false })
+      .limit(12),
+    supabase
+      .from('category_content')
+      .select('*')
+      .eq('category', slug)
+      .single(),
+  ])
 
-  return { meta, transmissoes: (data ?? []) as Transmissao[], total: count ?? 0, isSubscriber }
+  return {
+    meta,
+    transmissoes: (transmissoesData ?? []) as Transmissao[],
+    total: count ?? 0,
+    isSubscriber,
+    content: catContent as CategoryContent | null,
+  }
 }
 
 export default async function CategoriaPage({ params }: PageProps) {
   const data = await getData(params.slug)
   if (!data) notFound()
 
-  const { meta, transmissoes, total, isSubscriber } = data
+  const { meta, transmissoes, total, isSubscriber, content } = data
 
   return (
     <>
       {/* HEADER */}
       <div className="page-header" style={{ paddingBottom: 'clamp(24px,3vw,40px)' }}>
-        {/* Breadcrumb */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 20 }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3,
+          color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 20,
+        }}>
           <Link href="/categorias" style={{ color: 'var(--muted)', textDecoration: 'none' }}>Categorias</Link>
           <span style={{ color: 'var(--faint)' }}>›</span>
           <span>{meta.label}</span>
@@ -73,14 +97,103 @@ export default async function CategoriaPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* GRID */}
+      {/* DESCRIPTION — 2 columns */}
+      {content && (content.desc_col1_html || content.desc_col2_html) && (
+        <section style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 0,
+          borderBottom: '1px solid var(--faint)',
+          padding: 'clamp(32px,4vw,56px) var(--px)',
+        }} className="cat-desc-grid">
+          {content.desc_col1_html && (
+            <div
+              className="article-prose"
+              style={{ paddingRight: 'clamp(20px,3vw,48px)', borderRight: '1px solid var(--faint)' }}
+              dangerouslySetInnerHTML={{ __html: content.desc_col1_html }}
+            />
+          )}
+          {content.desc_col2_html && (
+            <div
+              className="article-prose"
+              style={{ paddingLeft: 'clamp(20px,3vw,48px)' }}
+              dangerouslySetInnerHTML={{ __html: content.desc_col2_html }}
+            />
+          )}
+        </section>
+      )}
+
+      {/* TIMELINE */}
+      {content?.timeline && content.timeline.length > 0 && (
+        <section style={{ borderBottom: '1px solid var(--faint)', padding: 'clamp(32px,4vw,56px) var(--px)' }}>
+          <p className="eyebrow" style={{ marginBottom: 32 }}>Linha do Tempo</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {content.timeline.map((item, i) => (
+              <div key={i} style={{
+                display: 'grid',
+                gridTemplateColumns: '120px 1fr',
+                gap: 24,
+                padding: '20px 0',
+                borderBottom: i < content.timeline.length - 1 ? '1px solid var(--faint)' : 'none',
+                alignItems: 'flex-start',
+              }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--red)', letterSpacing: 2 }}>
+                  {item.year}
+                </div>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                  {item.event}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* NOTABLE FIGURES */}
+      {content?.figures && content.figures.length > 0 && (
+        <section style={{ borderBottom: '1px solid var(--faint)', padding: 'clamp(32px,4vw,56px) var(--px)' }}>
+          <p className="eyebrow" style={{ marginBottom: 32 }}>Figuras Notáveis</p>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+            gap: 0,
+            border: '1px solid var(--faint)',
+          }}>
+            {content.figures.map((fig, i) => (
+              <div key={i} style={{
+                padding: '24px 20px',
+                borderRight: '1px solid var(--faint)',
+                borderBottom: '1px solid var(--faint)',
+              }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 2, color: 'var(--cream)', marginBottom: 4 }}>
+                  {fig.name}
+                </p>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--red)', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>
+                  {fig.era}
+                </span>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.65 }}>
+                  {fig.contribution}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* TRANSMISSÕES */}
+      <div style={{ padding: '14px var(--px)', borderBottom: '1px solid var(--faint)', marginTop: 0 }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
+          Transmissões · <span style={{ color: 'var(--cream)' }}>{total}</span> textos
+        </p>
+      </div>
+
       <div className="grid-3col section-pad">
         {transmissoes.map(t => (
           <TransmissaoCard key={t.id} transmissao={t} isSubscriber={isSubscriber} />
         ))}
         {transmissoes.length === 0 && (
           <div style={{ gridColumn: '1/-1', padding: '64px 0', textAlign: 'center' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase' }}>
               Em breve — transmissões chegando
             </p>
           </div>
@@ -88,11 +201,15 @@ export default async function CategoriaPage({ params }: PageProps) {
       </div>
 
       {/* FOOTER */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, padding: '16px var(--px)', borderTop: '1px solid var(--faint)' }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: 12, padding: '16px var(--px)',
+        borderTop: '1px solid var(--faint)',
+      }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
           {total} transmissões sobre {meta.label}
         </p>
-        <Link href="/categorias" style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
+        <Link href="/categorias" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
           ← Todas as categorias
         </Link>
       </div>

@@ -83,7 +83,7 @@ export default function HermesQuiz({ transmissaoId, questions, xpReward, onCompl
       {state === 'answering' && q && (
         <div style={{ maxWidth: 640 }}>
           {/* Progress */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 16 }}>
             <span>Questão {current + 1} de {questions.length}</span>
             <span style={{ color: 'var(--gold)' }}>+{xpReward} XP</span>
           </div>
@@ -116,7 +116,7 @@ export default function HermesQuiz({ transmissaoId, questions, xpReward, onCompl
                     transition: 'all .2s', textAlign: 'left',
                   }}
                 >
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', minWidth: 20 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', minWidth: 20 }}>
                     {String.fromCharCode(65 + idx)}
                   </span>
                   <span style={{ fontFamily: 'var(--font-body)', fontSize: 16, color, lineHeight: 1.5 }}>{opt}</span>
@@ -141,7 +141,7 @@ export default function HermesQuiz({ transmissaoId, questions, xpReward, onCompl
       {state === 'reviewing' && (
         <div style={{ maxWidth: 480 }}>
           <div style={{ border: '1px solid var(--faint)', padding: 32, marginBottom: 24 }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 12 }}>Resultado Final</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 12 }}>Resultado Final</p>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: 64, color: 'var(--cream)', letterSpacing: 4, lineHeight: 1 }}>
               {score}<span style={{ fontSize: 32, color: 'var(--muted)' }}>/{questions.length}</span>
             </p>

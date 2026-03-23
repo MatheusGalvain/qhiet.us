@@ -38,13 +38,13 @@ export default async function AdminCategoriasPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 40 }}>
         <div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--red)', marginBottom: 8 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--red)', marginBottom: 8 }}>
             Taxonomia
           </p>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 48, letterSpacing: 2, color: 'var(--cream)', lineHeight: 1 }}>
             Categorias
           </h1>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, color: 'var(--muted)', marginTop: 8 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--muted)', marginTop: 8 }}>
             {list.length} transmissões distribuídas em {sorted.filter(c => c.total > 0).length} categorias
           </p>
         </div>
@@ -68,33 +68,38 @@ export default async function AdminCategoriasPage() {
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, letterSpacing: 2, color: 'var(--cream)', marginBottom: 2 }}>
                   {meta.label}
                 </p>
-                <Link href={`/categorias/${meta.slug}`} target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
-                  /categorias/{meta.slug} ↗
-                </Link>
+                <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                  <Link href={`/categorias/${meta.slug}`} target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
+                    /categorias/{meta.slug} ↗
+                  </Link>
+                  <Link href={`/admin/categorias/${meta.slug}`} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--red)', textDecoration: 'none', textTransform: 'uppercase', border: '1px solid var(--red-dim)', padding: '2px 8px' }}>
+                    Editar conteúdo →
+                  </Link>
+                </div>
               </div>
 
               {/* Total */}
               <div style={{ textAlign: 'center' }}>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, letterSpacing: 1, color: 'var(--cream)', lineHeight: 1 }}>{total}</p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 7, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', marginTop: 3 }}>total</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', marginTop: 3 }}>total</p>
               </div>
 
               {/* Published */}
               <div style={{ textAlign: 'center' }}>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, letterSpacing: 1, color: published > 0 ? 'var(--gold)' : 'var(--muted)', lineHeight: 1, opacity: published > 0 ? 1 : 0.3 }}>{published}</p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 7, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', marginTop: 3 }}>publicadas</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', marginTop: 3 }}>publicadas</p>
               </div>
 
               {/* Free */}
               <div style={{ textAlign: 'center' }}>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, letterSpacing: 1, color: 'var(--muted)', lineHeight: 1, opacity: free > 0 ? 0.8 : 0.2 }}>{free}</p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 7, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', marginTop: 3 }}>livres</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', marginTop: 3 }}>livres</p>
               </div>
 
               {/* Locked */}
               <div style={{ textAlign: 'center' }}>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, letterSpacing: 1, color: locked > 0 ? 'var(--red)' : 'var(--muted)', lineHeight: 1, opacity: locked > 0 ? 0.8 : 0.2 }}>{locked}</p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 7, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', marginTop: 3 }}>assinante</p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', marginTop: 3 }}>assinante</p>
               </div>
             </div>
 

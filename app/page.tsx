@@ -3,27 +3,48 @@ import HermesBot from '@/components/layout/HermesBot'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import type { Transmissao } from '@/types'
-import { padNumber, getCategorySymbol, formatDatePT } from '@/lib/utils'
+import { padNumber, formatDatePT } from '@/lib/utils'
 
 export const revalidate = 3600
 
-async function getRecentTransmissoes(): Promise<Transmissao[]> {
+async function getData() {
   try {
     const supabase = await createClient()
-    const { data } = await supabase
+
+    // Featured: most recent locked transmissão
+    const { data: featured } = await supabase
+      .from('transmissoes')
+      .select('*')
+      .eq('access', 'locked')
+      .order('published_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    // Grid: 3 most recent free transmissões
+    const { data: grid } = await supabase
       .from('transmissoes')
       .select('*')
       .eq('access', 'free')
       .order('published_at', { ascending: false })
-      .limit(6)
-    return data ?? []
+      .limit(3)
+
+    // Counts
+    const { count: totalCount } = await supabase
+      .from('transmissoes')
+      .select('*', { count: 'exact', head: true })
+
+    return {
+      featured: featured as Transmissao | null,
+      grid: (grid ?? []) as Transmissao[],
+      total: totalCount ?? 0,
+    }
   } catch {
-    return []
+    return { featured: null, grid: [], total: 212 }
   }
 }
 
 export default async function HomePage() {
-  const transmissoes = await getRecentTransmissoes()
+  const { featured, grid, total } = await getData()
 
   return (
     <>
@@ -32,175 +53,281 @@ export default async function HomePage() {
       {/* SECTION DIVIDER */}
       <div className="section-div">
         <div className="sdiv-line" />
-        <span className="sdiv-sym">☿</span>
-        <span className="sdiv-text">Transmissões Recentes</span>
+        <span className="sdiv-sym">✦</span>
+        <span className="sdiv-text">Portal Oculto · {total} Transmissões</span>
+        <span className="sdiv-sym">✦</span>
         <div className="sdiv-line" />
       </div>
 
       {/* QUOTE SECTION */}
       <section className="quote-section">
-        <div className="qs-left" style={{ borderRight: '1px solid var(--faint)', paddingRight: 56 }}>
-          <p style={{
-            fontFamily: 'var(--font-body)',
-            fontSize: 'clamp(20px, 2.5vw, 32px)',
-            color: 'var(--cream)',
-            lineHeight: 1.45,
-            borderLeft: '2px solid var(--red)',
-            paddingLeft: 24,
-          }}>
-            "A ignorância é a mãe de todos os males — e o conhecimento, a única redenção possível."
-          </p>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', marginTop: 14, paddingLeft: 26 }}>
-            — Evangelhos Gnósticos · Nag Hammadi
-          </p>
+        <div className="qs-left">
+          <div className="qs-text">
+            "Não busques a verdade fora de ti. O que procuras no mundo já habita, em silêncio, dentro de tua própria sombra."
+          </div>
+          <div className="qs-cite">— Evangelhos Gnósticos · Nag Hammadi · Séc. II</div>
         </div>
-        <div className="qs-right" style={{ paddingLeft: 56, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 20 }}>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(15px, 1.5vw, 17px)', color: 'var(--muted)', lineHeight: 1.8 }}>
-            O QHIETHUS é um portal dedicado ao estudo dos mistérios ocultos — uma biblioteca viva de transmissões sobre as grandes tradições esotéricas ocidentais. Aqui, o conhecimento não é decoração: é transformação.
-          </p>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--red)', textTransform: 'uppercase' }}>
-            <span style={{ width: 20, height: 1, background: 'var(--red)', display: 'inline-block', flexShrink: 0 }} />
-            Hermetismo · Cabala · Gnosticismo · Alquimia
-          </span>
-        </div>
-      </section>
-
-      {/* POSTS GRID */}
-      <section className="section-pad">
-        <div className="posts-header" style={{ marginBottom: 0 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 3vw, 32px)', letterSpacing: 4, color: 'var(--cream)' }}>
-            TRANSMISSÕES RECENTES
-          </h2>
-          <Link href="/transmissoes" style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-            Ver todas →
-          </Link>
-        </div>
-
-        <div className="grid-3col">
-          {transmissoes.length > 0
-            ? transmissoes.map(t => <HomePostCard key={t.id} post={t} />)
-            : <FallbackPosts />
-          }
-        </div>
-      </section>
-
-      {/* CTA BANNER */}
-      <section className="cta-banner-grid">
-        <div style={{ padding: 'clamp(40px, 5vw, 64px) var(--px)', borderRight: '1px solid var(--faint)' }}>
-          <p className="eyebrow" style={{ marginBottom: 16 }}>Plano Iniciado</p>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 5vw, 56px)', letterSpacing: 3, color: 'var(--cream)', lineHeight: 1, marginBottom: 16 }}>
-            ALÉM DO<br /><span style={{ color: 'var(--red)' }}>VÉU</span>
-          </h2>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(14px, 1.5vw, 17px)', color: 'var(--muted)', lineHeight: 1.8, maxWidth: 360, marginBottom: 32 }}>
-            Acesso ilimitado a todas as transmissões, quiz de IA Hermes e 4 livros mensais curados.
-          </p>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <Link href="/membros" className="btn-primary">Assinar por R$29/mês →</Link>
-            <Link href="/login" className="btn-secondary">Criar conta grátis</Link>
+        <div className="qs-right">
+          <div className="qs-tag">Sobre o Portal</div>
+          <div className="qs-context">
+            O QHIETHUS não é um repositório de curiosidades. É um caminho.<br /><br />
+            Cada texto foi selecionado para conduzir o leitor um passo mais fundo — da superfície da tradição até o núcleo vivo do mistério que ela carrega.
           </div>
         </div>
-        <div style={{ padding: 'clamp(40px, 5vw, 64px) var(--px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 24 }}>
-          {[
-            ['◉', 'Leitura livre', 'Acesso a todas as transmissões da categoria Leitura Livre'],
-            ['◈', 'Exclusivo Iniciado', 'Transmissões premium, quiz de IA e 4 livros mensais por e-mail'],
-            ['✦', 'XP & Rank global', 'Acumule XP por leitura e quiz. Suba no ranking entre os membros'],
-          ].map(([sym, title, desc]) => (
-            <div key={title as string} style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 16, color: 'var(--gold)', opacity: 0.6, paddingTop: 2, flexShrink: 0 }}>{sym}</span>
-              <div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 2vw, 20px)', letterSpacing: 2, color: 'var(--cream)', marginBottom: 4 }}>{title}</p>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--muted)', lineHeight: 1.7 }}>{desc}</p>
-              </div>
-            </div>
-          ))}
+      </section>
+
+      {/* POSTS SECTION */}
+      <section className="posts-section">
+        {/* Header */}
+        <div className="posts-header">
+          <h2 className="posts-label">TRANSMISSÕES</h2>
+          <span className="posts-count">[ {total} textos · 87 livros ]</span>
+        </div>
+
+        {/* Featured article */}
+        {featured ? (
+          <FeaturedArticle transmissao={featured} />
+        ) : (
+          <FeaturedArticleFallback />
+        )}
+
+        {/* 3-card grid */}
+        <div className="articles-grid">
+          {grid.length > 0
+            ? grid.map(t => <GridCard key={t.id} post={t} />)
+            : <FallbackGridCards />
+          }
+        </div>
+
+        <div style={{ padding: '14px 0', display: 'flex', justifyContent: 'flex-end' }}>
+          <Link href="/transmissoes" style={{
+            fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3,
+            color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase',
+          }}>
+            Ver todas as transmissões →
+          </Link>
         </div>
       </section>
+
+      {/* MEMBERSHIP SECTION */}
+      <MembershipSection />
 
       <HermesBot message="Bem-vindo ao QHIETHUS. Explore as transmissões ou navegue pelas categorias para iniciar sua jornada." />
     </>
   )
 }
 
-/* ─── Post Card ─── */
-function HomePostCard({ post }: { post: Transmissao }) {
+/* ─── Featured Article ─── */
+function FeaturedArticle({ transmissao: t }: { transmissao: Transmissao }) {
+  const catLabel = t.categories.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(' · ')
+  const preview = t.excerpt || t.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().split(' ').slice(0, 30).join(' ') + '…'
+  const dateStr = formatDatePT(t.published_at).toUpperCase()
+
   return (
-    <Link href={`/artigo/${post.slug}`} style={{ textDecoration: 'none' }}>
-      <article
-        className="home-post-card"
-        style={{
-          padding: 'clamp(20px, 2.5vw, 32px) clamp(16px, 2vw, 28px)',
-          borderRight: '1px solid var(--faint)',
-          borderBottom: '1px solid var(--faint)',
-          cursor: 'pointer',
-          display: 'flex', flexDirection: 'column', gap: 10,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: post.access === 'free' ? 'var(--red-dim)' : 'var(--gold)' }}>
-            {post.access === 'free' ? '◉ Leitura Livre' : '◈ Assinantes'}
-          </span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 1, color: 'var(--muted)', border: '1px solid var(--faint)', padding: '3px 9px', whiteSpace: 'nowrap' }}>
-            est. <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--cream)', verticalAlign: 'middle' }}>{post.read_time_minutes} min</span>
-          </span>
+    <Link href={`/artigo/${t.slug}`} className="article-featured">
+      {/* Main content */}
+      <div className="af-main">
+        <p className="af-cat">{catLabel}</p>
+        <h2 className="af-title">{t.title}</h2>
+        <p className={`af-excerpt af-blurred`}>{preview}</p>
+
+        {/* VIP center badge */}
+        <div className="af-center-badge">
+          <div className="af-veil-tag">
+            <div className="af-veil-line-top" />
+            <div className="af-veil-diamond" />
+            <span className="af-veil-text">Assinantes</span>
+            <div className="af-veil-diamond" />
+            <div className="af-veil-line-bot" />
+          </div>
+          <span className="af-veil-sub">acesso exclusivo</span>
         </div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 4vw, 52px)', color: 'var(--faint)', lineHeight: 1 }}>
-          {padNumber(post.number)}
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-          {post.categories.map(cat => (
-            <span key={cat} className="cat-tag-inline">
-              <span className="cat-sym">{getCategorySymbol(cat)}</span>
-              {cat.charAt(0).toUpperCase() + cat.slice(1)}
-            </span>
+      </div>
+
+      {/* Right meta */}
+      <div className="af-side">
+        <div className="af-meta-block">
+          {([
+            ['Data', dateStr],
+            ['Leitura', `${t.read_time_minutes} min`],
+            ['Categoria', catLabel.split(' · ')[0]],
+          ] as [string, string][]).map(([label, value]) => (
+            <div key={label} className="af-meta-row">
+              <span className="af-meta-label">{label}</span>
+              <span className="af-meta-val">{value}</span>
+            </div>
           ))}
         </div>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 2vw, 20px)', letterSpacing: 1, lineHeight: 1.2, color: 'var(--cream)' }}>
-          {post.title}
-        </h3>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: '#b8b8b8', lineHeight: 1.75, flex: 1 }}>
-          {post.excerpt}
-        </p>
-        <div style={{ display: 'flex', alignItems: 'center', paddingTop: 12, borderTop: '1px solid var(--faint)', marginTop: 'auto' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>
-            {formatDatePT(post.published_at)}
-          </span>
+
+        <div className="af-next">
+          <p className="af-next-label">próximo conteúdo</p>
+          <p className="af-next-days">em <span>7</span> dias</p>
+          <div className="af-next-bar">
+            <div className="af-next-fill" />
+          </div>
         </div>
-      </article>
+      </div>
     </Link>
   )
 }
 
-/* ─── Fallback (static) ─── */
-function FallbackPosts() {
-  const posts = [
-    { num: '002', title: 'A Mente como Primeiro Princípio', excerpt: 'O primeiro princípio hermético afirma que o universo é de natureza mental. Toda realidade existe na mente do Todo.', cats: [{ sym: '☿', name: 'Hermetismo' }], date: '15 Mar 2026', mins: 8 },
-    { num: '003', title: 'Os Arquontes e o Deus Demiurgo de Valentino', excerpt: 'Para Valentino, o deus criador do mundo não era o Deus supremo, mas um ser menor, ignorante de sua própria inferioridade.', cats: [{ sym: '⊕', name: 'Gnosticismo' }], date: '08 Mar 2026', mins: 11 },
-    { num: '004', title: 'Nigredo: A Putrefação Necessária do Ego', excerpt: 'O primeiro estágio alquímico representa a dissolução — a morte simbólica do eu superficial antes da transformação genuína.', cats: [{ sym: '☽', name: 'Alquimia' }], date: '01 Mar 2026', mins: 6 },
-  ]
+function FeaturedArticleFallback() {
+  return (
+    <div className="article-featured">
+      <div className="af-main">
+        <p className="af-cat">Cabala · Árvore da Vida</p>
+        <h2 className="af-title">O Silêncio Entre os Véus:<br />Ain Soph e a Emanação do Ser</h2>
+        <p className="af-excerpt af-blurred">
+          Antes da criação, havia apenas o Sem Fim — o Ain Soph. Não um vazio, mas uma plenitude tão absoluta que nenhum nome pode alcançá-la.
+        </p>
+        <div className="af-center-badge">
+          <div className="af-veil-tag">
+            <div className="af-veil-line-top" />
+            <div className="af-veil-diamond" />
+            <span className="af-veil-text">Assinantes</span>
+            <div className="af-veil-diamond" />
+            <div className="af-veil-line-bot" />
+          </div>
+          <span className="af-veil-sub">acesso exclusivo</span>
+        </div>
+      </div>
+      <div className="af-side">
+        <div className="af-meta-block">
+          {([['Data', 'MAR 2026'], ['Leitura', '14 min'], ['Categoria', 'Cabala']] as [string, string][]).map(([l, v]) => (
+            <div key={l} className="af-meta-row">
+              <span className="af-meta-label">{l}</span>
+              <span className="af-meta-val">{v}</span>
+            </div>
+          ))}
+        </div>
+        <div className="af-next">
+          <p className="af-next-label">próximo conteúdo</p>
+          <p className="af-next-days">em <span>7</span> dias</p>
+          <div className="af-next-bar">
+            <div className="af-next-fill" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
+/* ─── Grid Card ─── */
+function GridCard({ post }: { post: Transmissao }) {
+  const catLabel = post.categories[0]
+    ? post.categories[0].charAt(0).toUpperCase() + post.categories[0].slice(1)
+    : ''
+  return (
+    <Link href={`/artigo/${post.slug}`} className="ag-card">
+      <div className="ag-num">{padNumber(post.number)}</div>
+      <div className="ag-cat">
+        <span>{catLabel}</span>
+        <span className="ag-time">{post.read_time_minutes} min</span>
+      </div>
+      <h3 className="ag-title">{post.title}</h3>
+      <span className={`ag-status ${post.access === 'free' ? 'free' : 'paid'}`}>
+        {post.access === 'free' ? '◉ LEITURA LIVRE' : '◈ ASSINANTES'}
+      </span>
+    </Link>
+  )
+}
+
+function FallbackGridCards() {
+  const cards = [
+    { num: 1, title: 'A Mente como Primeiro Princípio', cat: 'Hermetismo', mins: 8, access: 'free' },
+    { num: 2, title: 'Os Arquontes e o Deus Demiurgo de Valentino', cat: 'Gnosticismo', mins: 11, access: 'free' },
+    { num: 3, title: 'Nigredo: A Putrefação Necessária do Ego', cat: 'Alquimia', mins: 6, access: 'free' },
+  ]
   return (
     <>
-      {posts.map(p => (
-        <article key={p.num} style={{ padding: 'clamp(20px, 2.5vw, 32px) clamp(16px, 2vw, 28px)', borderRight: '1px solid var(--faint)', borderBottom: '1px solid var(--faint)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: 'var(--red-dim)' }}>◉ Leitura Livre</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 1, color: 'var(--muted)', border: '1px solid var(--faint)', padding: '3px 9px' }}>
-              est. <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--cream)', verticalAlign: 'middle' }}>{p.mins} min</span>
-            </span>
+      {cards.map(p => (
+        <div key={p.num} className="ag-card">
+          <div className="ag-num">{padNumber(p.num)}</div>
+          <div className="ag-cat">
+            <span>{p.cat}</span>
+            <span className="ag-time">{p.mins} min</span>
           </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 4vw, 52px)', color: 'var(--faint)', lineHeight: 1 }}>{p.num}</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {p.cats.map(c => (
-              <span key={c.name} className="cat-tag-inline"><span className="cat-sym">{c.sym}</span>{c.name}</span>
-            ))}
-          </div>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 2vw, 20px)', letterSpacing: 1, lineHeight: 1.2, color: 'var(--cream)' }}>{p.title}</h3>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: '#b8b8b8', lineHeight: 1.75 }}>{p.excerpt}</p>
-          <div style={{ paddingTop: 12, borderTop: '1px solid var(--faint)', marginTop: 'auto' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>{p.date}</span>
-          </div>
-        </article>
+          <h3 className="ag-title">{p.title}</h3>
+          <span className="ag-status free">◉ LEITURA LIVRE</span>
+        </div>
       ))}
     </>
+  )
+}
+
+/* ─── Membership Section ─── */
+function MembershipSection() {
+  return (
+    <section className="membership">
+      {/* Left — plans */}
+      <div className="mem-left">
+        <h2 className="mem-display">ASCEN<span>DA</span></h2>
+        <p className="mem-desc">
+          Dois caminhos se abrem diante do buscador. O primeiro, livre — para os que chegam. O segundo, para os que escolhem permanecer.
+        </p>
+
+        <div className="plans">
+          {/* Profano */}
+          <div className="plan">
+            <p className="plan-name">Profano</p>
+            <div>
+              <span className="plan-price">R$ 0</span>
+              <span className="plan-period"> / gratuito</span>
+            </div>
+            <div className="plan-features">
+              {['Textos introdutórios', '1 livro/mês por e-mail', 'Newsletter mensal'].map(f => (
+                <p key={f} className="plan-feature">{f}</p>
+              ))}
+            </div>
+            <Link href="/login" className="plan-cta">Entrar</Link>
+          </div>
+
+          {/* Iniciado (featured) */}
+          <div className="plan featured">
+            <p className="plan-name">Iniciado</p>
+            <div>
+              <span className="plan-price">R$ 29</span>
+              <span className="plan-period"> / por mês</span>
+            </div>
+            <div className="plan-features">
+              {['Acesso completo', '4 livros/mês', 'Trilhas de estudo', 'Acesso antecipado'].map(f => (
+                <p key={f} className="plan-feature">{f}</p>
+              ))}
+            </div>
+            <Link href="/membros" className="plan-cta">Ascender →</Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Right — book of the month */}
+      <div className="mem-right">
+        <div>
+          <p className="book-label">// Livro do Mês · Março 2026</p>
+          <div className="book-card">
+            <div className="book-cover">
+              THE<br />KYBALION<br /><br />✦
+            </div>
+            <div>
+              <p className="book-title">The Kybalion</p>
+              <span className="book-author">THREE INITIATES · 1908</span>
+              <p className="book-desc">
+                Os sete princípios herméticos que governam toda a existência. Texto fundador da tradição ocidental moderna — enviado diretamente ao seu e-mail ao se inscrever.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="readbook">
+          <div className="rb-item">
+            <span className="rb-tag free">◉ LEITURA LIVRE</span>
+            <p className="rb-text">Acesso ao conteúdo introdutório. Um livro por mês enviado por e-mail ao se cadastrar gratuitamente.</p>
+          </div>
+          <div className="rb-item">
+            <span className="rb-tag paid">◈ PLANO INICIADO</span>
+            <p className="rb-text">Acesso completo ao portal, 4 livros por mês + guias exclusivos de estudo.</p>
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }

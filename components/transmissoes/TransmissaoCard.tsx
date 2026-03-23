@@ -28,13 +28,13 @@ export default function TransmissaoCard({ transmissao: t, isSubscriber }: Transm
         {/* Top row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <span style={{
-            fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2,
+            fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2,
             color: t.access === 'free' ? 'var(--red-dim)' : 'var(--gold)',
             whiteSpace: 'nowrap',
           }}>
             {t.access === 'free' ? '◉ Leitura Livre' : '◈ Assinantes'}
           </span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 1, color: 'var(--muted)', border: '1px solid var(--faint)', padding: '3px 9px', whiteSpace: 'nowrap' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 1, color: 'var(--muted)', border: '1px solid var(--faint)', padding: '3px 9px', whiteSpace: 'nowrap' }}>
             est.{' '}
             <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--cream)', verticalAlign: 'middle' }}>
               {t.read_time_minutes} min
@@ -77,7 +77,7 @@ export default function TransmissaoCard({ transmissao: t, isSubscriber }: Transm
 
         {/* Footer */}
         <div style={{ display: 'flex', alignItems: 'center', paddingTop: 12, borderTop: '1px solid var(--faint)', marginTop: 'auto' }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>
             {formatDatePT(t.published_at)}
           </span>
         </div>

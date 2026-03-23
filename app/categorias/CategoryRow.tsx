@@ -19,7 +19,7 @@ export default function CategoryRow({ slug, label, symbol, count, tags }: {
           </span>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             {tags.slice(0, 2).map(tag => (
-              <span key={tag} style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--faint)', border: '1px solid var(--faint)', padding: '2px 8px', textTransform: 'uppercase' }}>
+              <span key={tag} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)', border: '1px solid var(--faint)', padding: '2px 8px', textTransform: 'uppercase' }}>
                 {tag}
               </span>
             ))}
@@ -28,7 +28,7 @@ export default function CategoryRow({ slug, label, symbol, count, tags }: {
         <div className="cat-arrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16, flexShrink: 0 }}>
           <div style={{ textAlign: 'right' }}>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px,4vw,42px)', color: 'var(--faint)', letterSpacing: 2, lineHeight: 1, display: 'block' }}>{count}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>textos</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>textos</span>
           </div>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red)', letterSpacing: 2 }}>→</span>
         </div>

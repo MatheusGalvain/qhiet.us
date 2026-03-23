@@ -33,13 +33,24 @@ async function getData(searchParams: PageProps['searchParams']) {
     })
 
   if (searchParams.cat && searchParams.cat !== 'todos') {
-    query = query.contains('categories', [searchParams.cat])
+    const cats = searchParams.cat.split(',').filter(Boolean)
+    if (cats.length === 1) {
+      // single category — contains check
+      query = query.contains('categories', cats)
+    } else if (cats.length > 1) {
+      // multiple categories — overlaps (any match)
+      query = query.overlaps('categories', cats)
+    }
   }
   if (searchParams.q) {
     query = query.ilike('title', `%${searchParams.q}%`)
   }
-  const accessFilter = searchParams.tab === 'locked' ? 'locked' : 'free'
-  query = query.eq('access', accessFilter)
+  // Filter by tab — default is 'free', 'locked' shows subscriber transmissoes (visible to all, content-locked)
+  if (searchParams.tab === 'locked') {
+    query = query.eq('access', 'locked')
+  } else {
+    query = query.eq('access', 'free')
+  }
 
   const { data, count } = await query.limit(12)
   return { transmissoes: (data ?? []) as Transmissao[], total: count ?? 0, isSubscriber }
@@ -85,7 +96,7 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
         padding: '14px var(--px)', borderBottom: '1px solid var(--faint)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8,
       }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
           Exibindo <span style={{ color: 'var(--cream)' }}>{transmissoes.length}</span> transmissões
         </p>
       </div>
@@ -97,7 +108,7 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
         ))}
         {transmissoes.length === 0 && (
           <div style={{ gridColumn: '1/-1', padding: '64px 0', textAlign: 'center' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase' }}>
               Nenhuma transmissão encontrada
             </p>
           </div>
@@ -114,7 +125,7 @@ function TabBtn({ href, active, label }: { href: string; active: boolean; label:
     <a
       href={href}
       style={{
-        fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 4,
+        fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4,
         textTransform: 'uppercase',
         color: active ? 'var(--cream)' : 'var(--muted)',
         background: 'transparent', border: 'none',

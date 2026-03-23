@@ -14,8 +14,8 @@ export default function Hero() {
       }}>
         {/* Eyebrow */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ color: 'var(--red-dim)', fontFamily: 'var(--font-mono)', fontSize: 10 }}>//</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 5, color: 'var(--red)', textTransform: 'uppercase' }}>
+          <span style={{ color: 'var(--red-dim)', fontFamily: 'var(--font-mono)', fontSize: 11 }}>//</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 5, color: 'var(--red)', textTransform: 'uppercase' }}>
             Portal Oculto · Est. MMXXVI
           </span>
         </div>
@@ -68,7 +68,7 @@ export default function Hero() {
             ].map(({ n, l }) => (
               <div key={l} style={{ padding: '0 28px', borderLeft: '1px solid var(--faint)', textAlign: 'right' }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: 40, color: 'var(--cream)', letterSpacing: 2, display: 'block' }}>{n}</span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>{l}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>{l}</span>
               </div>
             ))}
           </div>
@@ -76,8 +76,8 @@ export default function Hero() {
 
         {/* Mobile CTA buttons */}
         <div style={{ display: 'flex', gap: 10, marginTop: 24, flexWrap: 'wrap' }} className="hero-mobile-ctas">
-          <Link href="/transmissoes" className="btn-primary" style={{ fontSize: 9 }}>Explorar →</Link>
-          <Link href="/membros" className="btn-secondary" style={{ fontSize: 9 }}>Assinar</Link>
+          <Link href="/transmissoes" className="btn-primary" style={{ fontSize: 12 }}>Explorar →</Link>
+          <Link href="/membros" className="btn-secondary" style={{ fontSize: 12 }}>Assinar</Link>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ export default function Hero() {
       <div className="hero-right-panel">
         <div style={{
           display: 'flex', justifyContent: 'space-between',
-          fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3,
+          fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3,
           color: 'var(--muted)', textTransform: 'uppercase',
           borderBottom: '1px solid var(--faint)', paddingBottom: 14,
         }}>
@@ -104,7 +104,7 @@ export default function Hero() {
             <p style={{ fontFamily: 'var(--font-body)', fontSize: 17, color: 'var(--cream)', lineHeight: 1.7 }}>
               "Conhece a ti mesmo e conhecerás o universo e os deuses."
             </p>
-            <span style={{ display: 'block', marginTop: 12, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: 'var(--muted)' }}>
+            <span style={{ display: 'block', marginTop: 12, fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)' }}>
               — Inscrição no Templo de Delfos
             </span>
           </div>
@@ -114,7 +114,7 @@ export default function Hero() {
               {Object.entries(CATEGORY_META).slice(0, 4).map(([key, { label, symbol }]) => (
                 <Link key={key} href={`/categorias/${key}`} style={{ textDecoration: 'none', padding: '0 12px', borderRight: '1px solid var(--faint)', cursor: 'pointer' }}>
                   <span style={{ display: 'block', fontSize: 15, color: 'var(--gold)', marginBottom: 4 }}>{symbol}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', display: 'block' }}>{label}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', display: 'block' }}>{label}</span>
                 </Link>
               ))}
             </div>

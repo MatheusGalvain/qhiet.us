@@ -64,14 +64,14 @@ export default async function CategoriasPage() {
             {[{ n: '212', l: 'Transmissões' }, { n: '6', l: 'Domínios' }, { n: '87', l: 'Livros' }].map(({ n, l }, i) => (
               <div key={l} style={{ padding: `0 ${i > 0 ? 32 : 0}px 0 0`, paddingRight: i < 2 ? 32 : 0, borderRight: i < 2 ? '1px solid var(--faint)' : 'none', paddingLeft: i > 0 ? 32 : 0 }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,4vw,52px)', color: 'var(--cream)', letterSpacing: 2, display: 'block' }}>{n}</span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>{l}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>{l}</span>
               </div>
             ))}
           </div>
           <blockquote style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 16, color: 'var(--muted)', lineHeight: 1.7, borderLeft: '1px solid var(--red-dim)', paddingLeft: 16 }}>
             "Conhece a ti mesmo e conhecerás o universo e os deuses."
             <br />
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: 'var(--faint)', fontStyle: 'normal' }}>— Inscrição no Templo de Delfos</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)', fontStyle: 'normal' }}>— Inscrição no Templo de Delfos</span>
           </blockquote>
         </div>
       </div>
@@ -92,10 +92,10 @@ export default async function CategoriasPage() {
 
       {/* FOOTER STRIP */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, padding: '16px var(--px)', borderTop: '1px solid var(--faint)' }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
           212 transmissões · 6 domínios do conhecimento
         </p>
-        <Link href="/transmissoes" style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--red)', border: '1px solid var(--red-dim)', padding: '8px 20px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+        <Link href="/transmissoes" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--red)', border: '1px solid var(--red-dim)', padding: '8px 20px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
           Ver todas →
         </Link>
       </div>

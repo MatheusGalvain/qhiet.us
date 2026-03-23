@@ -105,7 +105,7 @@ function LoginContent() {
 
         <blockquote style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 15, color: 'var(--muted)', lineHeight: 1.7, borderLeft: '1px solid var(--red-dim)', paddingLeft: 16 }}>
           "A ignorância é a mãe de todos os males — e o conhecimento, a única redenção possível."
-          <cite style={{ display: 'block', marginTop: 6, fontStyle: 'normal', fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--faint)' }}>
+          <cite style={{ display: 'block', marginTop: 6, fontStyle: 'normal', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)' }}>
             — Evangelhos Gnósticos · Nag Hammadi
           </cite>
         </blockquote>
@@ -121,7 +121,7 @@ function LoginContent() {
               key={t}
               onClick={() => { setTab(t); setError(null) }}
               style={{
-                fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 4, textTransform: 'uppercase',
+                fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, textTransform: 'uppercase',
                 color: tab === t ? 'var(--cream)' : 'var(--muted)', background: 'transparent', border: 'none',
                 padding: '14px 28px 14px 0', marginRight: 28, cursor: 'pointer', position: 'relative', transition: 'color .2s',
                 borderBottom: tab === t ? '1px solid var(--red)' : '1px solid transparent',
@@ -134,13 +134,13 @@ function LoginContent() {
         </div>
 
         {success && (
-          <div style={{ border: '1px solid var(--gold)', background: 'rgba(200,150,10,0.08)', padding: '12px 16px', marginBottom: 20, fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--gold)' }}>
+          <div style={{ border: '1px solid var(--gold)', background: 'rgba(200,150,10,0.08)', padding: '12px 16px', marginBottom: 20, fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--gold)' }}>
             {success}
           </div>
         )}
 
         {error && (
-          <div style={{ border: '1px solid var(--red-dim)', background: 'var(--red-faint)', padding: '12px 16px', marginBottom: 20, fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--red)' }}>
+          <div style={{ border: '1px solid var(--red-dim)', background: 'var(--red-faint)', padding: '12px 16px', marginBottom: 20, fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--red)' }}>
             {error}
           </div>
         )}
@@ -155,7 +155,7 @@ function LoginContent() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label className="form-label">Senha</label>
               <input name="password" type="password" required className="form-input" placeholder="••••••••" />
-              <button type="button" style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', textAlign: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <button type="button" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', textAlign: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>
                 Esqueci minha senha →
               </button>
             </div>
@@ -164,9 +164,9 @@ function LoginContent() {
             </button>
             <Divider />
             <GoogleButton onClick={handleGoogle} label="Continuar com Google" />
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', textAlign: 'center', marginTop: 8 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', textAlign: 'center', marginTop: 8 }}>
               Não tem conta?{' '}
-              <button type="button" onClick={() => setTab('register')} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2 }}>
+              <button type="button" onClick={() => setTab('register')} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2 }}>
                 Cadastre-se gratuitamente
               </button>
             </p>
@@ -188,38 +188,14 @@ function LoginContent() {
               <label className="form-label">Senha</label>
               <input name="password" type="password" required minLength={8} className="form-input" placeholder="Mínimo 8 caracteres" />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <label className="form-label">Escolha seu plano</label>
-              <div style={{ display: 'flex', gap: 0 }}>
-                {(['profano', 'iniciado'] as const).map((p) => (
-                  <div
-                    key={p}
-                    onClick={() => setPlan(p)}
-                    style={{
-                      flex: 1, padding: 16, border: `1px solid ${plan === p ? 'var(--red-dim)' : 'var(--faint)'}`,
-                      background: plan === p ? 'var(--red-faint)' : 'transparent',
-                      cursor: 'pointer', transition: 'all .2s', textAlign: 'center',
-                      borderLeft: p === 'iniciado' ? 'none' : undefined,
-                    }}
-                  >
-                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 3, color: plan === p ? 'var(--cream)' : 'var(--muted)', display: 'block' }}>
-                      {p.toUpperCase()}
-                    </span>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: plan === p ? 'var(--red)' : 'var(--muted)', display: 'block', marginTop: 4 }}>
-                      {p === 'profano' ? 'Gratuito' : 'R$ 29/mês'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
             <button type="submit" className="btn-primary" style={{ marginTop: 8, width: '100%' }}>
               Iniciar jornada →
             </button>
             <Divider />
             <GoogleButton onClick={handleGoogle} label="Cadastrar com Google" />
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', textAlign: 'center', marginTop: 8 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', textAlign: 'center', marginTop: 8 }}>
               Já tem conta?{' '}
-              <button type="button" onClick={() => setTab('login')} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2 }}>
+              <button type="button" onClick={() => setTab('login')} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2 }}>
                 Entrar
               </button>
             </p>
@@ -232,7 +208,7 @@ function LoginContent() {
 
 function Divider() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', margin: '4px 0' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', margin: '4px 0' }}>
       <span style={{ flex: 1, height: 1, background: 'var(--faint)', display: 'block' }} />
       ou
       <span style={{ flex: 1, height: 1, background: 'var(--faint)', display: 'block' }} />
@@ -242,7 +218,7 @@ function Divider() {
 
 function GoogleButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
-    <button type="button" onClick={onClick} style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', background: 'transparent', color: 'var(--muted)', border: '1px solid var(--faint)', padding: 14, cursor: 'pointer', transition: 'all .2s', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+    <button type="button" onClick={onClick} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', background: 'transparent', color: 'var(--muted)', border: '1px solid var(--faint)', padding: 14, cursor: 'pointer', transition: 'all .2s', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" opacity=".6"/>
         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" opacity=".6"/>

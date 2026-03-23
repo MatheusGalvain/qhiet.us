@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import NoiseOverlay from '@/components/layout/NoiseOverlay'
 import Nav from '@/components/layout/Nav'
+import Footer from '@/components/layout/Footer'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/types'
 
@@ -50,6 +51,7 @@ export default async function RootLayout({
         <NoiseOverlay />
         <Nav profile={profile} />
         <main>{children}</main>
+        <Footer />
       </body>
     </html>
   )

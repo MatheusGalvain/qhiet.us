@@ -14,6 +14,7 @@ interface NavProps {
 const NAV_LINKS = [
   { href: '/transmissoes', label: 'Transmissões' },
   { href: '/categorias',   label: 'Categorias' },
+  { href: '/ranking',      label: 'Ranking' },
   { href: '/membros',      label: 'Membros' },
 ]
 
@@ -115,7 +116,7 @@ export default function Nav({ profile }: NavProps) {
             <Avatar name={profile.name} size="sm" />
             <div>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: 2, color: 'var(--cream)' }}>{profile.name}</p>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--red)', textTransform: 'uppercase', marginTop: 2 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--red)', textTransform: 'uppercase', marginTop: 2 }}>
                 {profile.is_subscriber ? '◈ Iniciado' : '◉ Profano'}
               </p>
             </div>
@@ -153,7 +154,7 @@ export default function Nav({ profile }: NavProps) {
             </>
           ) : (
             <form action="/api/auth/logout" method="POST">
-              <button type="submit" style={{ width: '100%', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)', padding: 12, cursor: 'pointer' }}>
+              <button type="submit" style={{ width: '100%', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)', padding: 12, cursor: 'pointer' }}>
                 Sair
               </button>
             </form>
@@ -162,7 +163,7 @@ export default function Nav({ profile }: NavProps) {
 
         {/* Footer */}
         <div style={{ padding: '12px 32px', borderTop: '1px solid var(--faint)', marginTop: 'auto' }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase' }}>
             QHIETHUS · Portal Oculto · Est. MMXXVI
           </p>
         </div>

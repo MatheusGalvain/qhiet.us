@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ReadingProgress from '@/components/artigo/ReadingProgress'
+import ReadingCompleteButton from '@/components/artigo/ReadingCompleteButton'
 import PaywallOverlay from '@/components/artigo/PaywallOverlay'
 import HermesQuiz from '@/components/artigo/HermesQuiz'
 import HermesBot from '@/components/layout/HermesBot'
@@ -24,8 +25,8 @@ async function getData(slug: string) {
   let isSubscriber = false
   if (user) {
     const { data: profile } = await supabase
-      .from('profiles').select('is_subscriber').eq('id', user.id).single()
-    isSubscriber = profile?.is_subscriber ?? false
+      .from('profiles').select('is_subscriber, is_admin').eq('id', user.id).single()
+    isSubscriber = profile?.is_subscriber ?? profile?.is_admin ?? false
   }
 
   const { data: quiz } = await supabase
@@ -47,6 +48,9 @@ export default async function ArtigoPage({ params }: PageProps) {
   const { transmissao: t, isSubscriber, quiz } = data
   const hasAccess = t.access === 'free' || isSubscriber
 
+  // XP for reading = 60% of total xp_reward
+  const readingXP = Math.round(t.xp_reward * 0.6)
+
   return (
     <>
       <ReadingProgress />
@@ -55,7 +59,7 @@ export default async function ArtigoPage({ params }: PageProps) {
       <div style={{
         padding: '14px var(--px)', borderBottom: '1px solid var(--faint)',
         display: 'flex', alignItems: 'center', gap: 10,
-        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3,
+        fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3,
         color: 'var(--muted)', textTransform: 'uppercase', flexWrap: 'wrap',
       }}>
         <Link href="/" style={{ color: 'var(--muted)', textDecoration: 'none' }}>Home</Link>
@@ -106,7 +110,7 @@ export default async function ArtigoPage({ params }: PageProps) {
             ].map(([label, value], i) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 {i > 0 && <span style={{ width: 1, height: 12, background: 'var(--faint)', display: 'inline-block', flexShrink: 0 }} />}
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
                   {label}: <span style={{ color: 'var(--cream)' }}>{value}</span>
                 </span>
               </div>
@@ -116,23 +120,22 @@ export default async function ArtigoPage({ params }: PageProps) {
           {/* Body */}
           {hasAccess ? (
             <div
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'clamp(16px, 1.5vw, 19px)',
-                lineHeight: 1.85,
-                color: '#d8d0c0',
-                maxWidth: 680,
-              }}
+              className="article-prose"
               dangerouslySetInnerHTML={{ __html: t.content }}
             />
           ) : (
             <>
               <div
-                style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(16px, 1.5vw, 19px)', lineHeight: 1.85, color: '#d8d0c0', maxWidth: 680 }}
+                className="article-prose"
                 dangerouslySetInnerHTML={{ __html: getPreview(t.content) }}
               />
               <PaywallOverlay />
             </>
+          )}
+
+          {/* Concluir Leitura button — at the bottom of article content */}
+          {hasAccess && (
+            <ReadingCompleteButton transmissaoId={t.id} xpReward={readingXP} />
           )}
 
           {/* Quiz */}
@@ -167,7 +170,7 @@ function ArticleSidebar({ transmissao: t, hasAccess }: { transmissao: Transmissa
     <>
       {/* Access status */}
       <div style={{ border: '1px solid var(--faint)', padding: 20, marginBottom: 20 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: t.access === 'free' ? 'var(--red-dim)' : 'var(--gold)', textTransform: 'uppercase', marginBottom: 8 }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: t.access === 'free' ? 'var(--red-dim)' : 'var(--gold)', textTransform: 'uppercase', marginBottom: 8 }}>
           {t.access === 'free' ? '◉ Leitura Livre' : '◈ Exclusivo Iniciados'}
         </p>
         <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(18px, 2vw, 28px)', letterSpacing: 2, color: 'var(--cream)', lineHeight: 1.1 }}>
@@ -177,13 +180,13 @@ function ArticleSidebar({ transmissao: t, hasAccess }: { transmissao: Transmissa
 
       {/* XP info */}
       <div style={{ border: '1px solid var(--faint)', padding: 20, marginBottom: 20 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 12 }}>Recompensas</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 12 }}>Recompensas</p>
         {[
           ['Leitura', Math.round(t.xp_reward * 0.6)],
           ['Quiz completo', Math.round(t.xp_reward * 0.4)],
         ].map(([label, xp]) => (
           <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: 'var(--muted)' }}>{label}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)' }}>{label}</span>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--gold)', letterSpacing: 2 }}>+{xp} XP</span>
           </div>
         ))}
@@ -191,7 +194,7 @@ function ArticleSidebar({ transmissao: t, hasAccess }: { transmissao: Transmissa
 
       {/* Categories */}
       <div style={{ border: '1px solid var(--faint)', padding: 20, marginBottom: 20 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 12 }}>Categorias</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 12 }}>Categorias</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {t.categories.map(cat => (
             <Link key={cat} href={`/categorias/${cat}`} style={{ textDecoration: 'none' }}>

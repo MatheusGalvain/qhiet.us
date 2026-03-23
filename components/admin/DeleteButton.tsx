@@ -20,13 +20,13 @@ export default function DeleteButton({ id, title }: { id: string; title: string 
         <button
           onClick={handleDelete}
           disabled={loading}
-          style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
         >
           {loading ? '...' : 'Confirmar'}
         </button>
         <button
           onClick={() => setConfirming(false)}
-          style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
         >
           Cancelar
         </button>
@@ -37,7 +37,7 @@ export default function DeleteButton({ id, title }: { id: string; title: string 
   return (
     <button
       onClick={() => setConfirming(true)}
-      style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, opacity: 0.5 }}
+      style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, opacity: 0.5 }}
     >
       Deletar
     </button>

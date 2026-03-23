@@ -28,15 +28,29 @@ export default function HermesBot({
   )
 }
 
+/* 10-pointed star SVG */
 function HermesIcon() {
+  // Generate 10-point star path
+  const points = 10
+  const outerR = 9
+  const innerR = 4.2
+  const cx = 10
+  const cy = 10
+  const pathParts: string[] = []
+  for (let i = 0; i < points * 2; i++) {
+    const angle = (Math.PI / points) * i - Math.PI / 2
+    const r = i % 2 === 0 ? outerR : innerR
+    const x = cx + r * Math.cos(angle)
+    const y = cy + r * Math.sin(angle)
+    pathParts.push(`${i === 0 ? 'M' : 'L'}${x.toFixed(3)},${y.toFixed(3)}`)
+  }
+  pathParts.push('Z')
+  const starPath = pathParts.join(' ')
+
   return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <circle cx="10" cy="10" r="9" stroke="#2a1e0c" strokeWidth=".8" />
-      <circle cx="7.5" cy="8.5" r="1" fill="#b02a1e" opacity=".6" />
-      <circle cx="12.5" cy="8.5" r="1" fill="#b02a1e" opacity=".6" />
-      <path d="M7 13 Q10 15 13 13" stroke="#c8960a" strokeWidth=".8" fill="none" strokeLinecap="round" />
-      <line x1="10" y1="1" x2="10" y2="3.5" stroke="#b02a1e" strokeWidth=".8" />
-      <circle cx="10" cy=".8" r=".7" fill="#b02a1e" />
+    <svg width="22" height="22" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d={starPath} stroke="#ede5d8" strokeWidth="1.2" fill="none" />
+      <circle cx="10" cy="10" r="2.5" fill="#b02a1e" />
     </svg>
   )
 }

@@ -62,14 +62,14 @@ export default function AdminLoginPage() {
           <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, letterSpacing: 6, color: 'var(--cream)', marginBottom: 8 }}>
             QHIETH<span style={{ color: 'var(--red)' }}>US</span>
           </p>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 4, color: 'var(--red)', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 4, color: 'var(--red)', textTransform: 'uppercase' }}>
             Acesso Administrativo
           </p>
         </div>
 
         {/* Form card */}
         <div style={{ border: '1px solid var(--faint)', padding: '36px 32px' }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 28 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 28 }}>
             Identificação
           </p>
 
@@ -80,7 +80,7 @@ export default function AdminLoginPage() {
               padding: '10px 14px',
               marginBottom: 20,
               fontFamily: 'var(--font-mono)',
-              fontSize: 10,
+              fontSize: 11,
               letterSpacing: 2,
               color: 'var(--red)',
             }}>
@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <label style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)' }}>
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)' }}>
                 E-mail
               </label>
               <input
@@ -104,7 +104,7 @@ export default function AdminLoginPage() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <label style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)' }}>
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)' }}>
                 Senha
               </label>
               <input
@@ -129,7 +129,7 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Back link */}
-        <p style={{ textAlign: 'center', marginTop: 24, fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>
+        <p style={{ textAlign: 'center', marginTop: 24, fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>
           <a href="/" style={{ color: 'var(--muted)', textDecoration: 'none' }}>← Voltar ao portal</a>
         </p>
       </div>
