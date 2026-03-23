@@ -134,6 +134,9 @@ export default async function ArtigoPage({ params }: PageProps) {
             </>
           )}
 
+          {/* Marker: progress tracks up to this point */}
+          <div id="article-end" />
+
           {/* Concluir Leitura button — at the bottom of article content */}
           {hasAccess && (
             <ReadingCompleteButton transmissaoId={t.id} xpReward={readingXP} />

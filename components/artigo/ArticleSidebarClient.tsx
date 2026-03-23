@@ -14,13 +14,25 @@ export default function ArticleSidebarClient({ transmissao: t, hasAccess }: Prop
 
   useEffect(() => {
     function onScroll() {
-      const doc = document.documentElement
-      const scrollTop = doc.scrollTop || document.body.scrollTop
-      const scrollHeight = doc.scrollHeight - doc.clientHeight
-      if (scrollHeight <= 0) return
-      setPct(Math.min(100, Math.round((scrollTop / scrollHeight) * 100)))
+      const marker = document.getElementById('article-end')
+      const scrollTop = window.scrollY || document.documentElement.scrollTop
+      const viewportH = window.innerHeight
+
+      if (marker) {
+        // Progress = how far the viewport bottom has reached the marker top
+        const markerTop = marker.getBoundingClientRect().top + scrollTop
+        const target = markerTop - viewportH
+        if (target <= 0) { setPct(100); return }
+        setPct(Math.min(100, Math.round((scrollTop / target) * 100)))
+      } else {
+        // Fallback: full page scroll
+        const scrollHeight = document.documentElement.scrollHeight - viewportH
+        if (scrollHeight <= 0) return
+        setPct(Math.min(100, Math.round((scrollTop / scrollHeight) * 100)))
+      }
     }
     window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll() // calc on mount
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 

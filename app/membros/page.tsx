@@ -1,7 +1,9 @@
 import HermesBot from '@/components/layout/HermesBot'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
+
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: 'Membros',
@@ -10,10 +12,11 @@ export const metadata: Metadata = {
 
 async function getStats() {
   const supabase = await createClient()
+  const service = createServiceClient()
   const [{ count: transmissoesCount }, { count: livrosCount }, { data: ranking }] = await Promise.all([
     supabase.from('transmissoes').select('*', { count: 'exact', head: true }),
     supabase.from('monthly_books').select('*', { count: 'exact', head: true }),
-    supabase
+    service
       .from('profiles')
       .select('id, name, nick, xp_total, is_subscriber')
       .order('xp_total', { ascending: false })

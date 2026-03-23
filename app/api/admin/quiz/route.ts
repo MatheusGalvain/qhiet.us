@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
   const { data, error } = await service
     .from('quizzes')
     .upsert(
-      { transmissao_id, questions, xp_reward: xp_reward ?? 50, updated_at: new Date().toISOString() },
+      { transmissao_id, questions, xp_reward: xp_reward ?? 50 },
       { onConflict: 'transmissao_id' }
     )
     .select()
