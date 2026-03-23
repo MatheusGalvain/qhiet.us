@@ -33,7 +33,7 @@ const COMPARE_ROWS = [
   { label: 'Transmissões Exclusivas Iniciado',      profano: false,    iniciado: true },
   { label: 'Quiz de IA Hermes',                     profano: false,    iniciado: true },
   { label: 'XP por leitura',                        profano: true,     iniciado: true },
-  { label: 'XP bônus por quiz',                     profano: false,    iniciado: true },
+  { label: 'Quiz liberado em artigos com bônus de xp',                     profano: false,    iniciado: true },
   { label: 'Livros mensais por e-mail',             profano: '1 livro', iniciado: '4 livros' },
   { label: 'Ranking global',                        profano: true,     iniciado: true },
   { label: 'Badge de assinante no perfil',          profano: false,    iniciado: true },
