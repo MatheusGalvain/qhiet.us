@@ -142,10 +142,10 @@ export default async function CategoriaPage({ params }: PageProps) {
                   {item?.date}
                 </div>
                 <div>
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text-primary)', lineHeight: 1.7 }}>
                     {item?.title}
                   </p>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--text-primary)', lineHeight: 1.7 }}>
                     {item?.desc}
                   </p>
                 </div>
