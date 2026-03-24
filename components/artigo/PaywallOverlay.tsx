@@ -3,17 +3,22 @@ import Link from 'next/link'
 export default function PaywallOverlay() {
   return (
     <div className="paywall-wrap">
-      {/* Blurred continuation */}
+      {/* Dense blurred text — visually fills the page behind the overlay */}
       <div className="paywall-blur">
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: 19, lineHeight: 1.85, color: '#d8d0c0', marginBottom: 28 }}>
-          O conhecimento mais profundo permanece velado para aqueles que ainda não cruzaram o limiar. A tradição hermética sempre distinguiu entre o exotérico — aberto a todos — e o esotérico, reservado aos iniciados.
-        </p>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: 19, lineHeight: 1.85, color: '#d8d0c0', marginBottom: 28 }}>
-          Como Hermes Trismegisto ensina, certos segredos só se revelam àqueles que demonstraram capacidade de recebê-los. A iniciação não é um mero ritual — é a transformação interna que precede a revelação exterior.
-        </p>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: 19, lineHeight: 1.85, color: '#d8d0c0', marginBottom: 28 }}>
-          Este texto continua por mais alguns minutos explorando as correspondências entre os sistemas simbólicos e sua aplicação na transformação interior do buscador.
-        </p>
+        {[
+          'Na tradição hermética, o véu que separa o manifestado do inmanifesto não é uma barreira imposta de fora, mas uma expressão da própria natureza do conhecimento: ele se revela apenas àqueles que já carregam, em si, a capacidade de recebê-lo. Cada etapa da iniciação corresponde a uma dissolução progressiva do eu superficial.',
+          'A doutrina das emanações — das Sefirot na Cabala, dos Aeons no Gnosticismo, dos Neter no Hermetismo egípcio — descreve não cosmologias abstratas, mas mapas internos. O iniciado que percorre o caminho do Meio aprende que a descida ao Abismo precede toda ascensão verdadeira.',
+          'Os cabalistas de Gerona, no século XIII, foram os primeiros a sistematizar o paradoxo central: o Infinito só pode criar o finito através de uma contração deliberada, um ato de auto-ocultamento pelo qual o Todo faz espaço para o Outro. Este é o Tzimtzum — e ele ecoa em toda tradição de transformação interior.',
+          'Como Hermes Trismegisto afirma na Tábua de Esmeralda: o que está em baixo corresponde ao que está em cima, e o que está em cima corresponde ao que está em baixo. Esta lei de correspondências é a chave que destranca cada nível da realidade para o iniciado que persevera.',
+          'A alquimia interior — a Grande Obra — começa sempre com o Nigredo, a escuridão necessária. Antes do ouro vem a putrefação. Antes da iluminação vem o deserto. A tradição é unânime neste ponto, através de culturas e séculos: a transformação real exige a morte do que era.',
+        ].map((text, i) => (
+          <p key={i} style={{
+            fontFamily: 'var(--font-body)', fontSize: 19,
+            lineHeight: 1.85, color: '#d8d0c0', marginBottom: 28,
+          }}>
+            {text}
+          </p>
+        ))}
       </div>
 
       {/* Gradient overlay + CTA card */}
@@ -40,7 +45,7 @@ export default function PaywallOverlay() {
             fontFamily: 'var(--font-body)', fontSize: 16,
             color: 'var(--muted)', lineHeight: 1.7,
           }}>
-            Este texto continua por mais alguns minutos de leitura. Torne-se assinante para acessar o conteúdo completo — e ganhar seu rank de conhecimento ao final.
+            Esta transmissão é exclusiva para assinantes Iniciados. Assine por R$19,99/mês e acesse todo o acervo, quiz de IA e 4 livros mensais.
           </p>
 
           <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap', justifyContent: 'center' }}>

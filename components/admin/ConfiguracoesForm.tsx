@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { saveNextPostAt } from '@/app/admin/configuracoes/actions'
 
 interface Props {
   nextPostAt: string
@@ -12,22 +13,17 @@ export default function ConfiguracoesForm({ nextPostAt }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  async function handleSave() {
+  function handleSave() {
     setSaved(false)
     setError(null)
     startTransition(async () => {
-      try {
-        const res = await fetch('/api/admin/settings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ key: 'next_post_at', value: date }),
-        })
-        if (!res.ok) throw new Error(await res.text())
-        setSaved(true)
-        setTimeout(() => setSaved(false), 3000)
-      } catch (e: any) {
-        setError(e.message)
+      const result = await saveNextPostAt(date)
+      if (!result.ok) {
+        setError(result.error ?? 'Erro desconhecido')
+        return
       }
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
     })
   }
 

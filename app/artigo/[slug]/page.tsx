@@ -130,13 +130,7 @@ export default async function ArtigoPage({ params }: PageProps) {
               dangerouslySetInnerHTML={{ __html: t.content }}
             />
           ) : (
-            <>
-              <div
-                className="article-prose"
-                dangerouslySetInnerHTML={{ __html: getPreview(t.content) }}
-              />
-              <PaywallOverlay />
-            </>
+            <PaywallOverlay />
           )}
 
           {/* Marker: progress tracks up to this point */}
