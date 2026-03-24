@@ -18,7 +18,12 @@ export async function POST(request: NextRequest) {
     }
 
     const { data: profile } = await supabase
-      .from('profiles').select('email, name').eq('id', user.id).single()
+      .from('profiles').select('email, name, is_subscriber').eq('id', user.id).single()
+
+    // Guard: already a subscriber — don't open a new checkout session
+    if ((profile as any)?.is_subscriber) {
+      return NextResponse.redirect(new URL('/perfil', request.url))
+    }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin
 

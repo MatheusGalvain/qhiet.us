@@ -13,7 +13,9 @@ export const metadata: Metadata = {
 async function getStats() {
   const supabase = await createClient()
   const service = createServiceClient()
-  const [{ count: transmissoesCount }, { count: livrosCount }, { data: ranking }] = await Promise.all([
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const [{ count: transmissoesCount }, { count: livrosCount }, { data: ranking }, { data: profile }] = await Promise.all([
     supabase.from('transmissoes').select('*', { count: 'exact', head: true }),
     supabase.from('monthly_books').select('*', { count: 'exact', head: true }),
     service
@@ -21,11 +23,15 @@ async function getStats() {
       .select('id, name, nick, xp_total, is_subscriber')
       .order('xp_total', { ascending: false })
       .limit(10),
+    user
+      ? supabase.from('profiles').select('is_subscriber').eq('id', user.id).single()
+      : Promise.resolve({ data: null }),
   ])
   return {
     transmissoesCount: transmissoesCount ?? 0,
     livrosCount: livrosCount ?? 0,
     ranking: (ranking ?? []) as Array<{ id: string; name: string; nick: string | null; xp_total: number; is_subscriber: boolean }>,
+    isSubscriber: (profile as any)?.is_subscriber ?? false,
   }
 }
 
@@ -61,7 +67,7 @@ const COMPARE_ROWS = [
 ]
 
 export default async function MembrosPage() {
-  const { transmissoesCount, livrosCount, ranking } = await getStats()
+  const { transmissoesCount, livrosCount, ranking, isSubscriber } = await getStats()
   return (
     <>
       {/* HERO */}
@@ -77,7 +83,10 @@ export default async function MembrosPage() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <CheckoutButton label="Assinar R$19,99/mês →" />
+            {isSubscriber
+              ? <ActivePlanBadge />
+              : <CheckoutButton label="Assinar R$19,99/mês →" />
+            }
             <Link href="/login?tab=register" className="btn-ghost">Criar conta grátis</Link>
           </div>
         </div>
@@ -173,7 +182,10 @@ export default async function MembrosPage() {
                 </div>
               ))}
             </div>
-            <CheckoutButton label="Assinar Iniciado →" fullWidth />
+            {isSubscriber
+              ? <ActivePlanBadge fullWidth />
+              : <CheckoutButton label="Assinar Iniciado →" fullWidth />
+            }
           </div>
         </div>
       </div>
@@ -224,5 +236,28 @@ function CheckoutButton({ label = 'Assinar →', fullWidth = false }: { label?: 
         {label}
       </button>
     </form>
+  )
+}
+
+function ActivePlanBadge({ fullWidth = false }: { fullWidth?: boolean }) {
+  return (
+    <div style={{
+      marginTop: fullWidth ? 32 : 0,
+      width: fullWidth ? '100%' : 'auto',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 10,
+      padding: fullWidth ? '16px' : '12px 20px',
+      border: '1px solid var(--red-dim)',
+      fontFamily: 'var(--font-mono)',
+      fontSize: 12,
+      letterSpacing: 3,
+      textTransform: 'uppercase' as const,
+      color: 'var(--red)',
+      justifyContent: fullWidth ? 'center' : 'flex-start',
+    }}>
+      <span style={{ fontSize: 14 }}>◈</span>
+      Plano Iniciado ativo
+    </div>
   )
 }
