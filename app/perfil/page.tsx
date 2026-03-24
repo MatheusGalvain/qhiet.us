@@ -49,14 +49,16 @@ async function getData() {
   const { data: books } = await supabase
     .from('monthly_books').select('*').order('month', { ascending: false }).limit(8)
 
-  // Activity heatmap — fetch past year of reading history
-  const oneYearAgo = new Date()
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+  // Activity heatmap — fetch reading history from Jan 1 to Dec 31 of current year
+  const currentYear = new Date().getFullYear()
+  const yearStart = new Date(currentYear, 0, 1).toISOString()
+  const yearEnd   = new Date(currentYear, 11, 31, 23, 59, 59).toISOString()
   const { data: activityRows } = await supabase
     .from('reading_history')
     .select('created_at')
     .eq('user_id', user.id)
-    .gte('created_at', oneYearAgo.toISOString())
+    .gte('created_at', yearStart)
+    .lte('created_at', yearEnd)
 
   // Build date → count map
   const activityMap: Record<string, number> = {}

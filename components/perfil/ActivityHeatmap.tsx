@@ -54,15 +54,19 @@ function computeStreaks(activityMap: Record<string, number>) {
 export default function ActivityHeatmap({ activityMap, totalActiveDays }: Props) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
+  const currentYear = today.getFullYear()
 
-  // Build 53 weeks starting from Sunday ~52 weeks ago
-  const startDate = new Date(today)
-  startDate.setDate(startDate.getDate() - 364)
-  startDate.setDate(startDate.getDate() - startDate.getDay()) // align to Sunday
+  // Build weeks from Jan 1 to Dec 31 of current year
+  const yearStart = new Date(currentYear, 0, 1) // Jan 1
+  const yearEnd   = new Date(currentYear, 11, 31) // Dec 31
+
+  // Align startDate to the Sunday of the week containing Jan 1
+  const startDate = new Date(yearStart)
+  startDate.setDate(startDate.getDate() - startDate.getDay())
 
   const weeks: Date[][] = []
   const cursor = new Date(startDate)
-  while (cursor <= today) {
+  while (cursor <= yearEnd) {
     const week: Date[] = []
     for (let d = 0; d < 7; d++) {
       week.push(new Date(cursor))
@@ -97,7 +101,7 @@ export default function ActivityHeatmap({ activityMap, totalActiveDays }: Props)
           ATIVIDADE
         </h2>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-          {totalActiveDays} dia{totalActiveDays !== 1 ? 's' : ''} ativos no último ano
+          {totalActiveDays} dia{totalActiveDays !== 1 ? 's' : ''} ativos em {currentYear}
         </p>
       </div>
 
