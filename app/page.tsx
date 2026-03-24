@@ -22,19 +22,19 @@ async function getData() {
   try {
     const supabase = await createClient()
 
-    // Featured: most recent locked transmissão
+    // Featured: most recent locked transmissão (never fetch content on list/home pages)
     const { data: featured } = await supabase
       .from('transmissoes')
-      .select('*')
+      .select('id, slug, number, title, excerpt, categories, access, read_time_minutes, published_at, xp_reward, status')
       .eq('access', 'locked')
       .order('published_at', { ascending: false })
       .limit(1)
       .single()
 
-    // Grid: 3 most recent free transmissões
+    // Grid: 3 most recent free transmissões (never fetch content for list views)
     const { data: grid } = await supabase
       .from('transmissoes')
-      .select('*')
+      .select('id, slug, number, title, excerpt, categories, access, read_time_minutes, published_at, xp_reward, status')
       .eq('access', 'free')
       .order('published_at', { ascending: false })
       .limit(3)
@@ -154,7 +154,7 @@ function countdownLabel(days: number | null): { line: string; num: string } {
 /* ─── Featured Article ─── */
 function FeaturedArticle({ transmissao: t, nextPostDays }: { transmissao: Transmissao; nextPostDays: number | null }) {
   const catLabel = t.categories.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(' · ')
-  const preview = t.excerpt || t.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().split(' ').slice(0, 30).join(' ') + '…'
+  const preview = t.excerpt || (t.content ? t.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().split(' ').slice(0, 30).join(' ') + '…' : '…')
   const dateStr = formatDatePT(t.published_at).toUpperCase()
   const { line: cLine, num: cNum } = countdownLabel(nextPostDays)
 

@@ -31,10 +31,24 @@ async function getData(slug: string) {
     isSubscriber = profile?.is_subscriber ?? profile?.is_admin ?? false
   }
 
+  const hasAccess = transmissao.access === 'free' || isSubscriber
+
   const { data: quiz } = await supabase
     .from('quizzes').select('*').eq('transmissao_id', transmissao.id).single()
 
-  return { transmissao: transmissao as Transmissao, isSubscriber, quiz }
+  // ─── SECURITY: Never send protected content to the browser for non-subscribers ───
+  // Client component props are serialized into __NEXT_DATA__ and visible in DevTools.
+  // Strip content and quiz answers server-side so they never leave the server.
+  const safeTransmissao: Transmissao = hasAccess
+    ? (transmissao as Transmissao)
+    : { ...(transmissao as Transmissao), content: '' }
+
+  const safeQuizQuestions: QuizQuestion[] = hasAccess && quiz
+    ? (quiz.questions as QuizQuestion[])
+    : []
+  // ─────────────────────────────────────────────────────────────────────────────────
+
+  return { transmissao: safeTransmissao, isSubscriber, hasAccess, quiz, safeQuizQuestions }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -47,8 +61,7 @@ export default async function ArtigoPage({ params }: PageProps) {
   const data = await getData(params.slug)
   if (!data) notFound()
 
-  const { transmissao: t, isSubscriber, quiz } = data
-  const hasAccess = t.access === 'free' || isSubscriber
+  const { transmissao: t, isSubscriber, hasAccess, quiz, safeQuizQuestions } = data
 
   // XP for reading = 60% of total xp_reward
   const readingXP = Math.round(t.xp_reward * 0.6)
@@ -145,7 +158,7 @@ export default async function ArtigoPage({ params }: PageProps) {
           {quiz && (
             <HermesQuiz
               transmissaoId={t.id}
-              questions={quiz.questions as QuizQuestion[]}
+              questions={safeQuizQuestions}
               xpReward={quiz.xp_reward}
               hasAccess={hasAccess}
             />

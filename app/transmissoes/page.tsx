@@ -27,7 +27,7 @@ async function getData(searchParams: PageProps['searchParams']) {
 
   let query = supabase
     .from('transmissoes')
-    .select('*', { count: 'exact' })
+    .select('id, slug, number, title, excerpt, categories, access, read_time_minutes, published_at, xp_reward, status', { count: 'exact' })
     .order(searchParams.sort === 'antigo' ? 'number' : 'published_at', {
       ascending: searchParams.sort === 'antigo',
     })
