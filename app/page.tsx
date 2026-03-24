@@ -286,7 +286,7 @@ function MembershipSection() {
           <div className="plan featured">
             <p className="plan-name">Iniciado</p>
             <div>
-              <span className="plan-price">R$ 29</span>
+              <span className="plan-price">R$19,99</span>
               <span className="plan-period"> / por mês</span>
             </div>
             <div className="plan-features">

@@ -23,7 +23,7 @@ export default function PaywallOverlay() {
             CONTEÚDO <span style={{ color: 'var(--red)' }}>EXCLUSIVO</span>
           </h3>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--muted)', lineHeight: 1.7 }}>
-            Esta transmissão é exclusiva para assinantes Iniciados. Assine por R$29/mês e acesse todo o acervo, quiz de IA e 4 livros mensais.
+            Esta transmissão é exclusiva para assinantes Iniciados. Assine por R$19,99/mês e acesse todo o acervo, quiz de IA e 4 livros mensais.
           </p>
           <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
             <Link href="/membros" className="btn-primary">

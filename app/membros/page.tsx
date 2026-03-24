@@ -7,7 +7,7 @@ export const revalidate = 0
 
 export const metadata: Metadata = {
   title: 'Membros',
-  description: 'Conheça os planos do QHIETHUS — Profano (gratuito) e Iniciado (R$29/mês).',
+  description: 'Conheça os planos do QHIETHUS — Profano (gratuito) e Iniciado (R$19,99/mês).',
 }
 
 async function getStats() {
@@ -77,7 +77,7 @@ export default async function MembrosPage() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <CheckoutButton label="Assinar R$29/mês →" />
+            <CheckoutButton label="Assinar R$19,99/mês →" />
             <Link href="/login?tab=register" className="btn-ghost">Criar conta grátis</Link>
           </div>
         </div>
@@ -160,7 +160,7 @@ export default async function MembrosPage() {
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(48px,6vw,72px)', color: 'var(--cream)', letterSpacing: 2, lineHeight: 1 }}>R$29</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(48px,6vw,72px)', color: 'var(--cream)', letterSpacing: 2, lineHeight: 1 }}>R$19,99</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: 2 }}>/mês</span>
             </div>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,32px)', letterSpacing: 4, color: 'var(--red)', marginBottom: 24 }}>INICIADO</p>
