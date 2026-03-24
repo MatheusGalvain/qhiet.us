@@ -7,7 +7,6 @@ import type { Metadata } from 'next'
 import ActivityHeatmap from '@/components/perfil/ActivityHeatmap'
 import NickForm from '@/components/perfil/NickForm'
 import ProfileSidebar from '@/components/perfil/ProfileSidebar'
-import ChangePasswordForm from '@/components/perfil/ChangePasswordForm'
 
 export const metadata: Metadata = { title: 'Perfil' }
 
@@ -87,6 +86,7 @@ export default async function PerfilPage() {
       {/* SIDEBAR */}
       <ProfileSidebar
         name={profile.name}
+        email={profile.email}
         isSubscriber={profile.is_subscriber}
         rankName={rank.name}
         rankSymbol={(rank as any).symbol}
@@ -295,7 +295,6 @@ export default async function PerfilPage() {
               Conta: {profile.email}
             </p>
             <NickForm currentNick={profile.nick ?? null} currentName={profile.name} nickUpdatedAt={profile.nick_updated_at ?? null} />
-            <ChangePasswordForm email={profile.email} />
           </div>
         </section>
 

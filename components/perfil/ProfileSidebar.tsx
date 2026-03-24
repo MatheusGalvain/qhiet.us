@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Avatar from '@/components/ui/Avatar'
+import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   name: string
+  email: string
   isSubscriber: boolean
   rankName: string
   rankSymbol: string
@@ -21,8 +23,25 @@ const sidebarLinks = [
   { href: '#config',    label: 'Configurações', icon: '○' },
 ]
 
-export default function ProfileSidebar({ name, isSubscriber, rankName, rankSymbol }: Props) {
+export default function ProfileSidebar({ name, email, isSubscriber, rankName, rankSymbol }: Props) {
   const [collapsed, setCollapsed] = useState(false)
+  const [resetState, setResetState] = useState<'idle' | 'confirm' | 'sending' | 'sent'>('idle')
+  const [resetError, setResetError] = useState<string | null>(null)
+
+  async function handleResetConfirm() {
+    setResetState('sending')
+    setResetError(null)
+    const supabase = createClient()
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/api/auth/callback?redirect=/redefinir-senha`,
+    })
+    if (error) {
+      setResetError(error.message)
+      setResetState('confirm')
+      return
+    }
+    setResetState('sent')
+  }
 
   return (
     <>
@@ -164,6 +183,165 @@ export default function ProfileSidebar({ name, isSubscriber, rankName, rankSymbo
           </Link>
         </div>
       )}
+
+      {/* ── Reset Password ── */}
+      <div
+        className="profile-identity-mobile-hide"
+        style={{
+          padding: collapsed ? '0 8px 12px' : '0 32px 12px',
+        }}
+      >
+        {collapsed ? (
+          <button
+            onClick={() => setResetState(s => s === 'idle' ? 'confirm' : 'idle')}
+            title="Redefinir senha"
+            style={{
+              background: 'none',
+              border: '1px solid var(--faint)',
+              color: 'var(--muted)',
+              cursor: 'pointer',
+              width: '100%',
+              height: 36,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 14,
+              borderRadius: 2,
+            }}
+          >
+            🔑
+          </button>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {resetState === 'idle' && (
+              <button
+                onClick={() => setResetState('confirm')}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid var(--faint)',
+                  color: 'var(--muted)',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 11,
+                  letterSpacing: 3,
+                  textTransform: 'uppercase',
+                  padding: '10px 16px',
+                  cursor: 'pointer',
+                  width: '100%',
+                  textAlign: 'left',
+                  whiteSpace: 'nowrap',
+                  transition: 'color .15s, border-color .15s',
+                }}
+                onMouseEnter={e => {
+                  ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--cream)'
+                  ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--muted)'
+                }}
+                onMouseLeave={e => {
+                  ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--muted)'
+                  ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--faint)'
+                }}
+              >
+                Redefinir senha →
+              </button>
+            )}
+
+            {resetState === 'confirm' && (
+              <div style={{
+                border: '1px solid var(--faint)',
+                padding: '12px 14px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+              }}>
+                <p style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 11,
+                  letterSpacing: 2, color: 'var(--muted)',
+                  textTransform: 'uppercase', lineHeight: 1.6,
+                }}>
+                  Enviar link para<br />
+                  <span style={{ color: 'var(--cream)' }}>{email}</span>?
+                </p>
+                {resetError && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red)', letterSpacing: 1 }}>
+                    {resetError}
+                  </p>
+                )}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={handleResetConfirm}
+                    style={{
+                      flex: 1,
+                      background: 'transparent',
+                      border: '1px solid var(--red-dim)',
+                      color: 'var(--red)',
+                      fontFamily: 'var(--font-mono)', fontSize: 11,
+                      letterSpacing: 2, textTransform: 'uppercase',
+                      padding: '8px 0',
+                      cursor: 'pointer',
+                      transition: 'border-color .15s, color .15s',
+                    }}
+                    onMouseEnter={e => {
+                      ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--red)'
+                      ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--cream)'
+                    }}
+                    onMouseLeave={e => {
+                      ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--red-dim)'
+                      ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--red)'
+                    }}
+                  >
+                    Sim
+                  </button>
+                  <button
+                    onClick={() => { setResetState('idle'); setResetError(null) }}
+                    style={{
+                      flex: 1,
+                      background: 'transparent',
+                      border: '1px solid var(--faint)',
+                      color: 'var(--muted)',
+                      fontFamily: 'var(--font-mono)', fontSize: 11,
+                      letterSpacing: 2, textTransform: 'uppercase',
+                      padding: '8px 0',
+                      cursor: 'pointer',
+                      transition: 'border-color .15s, color .15s',
+                    }}
+                    onMouseEnter={e => {
+                      ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--muted)'
+                      ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--cream)'
+                    }}
+                    onMouseLeave={e => {
+                      ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--faint)'
+                      ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--muted)'
+                    }}
+                  >
+                    Não
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {resetState === 'sending' && (
+              <p style={{
+                fontFamily: 'var(--font-mono)', fontSize: 11,
+                letterSpacing: 2, color: 'var(--muted)',
+                textTransform: 'uppercase', padding: '10px 0',
+              }}>
+                Enviando...
+              </p>
+            )}
+
+            {resetState === 'sent' && (
+              <div style={{
+                border: '1px solid var(--faint)',
+                padding: '12px 14px',
+                fontFamily: 'var(--font-mono)', fontSize: 11,
+                letterSpacing: 2, color: 'var(--gold)',
+                textTransform: 'uppercase', lineHeight: 1.7,
+              }}>
+                <span style={{ marginRight: 6 }}>✦</span>Link enviado
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* ── Logout ── */}
       <div
