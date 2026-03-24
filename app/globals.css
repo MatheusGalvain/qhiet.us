@@ -795,15 +795,16 @@ body {
    PROFILE LAYOUT — tabs on mobile
 ═══════════════════════════════════════ */
 .profile-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
+  display: flex;
   min-height: calc(100vh - var(--nav-h));
 }
-@media (max-width: 1023px) {
-  .profile-layout { grid-template-columns: 220px 1fr; }
+/* Main content always fills remaining space regardless of sidebar width */
+.profile-layout > div {
+  flex: 1;
+  min-width: 0;
 }
 @media (max-width: 767px) {
-  .profile-layout { grid-template-columns: 1fr; display: flex; flex-direction: column; }
+  .profile-layout { flex-direction: column; }
 }
 
 .profile-sidebar {

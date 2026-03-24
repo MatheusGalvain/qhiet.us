@@ -1,12 +1,13 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import Avatar from '@/components/ui/Avatar'
 import Link from 'next/link'
 import type { Profile } from '@/types'
 import { getRank, getNextRank, RANK_THRESHOLDS, formatDatePT, formatNumber, getCategorySymbol, padNumber } from '@/lib/utils'
 import type { Metadata } from 'next'
 import ActivityHeatmap from '@/components/perfil/ActivityHeatmap'
 import NickForm from '@/components/perfil/NickForm'
+import ProfileSidebar from '@/components/perfil/ProfileSidebar'
+import ChangePasswordForm from '@/components/perfil/ChangePasswordForm'
 
 export const metadata: Metadata = { title: 'Perfil' }
 
@@ -80,76 +81,16 @@ export default async function PerfilPage() {
     ? ((profile.xp_total - rank.min) / (nextRank.min - rank.min)) * 100
     : 100
 
-  const sidebarLinks = [
-    { href: '#xp',        label: 'XP & Rank',    icon: '✦' },
-    { href: '#atividade', label: 'Atividade',     icon: '◈' },
-    { href: '#historico', label: 'Histórico',     icon: '◎' },
-    { href: '#livros',    label: 'Livros',         icon: '☿' },
-    { href: '#config',    label: 'Configurações',  icon: '○' },
-  ]
-
   return (
     <div className="profile-layout">
 
-      {/* SIDEBAR / MOBILE TABS */}
-      <aside className="profile-sidebar">
-        {/* Identity */}
-        <div className="profile-identity-mobile-hide" style={{ padding: '0 32px 32px', borderBottom: '1px solid var(--faint)', marginBottom: 8 }}>
-          <div style={{ marginBottom: 14 }}>
-          <Avatar name={profile.name} size="lg" />
-        </div>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, letterSpacing: 3, color: 'var(--cream)' }}>{profile.name}</p>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: profile.is_subscriber ? 'var(--red)' : 'var(--muted)', textTransform: 'uppercase', marginTop: 4 }}>
-             {(rank as any).symbol} {rank.name} · {profile.is_subscriber ? 'Iniciado' : 'Profano'}
-          </span>
-        </div>
-
-        {/* Mobile identity strip (visible on mobile only) */}
-        <div className="profile-mobile-identity" style={{ padding: '16px var(--px-sm) 16px', borderBottom: '1px solid var(--faint)' }}>
-          <Avatar name={profile.name} size="sm" />
-          <div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 2, color: 'var(--cream)' }}>{profile.name}</p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--red)', textTransform: 'uppercase', marginTop: 2 }}>
-              {rank.symbol} {rank.name} · {profile.is_subscriber ? 'Iniciado' : 'Profano'}
-            </p>
-          </div>
-        </div>
-
-        {/* Nav / Tab bar */}
-        <ul className="profile-sidebar-nav" style={{ listStyle: 'none', padding: '8px 0', flex: 1 }}>
-          {sidebarLinks.map(({ href, label, icon }) => (
-            <li key={href}>
-              <a
-                href={href}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '12px 32px',
-                  fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase',
-                  color: 'var(--muted)', textDecoration: 'none',
-                  transition: 'all .2s', borderLeft: '2px solid transparent',
-                }}
-              >
-                <span style={{ fontSize: 13, color: 'var(--gold)', opacity: 0.5, width: 16, textAlign: 'center' }}>{icon}</span>
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
-
-        {/* Upgrade CTA */}
-        {!profile.is_subscriber && (
-          <div style={{ padding: '0 32px', marginBottom: 16, marginTop: 'auto' }} className="profile-identity-mobile-hide">
-            <Link href="/membros" className="btn-primary" style={{ display: 'block', textAlign: 'center', fontSize: 12, padding: '12px' }}>
-              Upgrade → Iniciado
-            </Link>
-          </div>
-        )}
-
-        {/* Logout */}
-        <div style={{ padding: '0 32px' }} className="profile-identity-mobile-hide">
-          <LogoutButton />
-        </div>
-      </aside>
+      {/* SIDEBAR */}
+      <ProfileSidebar
+        name={profile.name}
+        isSubscriber={profile.is_subscriber}
+        rankName={rank.name}
+        rankSymbol={(rank as any).symbol}
+      />
 
       {/* MAIN */}
       <div style={{ padding: 'clamp(28px,4vw,48px) var(--px)' }}>
@@ -354,6 +295,7 @@ export default async function PerfilPage() {
               Conta: {profile.email}
             </p>
             <NickForm currentNick={profile.nick ?? null} currentName={profile.name} nickUpdatedAt={profile.nick_updated_at ?? null} />
+            <ChangePasswordForm email={profile.email} />
           </div>
         </section>
 
