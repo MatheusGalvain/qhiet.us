@@ -4,11 +4,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const NAV_ITEMS = [
-  { href: '/admin',              label: 'Dashboard',      icon: '◈' },
-  { href: '/admin/transmissoes', label: 'Transmissões',   icon: '◎' },
-  { href: '/admin/livros',       label: 'Livros',         icon: '☿' },
-  { href: '/admin/membros',      label: 'Membros',        icon: '○' },
-  { href: '/admin/categorias',   label: 'Categorias',     icon: '△' },
+  { href: '/admin',               label: 'Dashboard',      icon: '◈' },
+  { href: '/admin/transmissoes',  label: 'Transmissões',   icon: '◎' },
+  { href: '/admin/livros',        label: 'Livros',         icon: '☿' },
+  { href: '/admin/membros',       label: 'Membros',        icon: '○' },
+  { href: '/admin/categorias',    label: 'Categorias',     icon: '△' },
+  { href: '/admin/configuracoes', label: 'Configurações',  icon: '✦' },
 ]
 
 interface Props {

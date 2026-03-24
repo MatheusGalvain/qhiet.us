@@ -7,6 +7,17 @@ import { padNumber, formatDatePT } from '@/lib/utils'
 
 export const revalidate = 3600
 
+function daysUntil(dateStr: string | null | undefined): number | null {
+  if (!dateStr) return null
+  const target = new Date(dateStr)
+  if (isNaN(target.getTime())) return null
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  target.setHours(0, 0, 0, 0)
+  const diff = Math.ceil((target.getTime() - today.getTime()) / 86_400_000)
+  return diff
+}
+
 async function getData() {
   try {
     const supabase = await createClient()
@@ -33,18 +44,31 @@ async function getData() {
       .from('transmissoes')
       .select('*', { count: 'exact', head: true })
 
+    // Countdown from site_settings
+    const { data: settingRow } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'next_post_at')
+      .single()
+
+    const rawDate = settingRow?.value
+    const nextPostDateStr: string | null =
+      typeof rawDate === 'string' ? rawDate : rawDate ? String(rawDate) : null
+    const nextPostDays = daysUntil(nextPostDateStr)
+
     return {
       featured: featured as Transmissao | null,
       grid: (grid ?? []) as Transmissao[],
       total: totalCount ?? 0,
+      nextPostDays,
     }
   } catch {
-    return { featured: null, grid: [], total: 212 }
+    return { featured: null, grid: [], total: 212, nextPostDays: 7 }
   }
 }
 
 export default async function HomePage() {
-  const { featured, grid, total } = await getData()
+  const { featured, grid, total, nextPostDays } = await getData()
 
   return (
     <>
@@ -86,9 +110,9 @@ export default async function HomePage() {
 
         {/* Featured article */}
         {featured ? (
-          <FeaturedArticle transmissao={featured} />
+          <FeaturedArticle transmissao={featured} nextPostDays={nextPostDays} />
         ) : (
-          <FeaturedArticleFallback />
+          <FeaturedArticleFallback nextPostDays={nextPostDays} />
         )}
 
         {/* 3-card grid */}
@@ -117,11 +141,20 @@ export default async function HomePage() {
   )
 }
 
+/* ─── Countdown label helper ─── */
+function countdownLabel(days: number | null): { line: string; num: string } {
+  if (days === null) return { line: 'próximo conteúdo', num: 'Em breve' }
+  if (days <= 0)     return { line: 'próximo conteúdo', num: 'Hoje' }
+  if (days === 1)    return { line: 'próximo conteúdo', num: 'Amanhã' }
+  return { line: 'próximo conteúdo', num: `em ${days} dias` }
+}
+
 /* ─── Featured Article ─── */
-function FeaturedArticle({ transmissao: t }: { transmissao: Transmissao }) {
+function FeaturedArticle({ transmissao: t, nextPostDays }: { transmissao: Transmissao; nextPostDays: number | null }) {
   const catLabel = t.categories.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(' · ')
   const preview = t.excerpt || t.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().split(' ').slice(0, 30).join(' ') + '…'
   const dateStr = formatDatePT(t.published_at).toUpperCase()
+  const { line: cLine, num: cNum } = countdownLabel(nextPostDays)
 
   return (
     <Link href={`/artigo/${t.slug}`} className="article-featured">
@@ -160,8 +193,8 @@ function FeaturedArticle({ transmissao: t }: { transmissao: Transmissao }) {
         </div>
 
         <div className="af-next">
-          <p className="af-next-label">próximo conteúdo</p>
-          <p className="af-next-days">em <span>7</span> dias</p>
+          <p className="af-next-label">{cLine}</p>
+          <p className="af-next-days"><span>{cNum}</span></p>
           <div className="af-next-bar">
             <div className="af-next-fill" />
           </div>
@@ -171,7 +204,8 @@ function FeaturedArticle({ transmissao: t }: { transmissao: Transmissao }) {
   )
 }
 
-function FeaturedArticleFallback() {
+function FeaturedArticleFallback({ nextPostDays }: { nextPostDays: number | null }) {
+  const { line: cLine, num: cNum } = countdownLabel(nextPostDays)
   return (
     <div className="article-featured">
       <div className="af-main">
@@ -201,8 +235,8 @@ function FeaturedArticleFallback() {
           ))}
         </div>
         <div className="af-next">
-          <p className="af-next-label">próximo conteúdo</p>
-          <p className="af-next-days">em <span>7</span> dias</p>
+          <p className="af-next-label">{cLine}</p>
+          <p className="af-next-days"><span>{cNum}</span></p>
           <div className="af-next-bar">
             <div className="af-next-fill" />
           </div>

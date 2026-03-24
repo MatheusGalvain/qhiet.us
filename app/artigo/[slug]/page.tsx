@@ -170,7 +170,11 @@ export default async function ArtigoPage({ params }: PageProps) {
 }
 
 function getPreview(html: string): string {
+  // Extract first 4 block-level elements preserving HTML formatting
+  const blockRe = /<(p|h2|h3|blockquote|ul|ol)(\s[^>]*)?>[\s\S]*?<\/\1>/gi
+  const blocks = html.match(blockRe) ?? []
+  if (blocks.length > 0) return blocks.slice(0, 4).join('\n')
+  // Fallback: plain text
   const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-  const words = text.split(' ').slice(0, 80).join(' ')
-  return `<p>${words}…</p>`
+  return `<p>${text.split(' ').slice(0, 80).join(' ')}…</p>`
 }
