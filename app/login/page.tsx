@@ -14,6 +14,9 @@ function LoginContent() {
   const defaultTab = (searchParams.get('tab') as 'login' | 'register') ?? 'login'
 
   const [tab, setTab] = useState<'login' | 'register'>(defaultTab)
+  const [mode, setMode] = useState<'form' | 'forgot'>('form')
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotSent, setForgotSent] = useState(false)
   const [plan, setPlan] = useState<'profano' | 'iniciado'>('profano')
   const [success, setSuccess] = useState<string | null>(null)
   const urlError = searchParams.get('error')
@@ -92,6 +95,16 @@ function LoginContent() {
     }
   }
 
+  async function handleForgotPassword(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/api/auth/callback?redirect=/redefinir-senha`,
+    })
+    if (error) { setError(error.message); return }
+    setForgotSent(true)
+  }
+
   async function handleGoogle() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -162,8 +175,47 @@ function LoginContent() {
           </div>
         )}
 
+        {/* FORGOT PASSWORD FORM */}
+        {mode === 'forgot' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {forgotSent ? (
+              <div style={{ border: '1px solid var(--gold)', background: 'rgba(200,150,10,0.08)', padding: '16px 20px', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--gold)', lineHeight: 1.9 }}>
+                Link enviado para <strong>{forgotEmail}</strong>.<br />
+                Verifique seu e-mail e clique no link para redefinir sua senha.
+              </div>
+            ) : (
+              <form onSubmit={handleForgotPassword} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', lineHeight: 1.8, margin: 0 }}>
+                  Digite seu e-mail e enviaremos um link para redefinir sua senha.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <label className="form-label">E-mail</label>
+                  <input
+                    type="email"
+                    required
+                    className="form-input"
+                    placeholder="seu@email.com"
+                    value={forgotEmail}
+                    onChange={e => setForgotEmail(e.target.value)}
+                  />
+                </div>
+                <button type="submit" className="btn-primary" style={{ width: '100%' }}>
+                  Enviar link de redefinição →
+                </button>
+              </form>
+            )}
+            <button
+              type="button"
+              onClick={() => { setMode('form'); setForgotSent(false); setForgotEmail(''); setError(null) }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+            >
+              ← Voltar ao login
+            </button>
+          </div>
+        )}
+
         {/* LOGIN FORM */}
-        {tab === 'login' && (
+        {mode === 'form' && tab === 'login' && (
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label className="form-label">E-mail</label>
@@ -172,7 +224,7 @@ function LoginContent() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label className="form-label">Senha</label>
               <input name="password" type="password" required className="form-input" placeholder="••••••••" />
-              <button type="button" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', textAlign: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <button type="button" onClick={() => { setMode('forgot'); setError(null) }} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', textAlign: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>
                 Esqueci minha senha →
               </button>
             </div>
@@ -191,7 +243,7 @@ function LoginContent() {
         )}
 
         {/* REGISTER FORM */}
-        {tab === 'register' && (
+        {mode === 'form' && tab === 'register' && (
           <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label className="form-label">Nome</label>

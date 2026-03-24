@@ -5,7 +5,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   typescript: true,
 })
 
-export const STRIPE_PRICE_INICIADO = process.env.STRIPE_PRICE_INICIADO!
+export const STRIPE_PRICE_INICIADO = process.env.STRIPE_PRICE_ID_INICIADO!
 
 /** Create Stripe Checkout Session for Iniciado plan */
 export async function createCheckoutSession({

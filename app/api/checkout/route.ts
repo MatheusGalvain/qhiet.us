@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 export async function POST(request: NextRequest) {
   try {
     // Guard: ensure Stripe env vars are present
-    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_PRICE_INICIADO) {
+    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_PRICE_ID_INICIADO) {
       console.error('[checkout] Missing Stripe env vars')
       return NextResponse.redirect(new URL('/membros?error=config', request.url))
     }
