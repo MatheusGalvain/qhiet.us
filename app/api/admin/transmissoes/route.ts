@@ -62,7 +62,10 @@ export async function POST(req: NextRequest) {
       status:             body.status ?? 'draft',
       read_time_minutes:  body.read_time_minutes ?? 5,
       xp_reward:          body.xp_reward ?? 30,
-      published_at:       body.status === 'published' ? new Date().toISOString() : null,
+      // If draft with a scheduled date → keep that date for countdown; if publishing → stamp now unless custom date provided
+      published_at:       body.status === 'published'
+        ? (body.published_at ?? new Date().toISOString())
+        : (body.published_at ?? null),
     })
     .select()
     .single()

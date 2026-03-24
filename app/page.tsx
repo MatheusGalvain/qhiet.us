@@ -44,17 +44,19 @@ async function getData() {
       .from('transmissoes')
       .select('*', { count: 'exact', head: true })
 
-    // Countdown from site_settings
-    const { data: settingRow } = await supabase
-      .from('site_settings')
-      .select('value')
-      .eq('key', 'next_post_at')
+    // Countdown: next draft transmissão with a scheduled published_at in the future
+    const now = new Date().toISOString()
+    const { data: nextDraft } = await supabase
+      .from('transmissoes')
+      .select('published_at')
+      .eq('status', 'draft')
+      .not('published_at', 'is', null)
+      .gt('published_at', now)
+      .order('published_at', { ascending: true })
+      .limit(1)
       .single()
 
-    const rawDate = settingRow?.value
-    const nextPostDateStr: string | null =
-      typeof rawDate === 'string' ? rawDate : rawDate ? String(rawDate) : null
-    const nextPostDays = daysUntil(nextPostDateStr)
+    const nextPostDays = daysUntil(nextDraft?.published_at)
 
     return {
       featured: featured as Transmissao | null,

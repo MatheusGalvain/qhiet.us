@@ -31,11 +31,16 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   const body = await req.json()
   const supabase = createServiceClient()
 
-  // If publishing for the first time, stamp published_at
+  // published_at logic:
+  // - draft with a date  → keep the date (scheduled countdown)
+  // - publishing without a date → stamp now
+  // - publishing with a date → keep provided date
   const updatePayload: Record<string, any> = { ...body }
   if (body.status === 'published' && !body.published_at) {
     updatePayload.published_at = new Date().toISOString()
   }
+  // Remove helper field that doesn't exist in DB
+  delete updatePayload.scheduled_at
 
   const { data, error } = await supabase
     .from('transmissoes')

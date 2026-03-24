@@ -35,6 +35,10 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
     status:            initial.status           ?? 'draft',
     read_time_minutes: initial.read_time_minutes ?? 5,
     xp_reward:         initial.xp_reward        ?? 30,
+    // scheduled_at: stored as published_at for drafts, used for countdown
+    scheduled_at:      initial.published_at
+      ? initial.published_at.slice(0, 10)
+      : '',
   })
 
   // Auto-generate slug from title (unless manually edited)
@@ -62,10 +66,15 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
       ? '/api/admin/transmissoes'
       : `/api/admin/transmissoes/${initial.id}`
 
+    const payload = {
+      ...form,
+      // pass scheduled_at so the API can use it as published_at on drafts
+      published_at: form.scheduled_at || null,
+    }
     const res = await fetch(url, {
       method: mode === 'create' ? 'POST' : 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     })
 
     if (!res.ok) {
@@ -296,6 +305,29 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
               />
             </div>
           </div>
+
+          {/* Agendamento — só aparece quando status é draft */}
+          {form.status === 'draft' && (
+            <div style={{ border: '1px solid var(--faint)', padding: 20 }}>
+              <label style={labelStyle}>
+                Agendar publicação
+                <span style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, marginLeft: 8, textTransform: 'none' }}>
+                  — exibe o contador na home page
+                </span>
+              </label>
+              <input
+                type="date"
+                value={form.scheduled_at}
+                onChange={e => setForm(f => ({ ...f, scheduled_at: e.target.value }))}
+                style={{ ...inputStyle, fontFamily: 'var(--font-mono)', fontSize: 15, colorScheme: 'dark' }}
+              />
+              {form.scheduled_at && (
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--red)', marginTop: 8, textTransform: 'uppercase' }}>
+                  ◈ Contador ativo até {form.scheduled_at}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Submit */}
           <button
