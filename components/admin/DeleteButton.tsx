@@ -3,15 +3,37 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-export default function DeleteButton({ id, title }: { id: string; title: string }) {
+interface DeleteProps {
+  id: string | number;
+  title: string;
+  endpoint: 'categories' | 'transmissoes';
+}
+
+export default function DeleteButton({ id, title, endpoint }: DeleteProps) {
   const router = useRouter()
   const [confirming, setConfirming] = useState(false)
   const [loading, setLoading] = useState(false)
 
   async function handleDelete() {
     setLoading(true)
-    await fetch(`/api/admin/transmissoes/${id}`, { method: 'DELETE' })
-    router.refresh()
+    try {
+      // Agora a URL é dinâmica baseada na prop 'endpoint'
+      const response = await fetch(`/api/admin/${endpoint}/${id}`, { 
+        method: 'DELETE' 
+      })
+
+      if (!response.ok) {
+        throw new Error('Falha ao deletar item')
+      }
+
+      setConfirming(false)
+      router.refresh() // Atualiza a lista na tela
+    } catch (error) {
+      console.error(error)
+      alert('Erro ao excluir. Verifique se existem dependências ligadas a este item.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (confirming) {

@@ -119,7 +119,7 @@ export default async function AdminTransmissoesPage() {
               <Link href={`/admin/transmissoes/${t.id}/editar`} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
                 Edit.
               </Link>
-              <DeleteButton id={t.id} title={t.title}/>
+              <DeleteButton id={t.id} title={t.title} endpoint="transmissoes"/>
             </div>
           </div>
         ))}

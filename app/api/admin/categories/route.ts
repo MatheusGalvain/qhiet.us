@@ -46,14 +46,51 @@ export async function POST(request: NextRequest) {
 }
 
 // DELETE — remove category
-export async function DELETE(request: NextRequest) {
-  const admin = await checkAdmin()
-  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const supabase = createServiceClient()
+  const { id } = params // O UUID que vem do botão
 
-  const slug = request.nextUrl.searchParams.get('slug')
-  if (!slug) return NextResponse.json({ error: 'Missing slug' }, { status: 400 })
+  try {
+    // 1. Pegamos o slug da categoria primeiro (precisamos dele para limpar as transmissões)
+    const { data: cat } = await supabase
+      .from('categories')
+      .select('slug')
+      .eq('id', id)
+      .single()
 
-  const service = createServiceClient()
-  await service.from('categories').delete().eq('slug', slug)
-  return NextResponse.json({ ok: true })
+    if (!cat) return NextResponse.json({ error: 'Não encontrado' }, { status: 404 })
+
+    // 2. Limpar o slug do array de categorias nas transmissões
+    // Usamos o operador 'cs' (contains) para achar quem tem esse slug no array
+    const { data: transmissoes } = await supabase
+      .from('transmissoes')
+      .select('id, categories')
+      .contains('categories', [cat.slug])
+
+    if (transmissoes) {
+      for (const t of transmissoes) {
+        const newCats = t.categories.filter((s: string) => s !== cat.slug)
+        await supabase
+          .from('transmissoes')
+          .update({ categories: newCats })
+          .eq('id', t.id)
+      }
+    }
+
+    // 3. Deletar a categoria
+    // Graças ao SQL que rodamos acima (CASCADE), o category_content será apagado sozinho!
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+
+    return NextResponse.json({ success: true })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 400 })
+  }
 }

@@ -17,40 +17,44 @@ function toISO(d: Date) {
 }
 
 function computeStreaks(activityMap: Record<string, number>) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const todayStr = toISO(new Date());
+  const sorted = Object.keys(activityMap).sort();
+  
+  if (sorted.length === 0) return { currentStreak: 0, maxStreak: 0 };
 
-  // Current streak (counting back from today; accept gap of 0 or 1 day)
-  let currentStreak = 0
-  const d = new Date(today)
-  // If today has no activity, start checking from yesterday
-  if (!activityMap[toISO(d)]) {
-    d.setDate(d.getDate() - 1)
+  // 1. Cálculo do MAX Streak
+  let maxStreak = 0;
+  let run = 0;
+ for (let i = 1; i < sorted.length; i++) {
+  const prevDate = new Date(sorted[i - 1] + 'T00:00:00'); // Garante fuso local
+  prevDate.setDate(prevDate.getDate() + 1);
+  
+  if (toISO(prevDate) === sorted[i]) {
+    run++;
+  } else {
+    run = 1;
   }
-  while (activityMap[toISO(d)]) {
-    currentStreak++
-    d.setDate(d.getDate() - 1)
-  }
-
-  // Max streak (over all time in map)
-  const sorted = Object.keys(activityMap).sort()
-  let maxStreak = 0
-  let run = 0
-  for (let i = 0; i < sorted.length; i++) {
-    if (i === 0) { run = 1; maxStreak = 1; continue }
-    const prev = new Date(sorted[i - 1])
-    prev.setDate(prev.getDate() + 1)
-    if (toISO(prev) === sorted[i]) {
-      run++
-    } else {
-      run = 1
-    }
-    if (run > maxStreak) maxStreak = run
-  }
-
-  return { currentStreak, maxStreak }
+  if (run > maxStreak) maxStreak = run;
 }
 
+  // 2. Cálculo do CURRENT Streak (Sequência Atual)
+  let currentStreak = 0;
+  const curr = new Date();
+  curr.setHours(0, 0, 0, 0);
+
+  // Se não fez nada hoje, verifica se fez ontem para manter a chama acesa
+  if (!activityMap[toISO(curr)]) {
+    curr.setDate(curr.getDate() - 1);
+  }
+
+  // Conta para trás enquanto houver atividade
+  while (activityMap[toISO(curr)] > 0) {
+    currentStreak++;
+    curr.setDate(curr.getDate() - 1);
+  }
+
+  return { currentStreak, maxStreak };
+}
 export default function ActivityHeatmap({ activityMap, totalActiveDays }: Props) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)

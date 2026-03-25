@@ -3,6 +3,7 @@
 -- ═══════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS public.categories (
+  id           uuid primary key default uuid_generate_v4(),
   slug        text PRIMARY KEY,
   label       text NOT NULL,
   symbol      text NOT NULL DEFAULT '◉',

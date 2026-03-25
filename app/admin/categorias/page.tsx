@@ -1,7 +1,8 @@
+import DeleteButton from '@/components/admin/DeleteButton';
 import { createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
-interface DbCategory { slug: string; label: string; symbol: string; color: string; sort_order: number }
+interface DbCategory { id: string, slug: string; label: string; symbol: string; color: string; sort_order: number }
 interface DbTransmissao { categories: string[] | null; status: string; access: string }
 
 export const revalidate = 0
@@ -75,7 +76,7 @@ export default async function AdminCategoriasPage() {
 
       {/* Category cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {sorted.map(({ slug, label, symbol, color, total, published, free, locked }) => (
+        {sorted.map(({ id, slug, label, symbol, color, total, published, free, locked }) => (
           <div key={slug} style={{ border: `1px solid ${total > 0 ? 'var(--faint)' : 'var(--faint)'}`, padding: '24px 28px', borderLeft: `3px solid ${color}` }}>
             <div style={{ display: 'grid', gridTemplateColumns: '48px 1fr 80px 80px 80px 80px', gap: 16, alignItems: 'center', marginBottom: 14 }}>
               {/* Symbol */}
@@ -95,6 +96,7 @@ export default async function AdminCategoriasPage() {
                   <Link href={`/admin/categorias/${slug}`} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--red)', textDecoration: 'none', textTransform: 'uppercase', border: '1px solid var(--red-dim)', padding: '2px 8px' }}>
                     Editar conteúdo →
                   </Link>
+                  <DeleteButton id={id} title={slug} endpoint="categories"/>
                 </div>
               </div>
 

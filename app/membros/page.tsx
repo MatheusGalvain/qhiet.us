@@ -50,8 +50,7 @@ const PLAN_FEATURES = {
     { check: true, text: 'Quiz de <strong>IA Hermes</strong> ao final de cada artigo' },
     { check: true, text: '<strong>4 livros mensais</strong> curados por e-mail/ebook' },
     { check: true, text: 'XP bônus por quiz e leitura exclusiva' },
-    { check: true, text: 'Acesso antecipado a novos conteúdos' },
-    { check: true, text: 'Badge exclusiva no perfil' },
+    // { check: true, text: 'Recomendação' },
   ],
 }
 

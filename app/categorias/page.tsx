@@ -64,7 +64,7 @@ export default async function CategoriasPage() {
 
         <div className="hero-right" style={{ padding: 'clamp(32px,5vw,56px) var(--px) clamp(32px,5vw,48px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 32 }}>
           <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap' }}>
-            {[{ n: '212', l: 'Transmissões' }, { n: String(cats.length), l: 'Domínios' }, { n: '87', l: 'Livros' }].map(({ n, l }, i) => (
+            {[{ n: String(transmissoes?.length), l: 'Transmissões' }, { n: String(cats.length), l: 'Domínios' }, { n: '87', l: 'Livros' }].map(({ n, l }, i) => (
               <div key={l} style={{ padding: `0 ${i > 0 ? 32 : 0}px 0 0`, paddingRight: i < 2 ? 32 : 0, borderRight: i < 2 ? '1px solid var(--faint)' : 'none', paddingLeft: i > 0 ? 32 : 0 }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,4vw,52px)', color: 'var(--cream)', letterSpacing: 2, display: 'block' }}>{n}</span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>{l}</span>

@@ -260,7 +260,8 @@ function GridCard({ post }: { post: Transmissao }) {
         <span>{catLabel}</span>
         <span className="ag-time">est. {post.read_time_minutes} min</span>
       </div>
-      <h3 className="ag-title">{post.title}</h3>
+      <h3 className="ag-title">{post?.title}</h3>
+      <span>{post?.excerpt}</span>
       <span className={`ag-status ${post.access === 'free' ? 'free' : 'paid'}`}>
         {post.access === 'free' ? '◉ LEITURA LIVRE' : '◈ ASSINANTES'}
       </span>

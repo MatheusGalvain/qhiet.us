@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-interface TimelineItem { year: string; event: string }
+interface TimelineItem { date: string; title: string }
 interface FigureItem   { name: string; era: string; contribution: string }
 
 interface CategoryContent {
@@ -142,7 +142,7 @@ export default function CategoryContentEditor({ slug, initialContent, initialMet
 
   /* ── Timeline helpers ── */
   const addTimelineItem = () =>
-    update('timeline', [...content.timeline, { year: '', event: '' }])
+    update('timeline', [...content.timeline, { date: '', title: '' }])
 
   const updateTimeline = (i: number, field: keyof TimelineItem, val: string) =>
     update('timeline', content.timeline.map((item, idx) => idx === i ? { ...item, [field]: val } : item))
@@ -398,8 +398,8 @@ export default function CategoryContentEditor({ slug, initialContent, initialMet
               <div>
                 <span style={labelStyle}>Ano / Período</span>
                 <input
-                  value={item.year}
-                  onChange={e => updateTimeline(i, 'year', e.target.value)}
+                  value={item.date}
+                  onChange={e => updateTimeline(i, 'date', e.target.value)}
                   placeholder="Séc. II"
                   style={{ ...inputStyle, resize: undefined }}
                 />
@@ -408,8 +408,8 @@ export default function CategoryContentEditor({ slug, initialContent, initialMet
                 <span style={labelStyle}>Evento</span>
                 <textarea
                   rows={2}
-                  value={item.event}
-                  onChange={e => updateTimeline(i, 'event', e.target.value)}
+                  value={item.title}
+                  onChange={e => updateTimeline(i, 'title', e.target.value)}
                   placeholder="Descrição do evento histórico..."
                   style={inputStyle}
                 />
