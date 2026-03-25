@@ -14,6 +14,12 @@ const MEMBER_LINKS = [
   { href: '/login?tab=register', label: 'Criar conta' },
 ]
 
+const HELP_LINKS = [
+  { href: '/politica-de-privacidade', label: 'Política de Privacidade' },
+  { href: '/termos-de-uso', label: 'Termos de Uso' },
+  { href: '/fale-conosco', label: 'Fale Conosco' },
+]
+
 export default function Footer() {
   return (
     <footer className="site-footer">
@@ -28,7 +34,7 @@ export default function Footer() {
           </p>
           <p className="footer-est">◉ Est. MMXXVI</p>
         </div>
-
+        
         {/* Col 2 — Explorar */}
         <div className="footer-col">
           <p className="footer-col-label">Explorar</p>
@@ -47,6 +53,16 @@ export default function Footer() {
               {label}
             </Link>
           ))}
+        </div>
+
+        {/* Col 3 — Links Ajudantes */}
+        <div className="footer-col">
+          <p className="footer-col-label">Ajuda</p>
+            {HELP_LINKS.map(({ href, label }) => (
+              <Link key={href} href={href} className="footer-link">
+                {label}
+              </Link>
+            ))}
         </div>
       </div>
 

@@ -25,7 +25,9 @@ export default function PaywallOverlay() {
       <div className="paywall-overlay">
         <div style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center',
+          background: 'black',
           gap: 16, textAlign: 'center', maxWidth: 480,
+          padding: 20,
         }}>
           <span style={{
             fontFamily: 'var(--font-display)', fontSize: 48,

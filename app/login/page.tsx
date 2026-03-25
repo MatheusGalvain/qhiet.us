@@ -232,7 +232,7 @@ function LoginContent() {
               Entrar no portal →
             </button>
             <Divider />
-            <GoogleButton onClick={handleGoogle} label="Continuar com Google" />
+            {/* <GoogleButton onClick={handleGoogle} label="Continuar com Google" /> */}
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', textAlign: 'center', marginTop: 8 }}>
               Não tem conta?{' '}
               <button type="button" onClick={() => setTab('register')} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2 }}>
@@ -261,7 +261,7 @@ function LoginContent() {
               Iniciar jornada →
             </button>
             <Divider />
-            <GoogleButton onClick={handleGoogle} label="Cadastrar com Google" />
+            {/* <GoogleButton onClick={handleGoogle} label="Cadastrar com Google" /> */}
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', textAlign: 'center', marginTop: 8 }}>
               Já tem conta?{' '}
               <button type="button" onClick={() => setTab('login')} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2 }}>

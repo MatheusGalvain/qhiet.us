@@ -94,6 +94,7 @@ export default async function ArtigoPage({ params }: PageProps) {
           borderRight: '1px solid var(--faint)',
           transition: 'background .3s, color .3s',
         }}>
+          
           {/* Categories */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
             {t.categories.map(cat => (
@@ -102,11 +103,10 @@ export default async function ArtigoPage({ params }: PageProps) {
           </div>
 
           {/* Title */}
-          <h1 style={{
+          <h1 className="article-title" style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(40px, 6vw, 72px)',
-            letterSpacing: 2, lineHeight: 0.92,
-            color: 'var(--cream)', marginBottom: 24,
+            letterSpacing: 2, lineHeight: 0.92, marginBottom: 24,
           }}>
             {t.title}
           </h1>
@@ -127,8 +127,8 @@ export default async function ArtigoPage({ params }: PageProps) {
               ].map(([label, value], i) => (
                 <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                   {i > 0 && <span style={{ width: 1, height: 12, background: 'var(--faint)', display: 'inline-block', flexShrink: 0 }} />}
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-                    {label}: <span style={{ color: 'var(--cream)' }}>{value}</span>
+                  <span className="article-color" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                    {label}: <span className="article-color">{value}</span>
                   </span>
                 </div>
               ))}
