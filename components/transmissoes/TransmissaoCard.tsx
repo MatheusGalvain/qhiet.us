@@ -29,7 +29,7 @@ export default function TransmissaoCard({ transmissao: t, isSubscriber }: Transm
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
           <span style={{
             fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2,
-            color: t.access === 'free' ? 'var(--red-dim)' : 'var(--gold)',
+            color: t.access === 'free' ? 'var(--red)' : 'var(--gold)',
             whiteSpace: 'nowrap',
           }}>
             {t.access === 'free' ? '◉ Leitura Livre' : '◈ Assinantes'}
@@ -46,7 +46,7 @@ export default function TransmissaoCard({ transmissao: t, isSubscriber }: Transm
         <div style={{
           fontFamily: 'var(--font-display)',
           fontSize: 'clamp(36px, 4vw, 52px)',
-          color: isLocked ? '#2a1a10' : 'var(--faint)',
+          color: isLocked ? 'var(--gold)' : 'rgba(var(--cream), 0.2)',
           lineHeight: 1,
         }}>
           {padNumber(t.number)}

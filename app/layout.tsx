@@ -8,6 +8,8 @@ import type { Profile } from '@/types'
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
+<link rel="icon" href="/favicon.ico" sizes="any" />
+
 export const metadata: Metadata = {
   title: {
     default: 'QHIETHUS — Portal Oculto',

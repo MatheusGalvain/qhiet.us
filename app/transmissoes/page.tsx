@@ -82,7 +82,9 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
 
       {/* TABS — full-width on mobile */}
       <div style={{
-        display: 'flex', alignItems: 'stretch',
+        display: 'flex',
+        justifyContent: 'flex-end', 
+        alignItems: 'stretch',
         borderBottom: '1px solid var(--faint)',
         padding: '0 var(--px)',
         overflowX: 'auto', scrollbarWidth: 'none',
@@ -133,7 +135,7 @@ function TabBtn({ href, active, label }: { href: string; active: boolean; label:
         cursor: 'pointer', textDecoration: 'none',
         display: 'inline-block', transition: 'color .2s',
         borderBottom: active ? '1px solid var(--red)' : '1px solid transparent',
-        marginBottom: -1, whiteSpace: 'nowrap', flexShrink: 0,
+        whiteSpace: 'nowrap', flexShrink: 0,
       }}
     >
       {label}

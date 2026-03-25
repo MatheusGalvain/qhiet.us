@@ -233,7 +233,7 @@ function LoginContent() {
             </button>
             <Divider />
             {/* <GoogleButton onClick={handleGoogle} label="Continuar com Google" /> */}
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', textAlign: 'center', marginTop: 8 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', textAlign: 'center', marginTop: 8 }}>
               Não tem conta?{' '}
               <button type="button" onClick={() => setTab('register')} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2 }}>
                 Cadastre-se gratuitamente
