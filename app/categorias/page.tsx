@@ -47,12 +47,12 @@ export default async function CategoriasPage() {
   return (
     <>
       {/* HEADER */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', borderBottom: '1px solid var(--faint)' }}
-        className="page-hero"
+      <div style={{ borderBottom: '1px solid var(--faint)' }}
+        className="page-hero flex-col lg:flex-row"
       >
-        <div style={{ padding: 'clamp(32px,5vw,56px) var(--px) clamp(32px,5vw,48px)', borderRight: '1px solid var(--faint)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 20 }}>
+        <div className='pb-16' style={{ padding: 'clamp(32px,5vw,56px) var(--px) clamp(0px, 2vw,48px)', borderRight: '1px solid var(--faint)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 20 }}>
           <div>
-            <p className="eyebrow" style={{ marginBottom: 16 }}>Portal Oculto · {cats.length} domínios</p>
+            <p className="eyebrow" style={{ marginBottom: 16 }}>Portal Oculto · {cats.length} categorias</p>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(48px,8vw,80px)', letterSpacing: 4, color: 'var(--cream)', lineHeight: 1 }}>
               CATE<span style={{ color: 'var(--red)' }}>GO</span>RIAS
             </h1>
@@ -64,8 +64,8 @@ export default async function CategoriasPage() {
 
         <div className="hero-right" style={{ padding: 'clamp(32px,5vw,56px) var(--px) clamp(32px,5vw,48px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 32 }}>
           <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap' }}>
-            {[{ n: String(transmissoes?.length), l: 'Transmissões' }, { n: String(cats.length), l: 'Domínios' }, { n: '87', l: 'Livros' }].map(({ n, l }, i) => (
-              <div key={l} style={{ padding: `0 ${i > 0 ? 32 : 0}px 0 0`, paddingRight: i < 2 ? 32 : 0, borderRight: i < 2 ? '1px solid var(--faint)' : 'none', paddingLeft: i > 0 ? 32 : 0 }}>
+            {[{ n: String(transmissoes?.length), l: 'Transmissões' }, { n: String(cats.length), l: 'Categorias' }].map(({ n, l }, i) => (
+              <div key={l} style={{ padding: `0 ${i > 0 ? 25 : 0}px 0 0`, paddingRight: i < 2 ? 25 : 0, borderRight: i < 2 ? '1px solid var(--faint)' : 'none', paddingLeft: i > 0 ? 25 : 0 }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,4vw,52px)', color: 'var(--cream)', letterSpacing: 2, display: 'block' }}>{n}</span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>{l}</span>
               </div>
@@ -97,7 +97,7 @@ export default async function CategoriasPage() {
       {/* FOOTER STRIP */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, padding: '16px var(--px)', borderTop: '1px solid var(--faint)' }}>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-          {transmissoes?.length ?? 0} transmissões · {cats.length} domínios do conhecimento
+          {transmissoes?.length ?? 0} transmissões · {cats.length} categorias de conhecimento
         </p>
         <Link href="/transmissoes" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--red)', border: '1px solid var(--red-dim)', padding: '8px 20px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
           Ver todas →

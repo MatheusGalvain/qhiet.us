@@ -77,7 +77,7 @@ export default function FilterBar() {
       </div>
 
       {/* Category pills — horizontal scroll on mobile */}
-      <div className="filter-bar" style={{ padding: '0 var(--px)', gap: 0 }}>
+      <div className="filter-bar flex-col lg:flex-row" style={{ padding: '0 var(--px)', gap: 0 }}>
         <CatButton active={isAll} onClick={() => updateParams({ cat: '' })}>
           Todos
         </CatButton>

@@ -65,8 +65,8 @@ export default function Nav({ profile }: NavProps) {
               </Link>
             ) : (
               <>
-                <Link href="/login" className="nav-btn">Entrar</Link>
-                <Link href="/membros" className="nav-btn primary">Assinar</Link>
+                <Link href="/login" className="nav-btn text-[8px] lg:text-xs">Entrar</Link>
+                <Link href="/membros" className="nav-btn text-[8px] lg:text-xs primary">Assinar</Link>
               </>
             )}
           </div>

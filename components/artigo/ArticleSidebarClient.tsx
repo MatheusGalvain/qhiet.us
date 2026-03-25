@@ -121,7 +121,7 @@ export default function ArticleSidebarClient({ transmissao: t, hasAccess, isFree
       {/* Article meta */}
       <div style={{ border: '1px solid var(--faint)', padding: 20 }}>
         {[
-          ['Domínio', t.categories?.[0]?.charAt(0).toUpperCase() + t.categories?.[0]?.slice(1) || '—'],
+          ['Categoria', t.categories?.[0]?.charAt(0).toUpperCase() + t.categories?.[0]?.slice(1) || '—'],
           ['Nível', t.access === 'free' ? '◉ Leitura Livre' : '◈ Iniciados'],
         ].map(([label, val], i, arr) => (
           <div key={label as string} style={{

@@ -81,9 +81,8 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
       </div>
 
       {/* TABS — full-width on mobile */}
-      <div style={{
+      <div className="lg:justify-end justify-center" style={{
         display: 'flex',
-        justifyContent: 'flex-end', 
         alignItems: 'stretch',
         borderBottom: '1px solid var(--faint)',
         padding: '0 var(--px)',
@@ -126,12 +125,12 @@ function TabBtn({ href, active, label }: { href: string; active: boolean; label:
   return (
     <a
       href={href}
+      className='mr-0 lg:text-xs text-[9px] lg:mr-6 py-4 px-2 lg:px-6'
       style={{
-        fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4,
+        fontFamily: 'var(--font-mono)', letterSpacing: 4,
         textTransform: 'uppercase',
         color: active ? 'var(--cream)' : 'var(--muted)',
         background: 'transparent', border: 'none',
-        padding: '16px 24px 16px 0', marginRight: 24,
         cursor: 'pointer', textDecoration: 'none',
         display: 'inline-block', transition: 'color .2s',
         borderBottom: active ? '1px solid var(--red)' : '1px solid transparent',

@@ -96,7 +96,7 @@ export default async function MembrosPage() {
             {[
               { n: String(transmissoesCount), l: 'Transmissões' },
               { n: String(livrosCount || '∞'), l: 'Livros' },
-              { n: '6',   l: 'Domínios' },
+              { n: '6',   l: 'Categorias' },
               { n: '∞',   l: 'Conhecimento' },
             ].map(({ n, l }, i) => (
               <div key={l} style={{ padding: 20, borderRight: i % 2 === 0 ? '1px solid var(--faint)' : 'none', borderBottom: i < 2 ? '1px solid var(--faint)' : 'none' }}>

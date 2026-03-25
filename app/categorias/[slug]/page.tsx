@@ -122,24 +122,20 @@ export default async function CategoriaPage({ params }: PageProps) {
 
       {/* DESCRIPTION — 2 columns */}
       {content && (content.desc_col1_html || content.desc_col2_html) && (
-        <section style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 0,
-          borderBottom: '1px solid var(--faint)',
-          padding: 'clamp(32px,4vw,56px) var(--px)',
-        }} className="cat-desc-grid">
+        <section 
+          className="grid grid-cols-1 md:grid-cols-2 gap-0 border-b border-[var(--faint)] cat-desc-grid"
+          style={{ padding: 'clamp(32px,4vw,56px) var(--px)' }}
+        >
           {content.desc_col1_html && (
             <div
-              className="article-prose"
-              style={{ paddingRight: 'clamp(20px,3vw,48px)', borderRight: '1px solid var(--faint)' }}
+              className="article-prose border-b md:border-b-0 md:border-r border-[var(--faint)] pb-8 md:pb-0 md:pr-[clamp(20px,3vw,48px)]"
               dangerouslySetInnerHTML={{ __html: content.desc_col1_html }}
             />
           )}
+          
           {content.desc_col2_html && (
             <div
-              className="article-prose"
-              style={{ paddingLeft: 'clamp(20px,3vw,48px)' }}
+              className="article-prose pt-8 md:pt-0 md:pl-[clamp(20px,3vw,48px)]"
               dangerouslySetInnerHTML={{ __html: content.desc_col2_html }}
             />
           )}
@@ -252,14 +248,17 @@ export default async function CategoriaPage({ params }: PageProps) {
       )}
 
       {/* TRANSMISSÕES */}
-      <div style={{ padding: '14px var(--px)', borderBottom: '1px solid var(--faint)', marginTop: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px var(--px)', borderBottom: '1px solid var(--faint)', marginTop: 0 }}>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-          Transmissões · <span style={{ color: 'var(--cream)' }}>{total}</span> textos
+         {total} transmissões sobre {meta.label}
         </p>
+         <Link href="/transmissoes" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
+          ← Todas as Transmissões
+        </Link>
       </div>
 
       <div className="grid-3col section-pad">
-        {transmissoes.map(t => (
+        {transmissoes.slice(0, 3).map(t => (
           <TransmissaoCard key={t.id} transmissao={t} isSubscriber={isSubscriber} />
         ))}
 
@@ -279,7 +278,7 @@ export default async function CategoriaPage({ params }: PageProps) {
         borderTop: '1px solid var(--faint)',
       }}>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-          {total} transmissões sobre {meta.label}
+          
         </p>
         <Link href="/categorias" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
           ← Todas as categorias

@@ -78,7 +78,7 @@ export default function CategoryRow({ slug, label, symbol, count, tags, color }:
         </div>
 
         {/* Count + arrow */}
-        <div className="cat-arrow" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 16, flexShrink: 0 }}>
+        <div className="cat-arrow flex-none md:d-flex" style={{ alignItems: 'center', justifyContent: 'flex-end', gap: 16, flexShrink: 0 }}>
           <div style={{ textAlign: 'right' }}>
             <span style={{
               fontFamily: 'var(--font-display)',

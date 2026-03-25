@@ -40,9 +40,10 @@ async function getData() {
       .limit(3)
 
     // Counts
-    const { count: totalCount } = await supabase
-      .from('transmissoes')
-      .select('*', { count: 'exact', head: true })
+    const { count: totalCount } = await supabase.from('transmissoes').select('*', { count: 'exact', head: true })
+
+    // Counts
+    const { count: totalCategories } = await supabase.from('categories').select('*', { count: 'exact', head: true })
 
     // Countdown: next draft transmissão with a scheduled published_at in the future
     const now = new Date().toISOString()
@@ -62,19 +63,20 @@ async function getData() {
       featured: featured as Transmissao | null,
       grid: (grid ?? []) as Transmissao[],
       total: totalCount ?? 0,
+      totalcat: totalCategories ?? 0,
       nextPostDays,
     }
   } catch {
-    return { featured: null, grid: [], total: 212, nextPostDays: 7 }
+    return { featured: null, grid: [], total: 1, totalcat: 1, nextPostDays: 7 }
   }
 }
 
 export default async function HomePage() {
-  const { featured, grid, total, nextPostDays } = await getData()
+  const { featured, grid, total, totalcat, nextPostDays } = await getData()
 
   return (
     <>
-      <Hero />
+      <Hero totalTransmissoes={total} totalCategorias={totalcat}/>
 
       {/* SECTION DIVIDER */}
       <div className="section-div">
@@ -107,7 +109,7 @@ export default async function HomePage() {
         {/* Header */}
         <div className="posts-header">
           <h2 className="posts-label">TRANSMISSÕES</h2>
-          <span className="posts-count">[ {total} textos · 87 livros ]</span>
+          <span className="posts-count">[ {total} textos ]</span>
         </div>
 
         {/* Featured article */}

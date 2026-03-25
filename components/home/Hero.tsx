@@ -2,7 +2,7 @@ import Sigil, { SigilInner } from '@/components/ui/Sigil'
 import Link from 'next/link'
 import { CATEGORY_META } from '@/types'
 
-export default function Hero() {
+export default function Hero({ totalTransmissoes, totalCategorias }: { totalTransmissoes: number, totalCategorias: number }) {
   return (
     <section className="hero-grid">
       {/* LEFT */}
@@ -62,9 +62,8 @@ export default function Hero() {
 
           <div className="hero-stats-row">
             {[
-              { n: '212', l: 'Transmissões' },
-              { n: '6',   l: 'Domínios' },
-              { n: '87',  l: 'Livros' },
+              { n: totalTransmissoes?.toString() || '0', l: 'Transmissões' }, 
+              { n: totalCategorias?.toString() || '0', l: 'Categorias' },
             ].map(({ n, l }) => (
               <div key={l} style={{ padding: '0 28px', borderLeft: '1px solid var(--faint)', textAlign: 'right' }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: 40, color: 'var(--cream)', letterSpacing: 2, display: 'block' }}>{n}</span>
@@ -110,8 +109,9 @@ export default function Hero() {
           </div>
 
           <div style={{ borderTop: '1px solid var(--faint)', paddingTop: 24, marginTop: 8 }}>
+            <span className="pb-2" style={{ display: 'flex', justifyContent: 'start', fontSize: 15, color: 'var(--gold)' }}>• Categorias mais acessadas:</span>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
-              {Object.entries(CATEGORY_META).slice(0, 4).map(([key, { label, symbol }]) => (
+              {Object.entries(CATEGORY_META).slice(0, 3).map(([key, { label, symbol }]) => (
                 <Link key={key} href={`/categorias/${key}`} style={{ textDecoration: 'none', padding: '0 12px', borderRight: '1px solid var(--faint)', cursor: 'pointer' }}>
                   <span style={{ display: 'block', fontSize: 15, color: 'var(--gold)', marginBottom: 4 }}>{symbol}</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', display: 'block' }}>{label}</span>
