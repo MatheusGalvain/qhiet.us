@@ -390,4 +390,3 @@ function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
     </section>
   )
 }
-                                                      

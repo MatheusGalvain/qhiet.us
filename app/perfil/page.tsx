@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import type { Profile } from '@/types'
 import { getRank, getNextRank, RANK_THRESHOLDS, formatDatePT, formatNumber, getCategorySymbol, padNumber } from '@/lib/utils'
@@ -61,8 +61,19 @@ async function getData(page: number) {
     .order('created_at', { ascending: false })
     .range(from, to)
 
-  const { data: books } = await supabase
-    .from('monthly_books').select('*').order('month', { ascending: false }).limit(8)
+  // Use service client to bypass RLS — filter by plan in app code
+  const service = createServiceClient()
+  const booksQuery = service
+    .from('monthly_books')
+    .select('*')
+    .order('month', { ascending: false })
+    .limit(12)
+
+  // Subscribers see all books; profano users see only books accessible to them
+  // .or() captures both: new books (plan_access array) and old books (plan text column)
+  const { data: books } = profile?.is_subscriber
+    ? await booksQuery
+    : await booksQuery.or('plan_access.cs.{profano},plan.eq.profano')
 
   // Activity heatmap — fetch reading history from Jan 1 to Dec 31 of current year
   const currentYear = new Date().getFullYear()
