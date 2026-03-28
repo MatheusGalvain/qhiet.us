@@ -337,4 +337,6 @@ export default function LoginPage() {
   return (
     <Suspense fallback={null}>
       <LoginContent />
-    </Suspen
+    </Suspense>
+  )
+}
