@@ -1,75 +1,101 @@
-import HermesBot from '@/components/layout/HermesBot'
-import Link from 'next/link'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
+import LegalLayout, { LegalH2, LegalP, LegalUL, LegalLI, S } from '@/components/legal/LegalLayout'
 
-export default async function TermosPage() {
+export const metadata: Metadata = {
+  title: 'Termos de Uso',
+  description: 'Termos e condições de uso do portal QHIETHUS.',
+}
+
+export default function TermosUsoPage() {
   return (
-    <div style={{ padding: 'clamp(40px,6vw,72px) var(--px)', borderRight: '1px solid var(--faint)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 24 }}>
-      <div>
-        {/* BreadCrumbs */}
-        <p className="eyebrow" style={{ marginBottom: 20 }}>Você está em · Termos de Uso</p>
+    <LegalLayout
+      label="Termos de Uso"
+      title="TERMOS DE USO"
+      date="Última atualização: Março de 2026"
+      intro="Ao acessar ou utilizar o QHIETHUS, você concorda com estes Termos de Uso. Leia com atenção antes de criar sua conta. Se não concordar com algum item, não utilize o portal."
+    >
 
-        {/* Titulo */}
-        <h1 className="hero-title-xl" style={{ marginBottom: 40 }}>
-          Termos <span style={{ color: 'var(--red)' }}> De </span> Uso
-        </h1>
+      <LegalH2>O que é o QHIETHUS</LegalH2>
+      <LegalP>
+        O QHIETHUS é um portal de conhecimento dedicado às tradições herméticas, cabalísticas,
+        gnósticas e correlatas. Oferece transmissões escritas, sistema de XP e ranking, quiz de
+        conhecimento gerado por inteligência artificial e curadoria mensal de livros.
+      </LegalP>
 
-        {/* Body */}
-        <div style={{ fontFamily: 'var(--font-mono)' }}>
-          <p style={{ marginBottom: 20 }}>
-            Ao acessar e utilizar o site <strong>QHIETHUS</strong>, você concorda em cumprir estes termos de serviço, todas as leis e regulamentos aplicáveis ​​e concorda que é responsável pelo cumprimento de todas as leis locais aplicáveis.
-          </p>
+      <LegalH2>Elegibilidade</LegalH2>
+      <LegalP>Para utilizar o QHIETHUS você deve:</LegalP>
+      <LegalUL>
+        <LegalLI>Ter pelo menos 18 anos de idade.</LegalLI>
+        <LegalLI>Fornecer informações verdadeiras no cadastro.</LegalLI>
+        <LegalLI>Ser responsável pela segurança da sua conta e senha.</LegalLI>
+      </LegalUL>
 
-          <h3 style={{ color: 'var(--foreground)', marginBottom: 15, fontSize: '1.2em' }}>1. Licença de Uso</h3>
-          <p style={{ marginBottom: 20 }}>
-            É concedida permissão para baixar temporariamente uma cópia dos materiais (informações ou software) no site QHIETHUS, apenas para visualização pessoal e não comercial transitória. Sob esta licença, você não pode:
-          </p>
+      <LegalH2>Planos e acesso</LegalH2>
+      <LegalP>O portal oferece dois planos:</LegalP>
+      <LegalUL>
+        <LegalLI><S>Plano Profano (gratuito):</S> acesso às transmissões de leitura livre, 1 livro por mês por e-mail e quiz básico.</LegalLI>
+        <LegalLI><S>Plano Iniciado (R$19,99/mês):</S> acesso completo a todas as transmissões, 4 livros por mês, XP completo, rank global e trilhas de estudo.</LegalLI>
+      </LegalUL>
+      <LegalP>Os benefícios de cada plano podem ser alterados mediante aviso prévio por e-mail.</LegalP>
 
-          <ul style={{ paddingLeft: 20, marginBottom: 25, listStyleType: 'none' }}>
-            <li style={{ marginBottom: 10 }}>
-              <span style={{ color: 'var(--red)', marginRight: 10 }}>•</span>
-              Modificar ou copiar os materiais;
-            </li>
-            <li style={{ marginBottom: 10 }}>
-              <span style={{ color: 'var(--red)', marginRight: 10 }}>•</span>
-              Usar os materiais para qualquer finalidade comercial;
-            </li>
-            <li style={{ marginBottom: 10 }}>
-              <span style={{ color: 'var(--red)', marginRight: 10 }}>•</span>
-              Tentar descompilar ou fazer engenharia reversa de qualquer software contido no portal;
-            </li>
-            <li style={{ marginBottom: 10 }}>
-              <span style={{ color: 'var(--red)', marginRight: 10 }}>•</span>
-              Remover quaisquer direitos autorais ou outras notações de propriedade.
-            </li>
-          </ul>
+      <LegalH2>Propriedade intelectual</LegalH2>
+      <LegalP>
+        Todo o conteúdo do QHIETHUS — textos, curadoria, quiz, código e design — é de propriedade
+        do portal ou licenciado adequadamente. É proibido:
+      </LegalP>
+      <LegalUL>
+        <LegalLI>Reproduzir, copiar ou distribuir o conteúdo sem autorização expressa.</LegalLI>
+        <LegalLI>Usar o conteúdo para fins comerciais sem licença.</LegalLI>
+        <LegalLI>Fazer engenharia reversa da plataforma.</LegalLI>
+        <LegalLI>Criar conteúdo derivado sem autorização.</LegalLI>
+      </LegalUL>
+      <LegalP>Os livros distribuídos mensalmente são obras de domínio público e podem ser compartilhados livremente.</LegalP>
 
-          <h3 style={{ color: 'var(--foreground)', marginBottom: 15, fontSize: '1.2em' }}>2. Isenção de Responsabilidade</h3>
-          <p style={{ marginBottom: 20 }}>
-            Os materiais no site da <strong>QHIETHUS</strong> são fornecidos 'como estão'. Não oferecemos garantias, expressas ou implícitas, e, por este meio, isentamos e negamos todas as outras garantias, incluindo, sem limitação, garantias implícitas ou condições de comercialização ou adequação a um fim específico.
-          </p>
+      <LegalH2>Conduta do usuário</LegalH2>
+      <LegalP>Ao utilizar o portal, você concorda em não:</LegalP>
+      <LegalUL>
+        <LegalLI>Compartilhar suas credenciais de acesso com terceiros.</LegalLI>
+        <LegalLI>Tentar burlar o sistema de XP ou ranking.</LegalLI>
+        <LegalLI>Utilizar bots ou automações para interagir com o portal.</LegalLI>
+        <LegalLI>Praticar qualquer ato que prejudique outros usuários ou o funcionamento do sistema.</LegalLI>
+      </LegalUL>
 
-          <h3 style={{ color: 'var(--foreground)', marginBottom: 15, fontSize: '1.2em' }}>3. Limitações</h3>
-          <p style={{ marginBottom: 20 }}>
-            Em nenhum caso o <strong>QHIETHUS</strong> ou seus fornecedores serão responsáveis ​​por quaisquer danos decorrentes do uso ou da incapacidade de usar os materiais, mesmo que tenhamos sido notificados oralmente ou por escrito da possibilidade de tais danos.
-          </p>
+      <LegalH2>Conteúdo gerado por IA</LegalH2>
+      <LegalP>
+        O quiz Hermes é gerado por inteligência artificial com base no conteúdo das transmissões.
+        As perguntas têm caráter educativo e podem conter imprecisões. O QHIETHUS não se
+        responsabiliza por eventuais erros nas questões geradas.
+      </LegalP>
 
-          <h3 style={{ color: 'var(--foreground)', marginBottom: 15, fontSize: '1.2em' }}>4. Precisão dos Materiais</h3>
-          <p style={{ marginBottom: 20 }}>
-            Os materiais exibidos no site podem incluir erros técnicos, tipográficos ou fotográficos. O QHIETHUS não garante que qualquer material em seu site seja preciso, completo ou atual, podendo realizar alterações sem aviso prévio.
-          </p>
+      <LegalH2>Limitação de responsabilidade</LegalH2>
+      <LegalP>
+        O QHIETHUS fornece conteúdo de natureza filosófica, histórica e cultural. O portal não
+        oferece aconselhamento religioso, espiritual, médico ou psicológico. O uso do conteúdo é
+        de responsabilidade exclusiva do usuário.
+      </LegalP>
 
-          <h3 style={{ color: 'var(--foreground)', marginBottom: 15, fontSize: '1.2em' }}>5. Links</h3>
-          <p style={{ marginBottom: 20 }}>
-            O <strong>QHIETHUS</strong> não analisou todos os sites vinculados e não é responsável pelo conteúdo de nenhum site de terceiros. A inclusão de qualquer link não implica endosso por nossa parte.
-          </p>
+      <LegalH2>Encerramento de conta</LegalH2>
+      <LegalP>
+        Você pode encerrar sua conta a qualquer momento em Perfil → Configurações. O QHIETHUS
+        pode suspender ou encerrar contas que violem estes termos, sem aviso prévio em casos graves.
+      </LegalP>
 
-          <p style={{ marginTop: 20, fontSize: '0.9em', opacity: 0.8 }}>
-            Estes termos são efetivos a partir de <strong>Março/2026</strong>.
-          </p>
-        </div>
-      </div>
-    </div>
+      <LegalH2>Alterações nos termos</LegalH2>
+      <LegalP>
+        Podemos atualizar estes termos periodicamente. Em caso de mudanças relevantes, notificaremos
+        por e-mail com 15 dias de antecedência. O uso continuado após as mudanças constitui aceite
+        dos novos termos.
+      </LegalP>
+
+      <LegalH2>Lei aplicável</LegalH2>
+      <LegalP>
+        Estes termos são regidos pela legislação brasileira. Fica eleito o foro da comarca de
+        Porto Alegre/RS para resolução de disputas.
+      </LegalP>
+
+      <LegalH2>Contato</LegalH2>
+      <LegalP>Dúvidas sobre os termos: <S>contato@qhiethus.com.br</S></LegalP>
+
+    </LegalLayout>
   )
 }

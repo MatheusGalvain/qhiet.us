@@ -1,67 +1,91 @@
-import HermesBot from '@/components/layout/HermesBot'
-import Link from 'next/link'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
+import LegalLayout, { LegalH2, LegalP, LegalUL, LegalLI, S } from '@/components/legal/LegalLayout'
 
-export default async function PoliticaPage() {
-    return(
-        <div style={{ padding: 'clamp(40px,6vw,72px) var(--px)', borderRight: '1px solid var(--faint)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 24 }}>
-          <div>
-            <p className="eyebrow" style={{ marginBottom: 20 }}>Você está em · Politica de Privacidade</p>
+export const metadata: Metadata = {
+  title: 'Política de Privacidade',
+  description: 'Como o QHIETHUS coleta, usa e protege seus dados pessoais, em conformidade com a LGPD.',
+}
 
-            <h1 className="hero-title-xl" style={{ marginBottom: 40 }}>
-              Políticas <span style={{ color: 'var(--red)' }}> De </span> Privacidade
-            </h1>
+export default function PoliticaPrivacidadePage() {
+  return (
+    <LegalLayout
+      label="Política de Privacidade"
+      title="POLÍTICA DE PRIVACIDADE"
+      date="Última atualização: Março de 2026"
+      intro="O QHIETHUS respeita sua privacidade. Este documento explica de forma clara quais dados coletamos, como os utilizamos, e quais são seus direitos como titular. Estamos em conformidade com a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018)."
+    >
 
-            <div style={{ fontFamily: 'var(--font-mono)' }}>
-                <p style={{ marginBottom: 20 }}>
-                    A sua privacidade é importante para nós. É política do <strong>QHIETHUS</strong> respeitar a sua privacidade em relação a qualquer informação sua que possamos coletar no site, e outros sites que possuímos e operamos.
-                </p>
+      <LegalH2>Quem somos</LegalH2>
+      <LegalP>
+        O QHIETHUS é um portal de conhecimento ocultista operado como pessoa jurídica brasileira.
+        Para dúvidas sobre privacidade, entre em contato pelo e-mail{' '}
+        <S>contato@qhiethus.com.br</S>.
+      </LegalP>
 
-                <p style={{ marginBottom: 20 }}>
-                    Solicitamos informações pessoais apenas quando realmente precisamos delas para lhe fornecer um serviço. Fazemo-lo por meios justos e legais, com o seu conhecimento e consentimento. Também informamos por que estamos coletando e como será usado.
-                </p>
+      <LegalH2>Quais dados coletamos</LegalH2>
+      <LegalP>Coletamos apenas os dados necessários para o funcionamento do portal:</LegalP>
+      <LegalUL>
+        <LegalLI><S>Dados de cadastro:</S> nome e endereço de e-mail fornecidos no momento do registro.</LegalLI>
+        <LegalLI><S>Dados de uso:</S> histórico de leituras, XP acumulado, rank e progresso nas categorias.</LegalLI>
+        <LegalLI><S>Dados de pagamento:</S> processados integralmente pelo Stripe. Não armazenamos dados de cartão de crédito.</LegalLI>
+        <LegalLI><S>Dados técnicos:</S> endereço IP, tipo de navegador e dados de sessão para segurança e funcionamento do sistema.</LegalLI>
+      </LegalUL>
 
-                <p style={{ marginBottom: 20 }}>
-                    Apenas retemos as informações coletadas pelo tempo necessário para fornecer o serviço solicitado. Protegemos os dados dentro de meios comercialmente aceitáveis ​​para evitar perdas e roubos, bem como acesso, divulgação ou modificação não autorizados.
-                </p>
+      <LegalH2>Como utilizamos seus dados</LegalH2>
+      <LegalUL>
+        <LegalLI>Para autenticar seu acesso ao portal.</LegalLI>
+        <LegalLI>Para calcular e exibir seu XP, rank e histórico de leitura.</LegalLI>
+        <LegalLI>Para enviar o livro mensal e a newsletter por e-mail.</LegalLI>
+        <LegalLI>Para processar e gerenciar sua assinatura.</LegalLI>
+        <LegalLI>Para melhorar o conteúdo e a experiência do portal.</LegalLI>
+      </LegalUL>
+      <LegalP>Não vendemos, alugamos ou compartilhamos seus dados com terceiros para fins de marketing.</LegalP>
 
-                <p style={{ marginBottom: 20 }}>
-                    Não compartilhamos informações de identificação pessoal publicamente ou com terceiros, exceto quando exigido por lei. Nosso site pode conter links para sites externos; esteja ciente de que não temos controle sobre o conteúdo e práticas desses sites.
-                </p>
+      <LegalH2>Por quanto tempo guardamos seus dados</LegalH2>
+      <LegalUL>
+        <LegalLI>Dados de conta: enquanto sua conta estiver ativa.</LegalLI>
+        <LegalLI>Histórico de leitura e XP: enquanto sua conta existir.</LegalLI>
+        <LegalLI>Dados de pagamento: conforme exigido pela legislação fiscal brasileira (5 anos).</LegalLI>
+        <LegalLI>Após exclusão da conta: os dados são removidos em até 30 dias, exceto os exigidos por lei.</LegalLI>
+      </LegalUL>
 
-                <h3 style={{ color: 'var(--foreground)', marginBottom: 15, fontSize: '1.2em' }}>Compromisso do Usuário</h3>
-                
-                <p style={{ marginBottom: 15 }}>
-                    O usuário se compromete a fazer uso adequado dos conteúdos e da informação que o <strong>QHIETHUS</strong> oferece, o que inclui, mas não se limita a:
-                </p>
+      <LegalH2>Seus direitos</LegalH2>
+      <LegalP>Como titular dos dados, você tem direito a:</LegalP>
+      <LegalUL>
+        <LegalLI>Confirmar a existência de tratamento dos seus dados.</LegalLI>
+        <LegalLI>Acessar seus dados a qualquer momento.</LegalLI>
+        <LegalLI>Corrigir dados incompletos, inexatos ou desatualizados.</LegalLI>
+        <LegalLI>Solicitar a exclusão dos seus dados.</LegalLI>
+        <LegalLI>Revogar o consentimento para uso dos dados.</LegalLI>
+        <LegalLI>Portabilidade dos seus dados.</LegalLI>
+      </LegalUL>
+      <LegalP>
+        Para exercer qualquer desses direitos, entre em contato:{' '}
+        <S>contato@qhiethus.com.br</S>.
+      </LegalP>
 
-                <ul style={{ paddingLeft: 20, marginBottom: 25, listStyleType: 'none' }}>
-                    <li style={{ marginBottom: 10 }}>
-                    <span style={{ color: 'var(--red)', marginRight: 10 }}>A)</span> 
-                    Não se envolver em atividades ilegais ou contrárias à boa fé e à ordem pública;
-                    </li>
-                    <li style={{ marginBottom: 10 }}>
-                    <span style={{ color: 'var(--red)', marginRight: 10 }}>B)</span> 
-                    Não difundir propaganda de natureza racista, xenofóbica, jogos de azar ou apologia ao terrorismo;
-                    </li>
-                    <li style={{ marginBottom: 10 }}>
-                    <span style={{ color: 'var(--red)', marginRight: 10 }}>C)</span> 
-                    Não causar danos aos sistemas físicos (hardware) e lógicos (software) do portal ou de terceiros.
-                    </li>
-                </ul>
+      <LegalH2>Cookies</LegalH2>
+      <LegalP>
+        Utilizamos cookies essenciais para manter sua sessão ativa e garantir o funcionamento
+        do portal. Não utilizamos cookies de rastreamento ou publicidade.
+      </LegalP>
 
-                <h3 style={{ color: 'var(--foreground)', marginBottom: 15, fontSize: '1.2em' }}>Mais informações</h3>
-                
-                <p>
-                    Esperamos que esteja esclarecido. Como mencionado anteriormente, se houver algo que você não tem certeza se precisa ou não, geralmente é mais seguro deixar os cookies ativados, caso interaja com um dos recursos que você usa em nosso site.
-                </p>
-                
-                <p style={{ marginTop: 20, fontSize: '0.9em', opacity: 0.8 }}>
-                    Esta política é efetiva a partir de <strong>Março/2026</strong>.
-                </p>
-            </div>
-          </div>
-        </div>
-    )
+      <LegalH2>Segurança</LegalH2>
+      <LegalP>
+        Seus dados são armazenados com criptografia em repouso e em trânsito. O acesso aos
+        dados é restrito e monitorado. Utilizamos autenticação segura via Supabase Auth.
+      </LegalP>
+
+      <LegalH2>Alterações nesta política</LegalH2>
+      <LegalP>
+        Podemos atualizar esta política periodicamente. Em caso de mudanças relevantes,
+        notificaremos por e-mail. O uso continuado do portal após as mudanças constitui
+        aceite da nova política.
+      </LegalP>
+
+      <LegalH2>Contato</LegalH2>
+      <LegalP>Dúvidas sobre privacidade: <S>contato@qhiethus.com.br</S></LegalP>
+
+    </LegalLayout>
+  )
 }

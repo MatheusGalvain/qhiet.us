@@ -8,6 +8,7 @@ import ActivityHeatmap from '@/components/perfil/ActivityHeatmap'
 import NickForm from '@/components/perfil/NickForm'
 import ProfileSidebar from '@/components/perfil/ProfileSidebar'
 import BillingPortalButton from '@/components/perfil/BillingPortalButton'
+import DeleteAccountButton from '@/components/perfil/DeleteAccountButton'
 
 export const metadata: Metadata = { title: 'Perfil' }
 
@@ -298,6 +299,16 @@ export default async function PerfilPage() {
             <NickForm currentNick={profile.nick ?? null} currentName={profile.name} nickUpdatedAt={profile.nick_updated_at ?? null} />
           </div>
 
+          {/* Account deletion — only for non-admins */}
+          {!profile.is_admin && (
+            <div style={{ maxWidth: 480, marginTop: 40, paddingTop: 40, borderTop: '1px solid var(--faint)' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 16 }}>
+                <span style={{ color: 'var(--red-dim)' }}>// </span>Zona de perigo
+              </p>
+              <DeleteAccountButton email={profile.email} />
+            </div>
+          )}
+
           {/* Subscription management — only for subscribers */}
           {profile.is_subscriber && (
             <div style={{ maxWidth: 480, marginTop: 40, paddingTop: 40, borderTop: '1px solid var(--faint)' }}>
@@ -318,13 +329,13 @@ export default async function PerfilPage() {
                   <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: 2, color: 'var(--gold)', marginBottom: 4 }}>
                     ◈ Plano Iniciado ativo
                   </p>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--cream)', textTransform: 'uppercase' }}>
                     Acesso completo · transmissões + livros
                   </p>
                 </div>
                 <BillingPortalButton />
               </div>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--faint)', lineHeight: 1.9 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--muted)', lineHeight: 1.9 }}>
                 Para cancelar, clique em &ldquo;Gerenciar assinatura&rdquo;. Você será redirecionado
                 para o portal seguro da Stripe onde pode cancelar, alterar o método de pagamento
                 ou ver o histórico de cobranças. O acesso permanece ativo até o fim do período pago.
