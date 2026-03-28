@@ -56,13 +56,13 @@ async function getData() {
     let entries: RankEntry[] = []
     const { data: rpcData, error: rpcError } = await service.rpc('get_ranking', { p_limit: 50 })
     if (!rpcError && rpcData) {
-      entries = rpcData as RankEntry[]
+      entries = (rpcData as RankEntry[]).filter(e => e.xp_total > 30)
     } else {
-      // Direct query fallback — includes everyone with ≥10 XP
+      // Direct query fallback — includes everyone with >30 XP
       const { data: rows } = await service
         .from('profiles')
         .select('id, name, nick, xp_total, xp_by_domain, is_subscriber')
-        .gte('xp_total', 10)
+        .gt('xp_total', 30)
         .order('xp_total', { ascending: false })
         .limit(50)
       entries = (rows ?? []).map((r: { id: string; name: string; nick: string | null; xp_total: number; xp_by_domain: Record<string, number> | null; is_subscriber: boolean }, i: number) => ({
@@ -230,7 +230,7 @@ export default async function RankingPage() {
                 padding: '10px var(--px)',
                 borderBottom: '1px solid var(--faint)',
               }}>
-                {['Rank', 'Buscador', 'XP', 'Domínio'].map(h => (
+                {['Rank', 'Buscador', '', 'XP'].map(h => (
                   <span key={h} style={{
                     fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3,
                     color: 'var(--muted)', textTransform: 'uppercase',
@@ -239,106 +239,84 @@ export default async function RankingPage() {
               </div>
 
              {rest.map(entry => {
-  const percentage = (entry.xp_total / maxXP) * 100
-  const isMe = entry.rank === myRank
 
-  return (
-    <div
-      key={entry.rank}
-      style={{
-        position: 'relative',
-        height: 48,
-        marginBottom: 6,
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid var(--faint)',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Barra de XP */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          height: '100%',
-          width: `${percentage}%`,
-          background: isMe
-            ? 'linear-gradient(90deg, rgba(176,42,30,0.6), rgba(176,42,30,0.2))'
-            : 'linear-gradient(90deg, rgba(40,120,60,0.7), rgba(40,120,60,0.2))',
-          transition: 'width .4s ease',
-        }}
-      />
+                const percentage = (entry.xp_total / maxXP) * 100
+                const isMe = entry.rank === myRank
 
-      {/* Conteúdo */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 2,
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 16px',
-        }}
-      >
-        {/* esquerda */}
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <span style={{
-            fontFamily: 'var(--font-mono)',
-            color: 'var(--muted)',
-            width: 40,
-          }}>
-            {entry.rank}
-          </span>
+                return (
+                  <div
+                    key={entry.rank}
+                    style={{
+                      position: 'relative',
+                      height: 48,
+                      marginBottom: 6,
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid var(--faint)',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {/* Barra de XP */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        height: '100%',
+                        width: `${percentage}%`,
+                        background: isMe
+                          ? 'linear-gradient(90deg, rgba(176,42,30,0.6), rgba(176,42,30,0.2))'
+                          : 'linear-gradient(90deg, rgba(40,120,60,0.7), rgba(40,120,60,0.2))',
+                        transition: 'width .4s ease',
+                      }}
+                    />
 
-          <span style={{
-            fontFamily: 'var(--font-display)',
-            color: 'var(--cream)',
-          }}>
-            {entry.nick || entry.name}
-          </span>
+                    {/* Conteúdo */}
+                    <div
+                      style={{
+                        position: 'relative',
+                        zIndex: 2,
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0 50px',
+                      }}
+                    >
+                      {/* esquerda */}
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <span style={{
+                          fontFamily: 'var(--font-mono)',
+                          color: 'var(--muted)',
+                          width: 40,
+                        }}>
+                          {entry.rank}
+                        </span>
 
-          {isMe && (
-            <span style={{
-              fontSize: 10,
-              color: 'var(--red)',
-              fontFamily: 'var(--font-mono)',
-              letterSpacing: 2,
-            }}>
-              VOCÊ
-            </span>
-          )}
-        </div>
+                        <span style={{
+                          fontFamily: 'var(--font-display)',
+                          color: 'var(--cream)',
+                        }}>
+                          {entry.nick || entry.name}
+                        </span>
 
-        {/* direita */}
-        <span style={{
-          fontFamily: 'var(--font-display)',
-          color: 'var(--cream)',
-        }}>
-          {entry.xp_total.toLocaleString('pt-BR')} XP
-        </span>
-      </div>
-    </div>
-  )
-})}
-            </div>
-          )}
+                        {isMe && (
+                          <span style={{
+                            fontSize: 10,
+                            color: 'var(--red)',
+                            fontFamily: 'var(--font-mono)',
+                            letterSpacing: 2,
+                          }}>
+                            VOCÊ
+                          </span>
+                        )}
+                      </div>
 
-          {/* Footer note */}
-          <div style={{ padding: '24px var(--px)', borderTop: '1px solid var(--faint)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-              XP acumulado por leituras e quizzes · mínimo 10 XP para aparecer
-            </p>
-            {!isLoggedIn && (
-              <a href="/login" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--red)', textTransform: 'uppercase', textDecoration: 'none', border: '1px solid var(--red-dim)', padding: '6px 14px' }}>
-                Entrar para ver sua posição →
-              </a>
-            )}
-          </div>
-        </>
-      )}
-
-      <HermesBot message="O ranking é atualizado conforme você lê e completa quizzes. Cada transmissão concluída vale XP." />
-    </>
-  )
-}
+                      {/* direita */}
+                      <span style={{
+                        fontFamily: 'var(--font-display)',
+                        color: 'var(--cream)',
+                      }}>
+                        {entry.xp_total.toLocaleString('pt-BR')} XP
+                      </span>
+                    </div>
+                  

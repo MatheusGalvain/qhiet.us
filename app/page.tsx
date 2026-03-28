@@ -1,7 +1,7 @@
 import Hero from '@/components/home/Hero'
 import HermesBot from '@/components/layout/HermesBot'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { Transmissao } from '@/types'
 import { padNumber, formatDatePT } from '@/lib/utils'
 
@@ -61,20 +61,32 @@ async function getData() {
 
     const nextPostDays = daysUntil(nextDraft?.published_at)
 
+    // Livro do mês — apenas o livro para profano (plan_access contém 'profano')
+    // Usa service client para contornar RLS (profano não está logado mas precisa ver)
+    const service = createServiceClient()
+    const { data: monthBook } = await service
+      .from('monthly_books')
+      .select('id, title, author, month, cover_url, plan_access')
+      .contains('plan_access', ['profano'])
+      .order('month', { ascending: false })
+      .limit(1)
+      .single()
+
     return {
       featured: featured as Transmissao | null,
       grid: (grid ?? []) as Transmissao[],
       total: totalCount ?? 0,
       totalcat: totalCategories ?? 0,
       nextPostDays,
+      monthBook: monthBook ?? null,
     }
   } catch {
-    return { featured: null, grid: [], total: 1, totalcat: 1, nextPostDays: 7 }
+    return { featured: null, grid: [], total: 1, totalcat: 1, nextPostDays: 7, monthBook: null }
   }
 }
 
 export default async function HomePage() {
-  const { featured, grid, total, totalcat, nextPostDays } = await getData()
+  const { featured, grid, total, totalcat, nextPostDays, monthBook } = await getData()
 
   return (
     <>
@@ -340,19 +352,24 @@ function MembershipSection() {
         </div>
       </div>
 
-      {/* Right — book of the month */}
+      {/* Right — book of the month (profano) */}
       <div className="mem-right">
         <div>
-          <p className="book-label">// Livro do Mês · Março 2026</p>
+          <p className="book-label">
+            // Livro do Mês{monthBook?.month ? ` · ${new Date(monthBook.month + '-02').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase())}` : ''}
+          </p>
           <div className="book-card">
             <div className="book-cover">
-              THE<br />KYBALION<br /><br />✦
+              {monthBook?.cover_url
+                ? <img src={monthBook.cover_url} alt={monthBook.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                : <>{(monthBook?.title ?? 'LIVRO DO MÊS').split(' ').slice(0, 3).join(' ')}<br /><br />✦</>
+              }
             </div>
             <div>
-              <p className="book-title">The Kybalion</p>
-              <span className="book-author">THREE INITIATES · 1908</span>
-              <p className="book-desc">
-                Os sete princípios herméticos que governam toda a existência. Texto fundador da tradição ocidental moderna — enviado diretamente ao seu e-mail ao se inscrever.
+              <p className="book-title">{monthBook?.title ?? '—'}</p>
+              <span className="book-author">{monthBook?.author ?? ''}</span>
+              <p className="book-desc" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginTop: 8 }}>
+                Enviado por e-mail ao se cadastrar gratuitamente.
               </p>
             </div>
           </div>
@@ -372,3 +389,4 @@ function MembershipSection() {
     </section>
   )
 }
+                                                      

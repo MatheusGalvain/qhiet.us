@@ -310,14 +310,25 @@ export default async function PerfilPage({
           </div>
 
           <div className="books-grid">
-            {books.map((book: any) => (
+            {books.map((book: any) => {
+              const isPremium = Array.isArray(book.plan_access)
+                ? !book.plan_access.includes('profano')
+                : false
+              return (
               <a
                 key={book.id}
                 href={book.file_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="book-card-link"
+                style={isPremium ? { outline: '1px solid var(--gold)', outlineOffset: 2 } : undefined}
               >
+                {/* Badge premium */}
+                {isPremium && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 8 }}>
+                    ◈ Iniciado
+                  </p>
+                )}
                 {/* Cover */}
                 <div style={{ width: '100%', aspectRatio: '2/3', marginBottom: 14, overflow: 'hidden', flexShrink: 0 }}>
                   {book.cover_url ? (
@@ -327,19 +338,20 @@ export default async function PerfilPage({
                       style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
                   ) : (
-                    <div style={{ width: '100%', height: '100%', background: 'var(--red-faint)', border: '1px solid var(--red-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red)', letterSpacing: 2, textAlign: 'center', padding: 12, lineHeight: 2 }}>
+                    <div style={{ width: '100%', height: '100%', background: isPremium ? 'rgba(200,150,10,0.06)' : 'var(--red-faint)', border: `1px solid ${isPremium ? 'var(--gold)' : 'var(--red-dim)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, color: isPremium ? 'var(--gold)' : 'var(--red)', letterSpacing: 2, textAlign: 'center', padding: 12, lineHeight: 2 }}>
                       {book.title.split(' ').slice(0, 4).join(' ')}
                     </div>
                   )}
                 </div>
                 <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 15, color: 'var(--cream)', marginBottom: 4, flex: 1 }}>{book.title}</p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 4 }}>{book.author}</p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--red-dim)', textTransform: 'uppercase', marginBottom: 10 }}>{book.month}</p>
-                <span style={{ display: 'block', width: '100%', padding: 8, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: isPremium ? 'var(--gold)' : 'var(--red-dim)', textTransform: 'uppercase', marginBottom: 10 }}>{book.month}</p>
+                <span style={{ display: 'block', width: '100%', padding: 8, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', background: 'transparent', border: `1px solid ${isPremium ? 'var(--gold)' : 'var(--faint)'}`, color: isPremium ? 'var(--gold)' : 'var(--muted)' }}>
                   Acessar →
                 </span>
               </a>
-            ))}
+              )
+            })}
             {books.length === 0 && (
               <div style={{ gridColumn: '1/-1', padding: '32px 0' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
