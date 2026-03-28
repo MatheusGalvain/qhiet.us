@@ -175,19 +175,25 @@ export default async function PerfilPage({
             </div>
           </div>
 
-          {/* XP by domain */}
-          <div className="domain-xp-grid">
-            {Object.entries(profile.xp_by_domain ?? {}).map(([cat, xp], i) => (
-              <div key={cat} style={{ padding: 'clamp(14px,2vw,20px) clamp(14px,2vw,24px)', borderRight: i % 3 !== 2 ? '1px solid var(--faint)' : 'none', borderBottom: i < 3 ? '1px solid var(--faint)' : 'none' }}>
-                <p style={{ fontSize: 18, color: 'var(--gold)', opacity: 0.5, marginBottom: 6 }}>{getCategorySymbol(cat)}</p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>{cat}</p>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,28px)', color: 'var(--cream)', letterSpacing: 2 }}>{formatNumber(Number(xp))}</p>
-                <div style={{ height: 2, background: 'var(--faint)', marginTop: 8 }}>
-                  <div style={{ height: '100%', width: `${Math.min((Number(xp) / Math.max(profile.xp_total, 1)) * 100, 100)}%`, background: 'var(--red)' }} />
-                </div>
+          {/* XP by domain — só exibe categorias com mais de 30 XP */}
+          {(() => {
+            const domainEntries = Object.entries(profile.xp_by_domain ?? {}).filter(([, xp]) => Number(xp) > 30)
+            if (domainEntries.length === 0) return null
+            return (
+              <div className="domain-xp-grid">
+                {domainEntries.map(([cat, xp], i) => (
+                  <div key={cat} style={{ padding: 'clamp(14px,2vw,20px) clamp(14px,2vw,24px)', borderRight: i % 3 !== 2 ? '1px solid var(--faint)' : 'none', borderBottom: i < 3 ? '1px solid var(--faint)' : 'none' }}>
+                    <p style={{ fontSize: 18, color: 'var(--gold)', opacity: 0.5, marginBottom: 6 }}>{getCategorySymbol(cat)}</p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>{cat}</p>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,28px)', color: 'var(--cream)', letterSpacing: 2 }}>{formatNumber(Number(xp))}</p>
+                    <div style={{ height: 2, background: 'var(--faint)', marginTop: 8 }}>
+                      <div style={{ height: '100%', width: `${Math.min((Number(xp) / Math.max(profile.xp_total, 1)) * 100, 100)}%`, background: 'var(--red)' }} />
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )
+          })()}
         </section>
 
         {/* ═══ ACTIVITY HEATMAP ═══ */}
