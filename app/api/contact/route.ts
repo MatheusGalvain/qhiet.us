@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { resend } from '@/lib/resend/client'
 
+export const dynamic = 'force-dynamic'
+
 const SUPPORT_EMAIL = 'suporteqhiethus@gmail.com'
 const FROM = process.env.RESEND_FROM_EMAIL ?? 'livros@qhiethus.com'
 
