@@ -319,4 +319,15 @@ export default async function RankingPage() {
                         {entry.xp_total.toLocaleString('pt-BR')} XP
                       </span>
                     </div>
-                  
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </>
+      )}
+
+      <HermesBot message="Consulte os buscadores mais dedicados do portal. Cada XP representa uma transmissão lida ou quiz completado." />
+    </>
+  )
+}

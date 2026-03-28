@@ -16,8 +16,8 @@ const MEMBER_LINKS = [
 
 const HELP_LINKS = [
   { href: '/politica-de-privacidade', label: 'Política de Privacidade' },
-  { href: '/termos-de-uso', label: 'Termos de Uso' },
   { href: '/politica-de-assinatura', label: 'Política de Assinatura' },
+  { href: '/termos-de-uso', label: 'Termos de Uso' },
   { href: '/fale-conosco', label: 'Fale Conosco' },
 ]
 

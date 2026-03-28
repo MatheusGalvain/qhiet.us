@@ -184,7 +184,7 @@ export default function ContactForm({ initialName = '', initialEmail = '', email
               fontFamily:    'var(--font-mono)',
               fontSize:      9,
               letterSpacing: 2,
-              color:         'var(--faint)',
+              color:         'var(--cream)',
               textTransform: 'uppercase',
             }}>
               vinculado à conta
@@ -275,7 +275,7 @@ export default function ContactForm({ initialName = '', initialEmail = '', email
           style={{
             background:    'transparent',
             border:        `1px solid ${canSubmit ? 'var(--gold)' : 'var(--faint)'}`,
-            color:         canSubmit ? 'var(--gold)' : 'var(--faint)',
+            color:         canSubmit ? 'var(--gold)' : 'var(--cream)',
             fontFamily:    'var(--font-mono)',
             fontSize:      11,
             letterSpacing: 3,

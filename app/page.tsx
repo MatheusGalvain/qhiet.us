@@ -152,7 +152,7 @@ export default async function HomePage() {
       </section>
 
       {/* MEMBERSHIP SECTION */}
-      <MembershipSection />
+      <MembershipSection monthBook={monthBook} />
 
       <HermesBot message="Bem-vindo ao QHIETHUS. Explore as transmissões ou navegue pelas categorias para iniciar sua jornada." />
     </>
@@ -309,7 +309,8 @@ function FallbackGridCards() {
 }
 
 /* ─── Membership Section ─── */
-function MembershipSection() {
+interface MonthBook { id?: string; title?: string; author?: string; month?: string; cover_url?: string | null; plan_access?: string[] }
+function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
   return (
     <section className="membership">
       {/* Left — plans */}

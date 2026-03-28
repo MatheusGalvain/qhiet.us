@@ -58,20 +58,34 @@ export default function BookUploadForm({ onSaved }: Props) {
       setError('')
       setProgress(0)
 
-      const urlRes = await fetch(`/api/admin/livros?filename=${encodeURIComponent(file.name)}`)
-      if (!urlRes.ok) { setError('Erro ao gerar URL de upload.'); setStatus('error'); return }
+      const mimeType = file.type || 'application/pdf'
+      const urlRes = await fetch(`/api/admin/livros?filename=${encodeURIComponent(file.name)}&type=${encodeURIComponent(mimeType)}`)
+      if (!urlRes.ok) {
+        const d = await urlRes.json().catch(() => ({}))
+        setError(`Erro ao gerar URL de upload: ${d.error ?? urlRes.status}`)
+        setStatus('error'); return
+      }
       const { signedUrl, path } = await urlRes.json()
 
       try {
         await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest()
           xhr.open('PUT', signedUrl)
-          xhr.setRequestHeader('Content-Type', 'application/pdf')
+          xhr.setRequestHeader('Content-Type', mimeType)
           xhr.upload.onprogress = e => {
             if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100))
           }
-          xhr.onload = () => xhr.status < 300 ? resolve() : reject(new Error(`Upload falhou: ${xhr.status}`))
-          xhr.onerror = () => reject(new Error('Erro de upload'))
+          xhr.onload = () => {
+            if (xhr.status < 300) {
+              resolve()
+            } else {
+              const body = xhr.responseText || ''
+              let detail = ''
+              try { detail = JSON.parse(body)?.message ?? body } catch { detail = body }
+              reject(new Error(`Upload falhou: ${xhr.status}${detail ? ' — ' + detail : ''}`))
+            }
+          }
+          xhr.onerror = () => reject(new Error('Erro de rede ao enviar o arquivo'))
           xhr.send(file)
         })
       } catch (err: any) {
