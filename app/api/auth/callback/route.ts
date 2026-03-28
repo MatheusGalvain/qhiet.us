@@ -25,8 +25,7 @@ export async function GET(request: NextRequest) {
   if (tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
     if (!error) {
-      // After email confirmation always land on /perfil
-      return NextResponse.redirect(`${origin}/perfil`)
+      return NextResponse.redirect(`${origin}/login`)
     }
   }
 
