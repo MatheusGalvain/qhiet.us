@@ -28,6 +28,8 @@ function LoginContent() {
       : null
   )
   const [, startTransition] = useTransition()
+  const [showLoginPwd, setShowLoginPwd]       = useState(false)
+  const [showRegisterPwd, setShowRegisterPwd] = useState(false)
 
   const supabase = createClient()
 
@@ -223,7 +225,23 @@ function LoginContent() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label className="form-label">Senha</label>
-              <input name="password" type="password" required className="form-input" placeholder="••••••••" />
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input name="password" type={showLoginPwd ? 'text' : 'password'} required className="form-input" placeholder="••••••••" style={{ paddingRight: 48, width: '100%' }} />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPwd(v => !v)}
+                  tabIndex={-1}
+                  style={{
+                    position: 'absolute', right: 12,
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: 'var(--muted)', fontFamily: 'var(--font-mono)',
+                    fontSize: 11, letterSpacing: 1, textTransform: 'uppercase',
+                    padding: 0, lineHeight: 1,
+                  }}
+                >
+                  {showLoginPwd ? 'ocultar' : 'ver'}
+                </button>
+              </div>
               <button type="button" onClick={() => { setMode('forgot'); setError(null) }} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', textAlign: 'right', background: 'none', border: 'none', cursor: 'pointer' }}>
                 Esqueci minha senha →
               </button>
@@ -234,7 +252,7 @@ function LoginContent() {
             <Divider />
             {/* <GoogleButton onClick={handleGoogle} label="Continuar com Google" /> */}
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', textAlign: 'center', marginTop: 8 }}>
-              Não tem conta?{' '}
+              Ainda não tem uma conta?{' '}
               <button type="button" onClick={() => setTab('register')} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2 }}>
                 Cadastre-se gratuitamente
               </button>
@@ -255,7 +273,23 @@ function LoginContent() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label className="form-label">Senha</label>
-              <input name="password" type="password" required minLength={8} className="form-input" placeholder="Mínimo 8 caracteres" />
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input name="password" type={showRegisterPwd ? 'text' : 'password'} required minLength={8} className="form-input" placeholder="Mínimo 8 caracteres" style={{ paddingRight: 48, width: '100%' }} />
+                <button
+                  type="button"
+                  onClick={() => setShowRegisterPwd(v => !v)}
+                  tabIndex={-1}
+                  style={{
+                    position: 'absolute', right: 12,
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: 'var(--muted)', fontFamily: 'var(--font-mono)',
+                    fontSize: 11, letterSpacing: 1, textTransform: 'uppercase',
+                    padding: 0, lineHeight: 1,
+                  }}
+                >
+                  {showRegisterPwd ? 'ocultar' : 'ver'}
+                </button>
+              </div>
             </div>
             <button type="submit" className="btn-primary" style={{ marginTop: 8, width: '100%' }}>
               Iniciar jornada →
@@ -303,6 +337,4 @@ export default function LoginPage() {
   return (
     <Suspense fallback={null}>
       <LoginContent />
-    </Suspense>
-  )
-}
+    </Suspen

@@ -55,7 +55,7 @@ export default function PoliticaAssinaturaPage() {
       <LegalH2>Reembolso</LegalH2>
       <LegalP>Nossa política de reembolso é:</LegalP>
       <LegalUL>
-        <LegalLI><S>Primeiros 7 dias:</S> reembolso integral garantido, sem perguntas. Basta solicitar em contato@qhiethus.com.br.</LegalLI>
+        <LegalLI><S>Primeiros 7 dias:</S> reembolso integral garantido, sem perguntas. Basta solicitar em suporteqhiethus@gmail.com.</LegalLI>
         <LegalLI><S>Após 7 dias:</S> não oferecemos reembolso proporcional por período não utilizado. O acesso continua até o fim do período pago.</LegalLI>
         <LegalLI><S>Cobranças indevidas:</S> se identificar uma cobrança incorreta, entre em contato imediatamente. Reembolsos por erro são processados em até 5 dias úteis.</LegalLI>
       </LegalUL>
@@ -87,7 +87,7 @@ export default function PoliticaAssinaturaPage() {
       <LegalH2>Dúvidas sobre cobrança</LegalH2>
       <LegalP>
         Para qualquer questão relacionada à sua assinatura, entre em contato:{' '}
-        <S>contato@qhiethus.com.br</S>
+        <S>suporteqhiethus@gmail.com</S>
       </LegalP>
       <LegalP>Responderemos em até 48 horas úteis.</LegalP>
 

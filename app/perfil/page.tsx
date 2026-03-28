@@ -12,7 +12,9 @@ import DeleteAccountButton from '@/components/perfil/DeleteAccountButton'
 
 export const metadata: Metadata = { title: 'Perfil' }
 
-async function getData() {
+const HISTORY_PER_PAGE = 5
+
+async function getData(page: number) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -41,12 +43,23 @@ async function getData() {
     profile = created
   }
 
+  // Count total history entries (excluding null transmissão)
+  const { count: historyTotal } = await supabase
+    .from('xp_events')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .not('transmissao_id', 'is', null)
+
+  const from = (page - 1) * HISTORY_PER_PAGE
+  const to   = from + HISTORY_PER_PAGE - 1
+
   const { data: xpEvents } = await supabase
     .from('xp_events')
     .select('*, transmissoes(number, title, categories)')
     .eq('user_id', user.id)
+    .not('transmissao_id', 'is', null)
     .order('created_at', { ascending: false })
-    .limit(20)
+    .range(from, to)
 
   const { data: books } = await supabase
     .from('monthly_books').select('*').order('month', { ascending: false }).limit(8)
@@ -70,11 +83,18 @@ async function getData() {
   }
   const totalActiveDays = Object.keys(activityMap).length
 
-  return { profile: profile as Profile, xpEvents: xpEvents ?? [], books: books ?? [], activityMap, totalActiveDays }
+  const totalPages = Math.max(1, Math.ceil((historyTotal ?? 0) / HISTORY_PER_PAGE))
+
+  return { profile: profile as Profile, xpEvents: xpEvents ?? [], books: books ?? [], activityMap, totalActiveDays, historyTotal: historyTotal ?? 0, totalPages, currentPage: page }
 }
 
-export default async function PerfilPage() {
-  const { profile, xpEvents, books, activityMap, totalActiveDays } = await getData()
+export default async function PerfilPage({
+  searchParams,
+}: {
+  searchParams: { page?: string }
+}) {
+  const page = Math.max(1, parseInt(searchParams?.page ?? '1', 10) || 1)
+  const { profile, xpEvents, books, activityMap, totalActiveDays, historyTotal, totalPages, currentPage } = await getData(page)
   const rank = getRank(profile.xp_total)
   const nextRank = getNextRank(profile.xp_total)
   const xpToNext = nextRank ? nextRank.min - profile.xp_total : 0
@@ -179,7 +199,9 @@ export default async function PerfilPage() {
         <section id="historico" style={{ marginBottom: 56, scrollMarginTop: 'calc(var(--nav-h) + 8px)' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 28 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}>HISTÓRICO</h2>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>Últimas {xpEvents.length} atividades</p>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
+              {historyTotal} {historyTotal === 1 ? 'atividade' : 'atividades'}
+            </p>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -231,6 +253,45 @@ export default async function PerfilPage() {
               </div>
             )}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--faint)' }}>
+              <Link
+                href={`/perfil?page=${currentPage - 1}#historico`}
+                aria-disabled={currentPage <= 1}
+                style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3,
+                  textTransform: 'uppercase', padding: '10px 16px',
+                  border: '1px solid var(--faint)',
+                  color: currentPage <= 1 ? 'var(--faint)' : 'var(--muted)',
+                  pointerEvents: currentPage <= 1 ? 'none' : 'auto',
+                  textDecoration: 'none',
+                }}
+              >
+                ← Anterior
+              </Link>
+
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
+                {currentPage} / {totalPages}
+              </p>
+
+              <Link
+                href={`/perfil?page=${currentPage + 1}#historico`}
+                aria-disabled={currentPage >= totalPages}
+                style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3,
+                  textTransform: 'uppercase', padding: '10px 16px',
+                  border: '1px solid var(--faint)',
+                  color: currentPage >= totalPages ? 'var(--faint)' : 'var(--muted)',
+                  pointerEvents: currentPage >= totalPages ? 'none' : 'auto',
+                  textDecoration: 'none',
+                }}
+              >
+                Próxima →
+              </Link>
+            </div>
+          )}
         </section>
 
         {/* ═══ LIVROS ═══ */}

@@ -26,7 +26,7 @@ export default async function CategoriasPage() {
   const service = createServiceClient()
 
   const [{ data: dbCats }, { data: transmissoes }] = await Promise.all([
-    service.from('categories').select('*').order('sort_order'),
+    service.from('categories').select('*').eq('active', true).order('sort_order'),
     service.from('transmissoes').select('categories').eq('status', 'published'),
   ])
 

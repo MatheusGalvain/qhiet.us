@@ -19,7 +19,7 @@ export default function PoliticaPrivacidadePage() {
       <LegalP>
         O QHIETHUS é um portal de conhecimento ocultista operado como pessoa jurídica brasileira.
         Para dúvidas sobre privacidade, entre em contato pelo e-mail{' '}
-        <S>contato@qhiethus.com.br</S>.
+        <S>suporteqhiethus@gmail.com</S>.
       </LegalP>
 
       <LegalH2>Quais dados coletamos</LegalH2>
@@ -61,7 +61,7 @@ export default function PoliticaPrivacidadePage() {
       </LegalUL>
       <LegalP>
         Para exercer qualquer desses direitos, entre em contato:{' '}
-        <S>contato@qhiethus.com.br</S>.
+        <S>suporteqhiethus@gmail.com</S>.
       </LegalP>
 
       <LegalH2>Cookies</LegalH2>
@@ -84,7 +84,7 @@ export default function PoliticaPrivacidadePage() {
       </LegalP>
 
       <LegalH2>Contato</LegalH2>
-      <LegalP>Dúvidas sobre privacidade: <S>contato@qhiethus.com.br</S></LegalP>
+      <LegalP>Dúvidas sobre privacidade: <S>suporteqhiethus@gmail.com</S></LegalP>
 
     </LegalLayout>
   )

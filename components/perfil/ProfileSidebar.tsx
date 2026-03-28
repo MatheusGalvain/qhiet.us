@@ -253,12 +253,12 @@ export default function ProfileSidebar({ name, email, isSubscriber, rankName, ra
                 gap: 10,
               }}>
                 <p style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 11,
+                  fontFamily: 'var(--font-mono)',
                   letterSpacing: 2, color: 'var(--muted)',
                   textTransform: 'uppercase', lineHeight: 1.6,
                 }}>
                   Enviar link para<br />
-                  <span style={{ color: 'var(--cream)' }}>{email}</span>?
+                  <span style={{ color: 'var(--cream)', fontSize: 8 }}>{email}</span>?
                 </p>
                 {resetError && (
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red)', letterSpacing: 1 }}>

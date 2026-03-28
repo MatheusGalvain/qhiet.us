@@ -1,8 +1,9 @@
 import DeleteButton from '@/components/admin/DeleteButton';
+import ToggleActiveButton from '@/components/admin/ToggleActiveButton'
 import { createServiceClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
-interface DbCategory { id: string, slug: string; label: string; symbol: string; color: string; sort_order: number }
+interface DbCategory { id: string, slug: string; label: string; symbol: string; color: string; sort_order: number; active?: boolean }
 interface DbTransmissao { categories: string[] | null; status: string; access: string }
 
 export const revalidate = 0
@@ -34,8 +35,8 @@ export default async function AdminCategoriasPage() {
     }
   }
 
-  interface SortedCat extends DbCategory { total: number; published: number; free: number; locked: number }
-  const sorted: SortedCat[] = cats.map(c => ({ ...c, ...(counts[c.slug] ?? { total: 0, published: 0, free: 0, locked: 0 }) }))
+  interface SortedCat extends DbCategory { total: number; published: number; free: number; locked: number; active: boolean }
+  const sorted: SortedCat[] = cats.map(c => ({ ...c, active: c.active !== false, ...(counts[c.slug] ?? { total: 0, published: 0, free: 0, locked: 0 }) }))
   const maxCount = Math.max(...sorted.map((c: SortedCat) => c.total), 1)
 
   return (
@@ -76,19 +77,22 @@ export default async function AdminCategoriasPage() {
 
       {/* Category cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {sorted.map(({ id, slug, label, symbol, color, total, published, free, locked }) => (
-          <div key={slug} style={{ border: `1px solid ${total > 0 ? 'var(--faint)' : 'var(--faint)'}`, padding: '24px 28px', borderLeft: `3px solid ${color}` }}>
+        {sorted.map(({ id, slug, label, symbol, color, total, published, free, locked, active }) => (
+          <div key={slug} style={{ border: '1px solid var(--faint)', padding: '24px 28px', borderLeft: `3px solid ${active ? color : 'var(--faint)'}`, opacity: active ? 1 : 0.6 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '48px 1fr 80px 80px 80px 80px', gap: 16, alignItems: 'center', marginBottom: 14 }}>
               {/* Symbol */}
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 28, color, opacity: total > 0 ? 0.9 : 0.4, textAlign: 'center' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 28, color: active ? color : 'var(--muted)', opacity: total > 0 ? 0.9 : 0.4, textAlign: 'center' }}>
                 {symbol}
               </span>
 
               {/* Name */}
               <div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, letterSpacing: 2, color: 'var(--cream)', marginBottom: 2 }}>
-                  {label}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, letterSpacing: 2, color: 'var(--cream)', margin: 0 }}>
+                    {label}
+                  </p>
+                  <ToggleActiveButton id={id} active={active} />
+                </div>
                 <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
                   <Link href={`/categorias/${slug}`} target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
                     /categorias/{slug} ↗

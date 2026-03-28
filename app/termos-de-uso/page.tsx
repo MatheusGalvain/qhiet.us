@@ -94,7 +94,7 @@ export default function TermosUsoPage() {
       </LegalP>
 
       <LegalH2>Contato</LegalH2>
-      <LegalP>Dúvidas sobre os termos: <S>contato@qhiethus.com.br</S></LegalP>
+      <LegalP>Dúvidas sobre os termos: <S>suporteqhiethus@gmail.com</S></LegalP>
 
     </LegalLayout>
   )

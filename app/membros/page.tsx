@@ -91,11 +91,14 @@ export default async function MembrosPage() {
         </div>
 
         {/* Hero right (hidden on mobile via .page-hero / .hero-right) */}
-        <div className="hero-right" style={{ padding: 'clamp(40px,6vw,72px) var(--px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 32 }}>
+        <div className="hero-right" style={{ padding: 'clamp(20px,6vw,7290px) var(--px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 32 }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,2.5vw,28px)', letterSpacing: 2, color: 'var(--cream)', marginBottom: 14 }}>
+            Dados reais do nosso portal:
+          </h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
             {[
               { n: String(transmissoesCount), l: 'Transmissões' },
-              { n: String(livrosCount || '∞'), l: 'Livros' },
+              { n: String(livrosCount || '∞'), l: 'Livros Ativos' },
               { n: '6',   l: 'Categorias' },
               { n: '∞',   l: 'Conhecimento' },
             ].map(({ n, l }, i) => (

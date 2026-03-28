@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { CATEGORY_META, type Transmissao } from '@/types'
 
+interface DbCategory { slug: string; label: string; symbol: string }
+
 interface Props {
   initial?: Partial<Transmissao>
   mode: 'create' | 'edit'
@@ -24,6 +26,16 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [slugManual, setSlugManual] = useState(!!initial.slug)
+  const [dbCategories, setDbCategories] = useState<DbCategory[]>([])
+
+  useEffect(() => {
+    fetch('/api/admin/categories')
+      .then(r => r.json())
+      .then((data: DbCategory[]) => {
+        if (Array.isArray(data) && data.length > 0) setDbCategories(data)
+      })
+      .catch(() => {/* silently fall back to CATEGORY_META */})
+  }, [])
 
   const [form, setForm] = useState({
     title:             initial.title            ?? '',
@@ -248,13 +260,16 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
           <div style={{ border: '1px solid var(--faint)', padding: 20 }}>
             <label style={labelStyle}>Categorias</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {Object.entries(CATEGORY_META).map(([key, meta]) => {
-                const selected = form.categories.includes(key)
+              {(dbCategories.length > 0
+                ? dbCategories
+                : Object.entries(CATEGORY_META).map(([slug, m]) => ({ slug, label: m.label, symbol: m.symbol }))
+              ).map(({ slug, label, symbol }) => {
+                const selected = form.categories.includes(slug)
                 return (
                   <button
-                    key={key}
+                    key={slug}
                     type="button"
-                    onClick={() => toggle(key)}
+                    onClick={() => toggle(slug)}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -268,10 +283,10 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
                     }}
                   >
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: selected ? 'var(--red)' : 'var(--muted)', width: 20 }}>
-                      {meta.symbol}
+                      {symbol}
                     </span>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: selected ? 'var(--cream)' : 'var(--muted)' }}>
-                      {meta.label}
+                      {label}
                     </span>
                   </button>
                 )

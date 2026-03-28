@@ -4,12 +4,25 @@ import { useState, useTransition, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CATEGORY_META } from '@/types'
 
-const CATEGORIES = Object.entries(CATEGORY_META)
+interface CategoryItem {
+  slug: string
+  label: string
+  symbol: string
+}
 
-export default function FilterBar() {
+interface FilterBarProps {
+  categories?: CategoryItem[]
+}
+
+export default function FilterBar({ categories }: FilterBarProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [, startTransition] = useTransition()
+
+  // Use DB categories if provided, otherwise fall back to CATEGORY_META
+  const CATEGORIES: CategoryItem[] = categories && categories.length > 0
+    ? categories
+    : Object.entries(CATEGORY_META).map(([slug, m]) => ({ slug, label: m.label, symbol: m.symbol }))
 
   // Support multi-select: cat=hermetismo,cabala
   const catParam = searchParams.get('cat') ?? ''
@@ -81,11 +94,11 @@ export default function FilterBar() {
         <CatButton active={isAll} onClick={() => updateParams({ cat: '' })}>
           Todos
         </CatButton>
-        {CATEGORIES.map(([key, { label, symbol }]) => (
+        {CATEGORIES.map(({ slug, label, symbol }) => (
           <CatButton
-            key={key}
-            active={currentCats.includes(key)}
-            onClick={() => toggleCategory(key)}
+            key={slug}
+            active={currentCats.includes(slug)}
+            onClick={() => toggleCategory(slug)}
             symbol={symbol}
           >
             {label}
@@ -104,7 +117,7 @@ export default function FilterBar() {
             Filtros ativos:
           </span>
           {currentCats.map(cat => {
-            const meta = CATEGORY_META[cat as keyof typeof CATEGORY_META]
+            const meta = CATEGORIES.find(c => c.slug === cat)
             return (
               <button
                 key={cat}
@@ -117,7 +130,7 @@ export default function FilterBar() {
                   cursor: 'pointer', textTransform: 'uppercase',
                 }}
               >
-                {meta?.symbol} {meta?.label} ×
+                {meta?.symbol} {meta?.label ?? cat} ×
               </button>
             )
           })}

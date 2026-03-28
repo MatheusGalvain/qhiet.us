@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import FilterBar from '@/components/transmissoes/FilterBar'
 import TransmissaoCard from '@/components/transmissoes/TransmissaoCard'
 import HermesBot from '@/components/layout/HermesBot'
@@ -13,6 +14,16 @@ export const metadata: Metadata = {
 
 interface PageProps {
   searchParams: { cat?: string; q?: string; tab?: string; sort?: string }
+}
+
+async function getActiveCategories() {
+  const service = createServiceClient()
+  const { data } = await service
+    .from('categories')
+    .select('slug, label, symbol')
+    .eq('active', true)
+    .order('sort_order')
+  return (data ?? []) as { slug: string; label: string; symbol: string }[]
 }
 
 async function getData(searchParams: PageProps['searchParams']) {
@@ -60,7 +71,10 @@ async function getData(searchParams: PageProps['searchParams']) {
 }
 
 export default async function TransmisoesPage({ searchParams }: PageProps) {
-  const { transmissoes, total, isSubscriber } = await getData(searchParams)
+  const [{ transmissoes, total, isSubscriber }, activeCategories] = await Promise.all([
+    getData(searchParams),
+    getActiveCategories(),
+  ])
   const activeTab = searchParams.tab ?? 'free'
 
   return (
@@ -78,7 +92,7 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
 
         <div style={{ marginTop: 24 }}>
           <Suspense>
-            <FilterBar />
+            <FilterBar categories={activeCategories} />
           </Suspense>
         </div>
       </div>
