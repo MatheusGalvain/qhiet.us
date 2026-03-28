@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const { error } = await resend.emails.send({
       from: FROM,
       to: SUPPORT_EMAIL,
-      replyTo: email.trim(),
+      reply_to: email.trim(),
       subject: `[Fale Conosco] ${title.trim()}`,
       html: `
         <!DOCTYPE html>
