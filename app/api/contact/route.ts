@@ -4,9 +4,28 @@ import nodemailer from 'nodemailer'
 export const dynamic = 'force-dynamic'
 
 const TO = 'suporteqhiethus@gmail.com'
+const COOLDOWN_MS = 60 * 1000 // 1 minuto entre envios por IP
+
+// In-memory rate limit (resets com deploy — suficiente para anti-spam básico)
+const lastSent = new Map<string, number>()
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit por IP
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+             ?? request.headers.get('x-real-ip')
+             ?? 'unknown'
+    const now = Date.now()
+    const last = lastSent.get(ip) ?? 0
+    const remaining = Math.ceil((COOLDOWN_MS - (now - last)) / 1000)
+
+    if (now - last < COOLDOWN_MS) {
+      return NextResponse.json(
+        { error: `Aguarde ${remaining}s antes de enviar outra mensagem.` },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
     const { name, email, title, message } = body
 
@@ -59,6 +78,9 @@ export async function POST(request: NextRequest) {
         </div>
       `,
     })
+
+    // Registra o IP após envio bem-sucedido
+    lastSent.set(ip, Date.now())
 
     return NextResponse.json({ success: true })
   } catch (err) {

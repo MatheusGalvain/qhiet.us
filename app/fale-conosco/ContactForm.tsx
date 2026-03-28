@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface Props {
   initialName?: string
@@ -8,17 +8,35 @@ interface Props {
   emailLocked?: boolean
 }
 
-type Status = 'idle' | 'sending' | 'success' | 'error'
+type Status = 'idle' | 'sending' | 'success' | 'error' | 'cooldown'
 
 export default function ContactForm({ initialName = '', initialEmail = '', emailLocked = false }: Props) {
   const [name, setName]       = useState(initialName)
   const [email, setEmail]     = useState(initialEmail)
+  const [cooldown, setCooldown] = useState(0) // segundos restantes
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [title, setTitle]     = useState('')
   const [message, setMessage] = useState('')
   const [status, setStatus]   = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  const canSubmit = name.trim() && email.trim() && title.trim() && message.trim() && status !== 'sending'
+  const canSubmit = name.trim() && email.trim() && title.trim() && message.trim() && status !== 'sending' && cooldown === 0
+
+  // Limpa o timer ao desmontar
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current) }, [])
+
+  function startCooldown(seconds: number) {
+    setCooldown(seconds)
+    timerRef.current = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -41,12 +59,23 @@ export default function ContactForm({ initialName = '', initialEmail = '', email
 
       const data = await res.json()
 
+      if (res.status === 429) {
+        // Extrai os segundos do erro e inicia contagem regressiva
+        const match = data.error?.match(/(\d+)s/)
+        const secs = match ? parseInt(match[1]) : 60
+        startCooldown(secs)
+        setErrorMsg(null)
+        setStatus('idle')
+        return
+      }
+
       if (!res.ok) {
         setErrorMsg(data.error ?? 'Erro ao enviar. Tente novamente.')
         setStatus('error')
         return
       }
 
+      startCooldown(60)
       setStatus('success')
     } catch {
       setErrorMsg('Erro de conexão. Tente novamente.')
@@ -256,7 +285,11 @@ export default function ContactForm({ initialName = '', initialEmail = '', email
             transition:    'color .15s, border-color .15s',
           }}
         >
-          {status === 'sending' ? 'Enviando...' : 'Enviar mensagem →'}
+          {status === 'sending'
+            ? 'Enviando...'
+            : cooldown > 0
+            ? `Aguarde ${cooldown}s...`
+            : 'Enviar mensagem →'}
         </button>
       </div>
     </form>
