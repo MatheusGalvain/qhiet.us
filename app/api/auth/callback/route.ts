@@ -8,7 +8,10 @@ export async function GET(request: NextRequest) {
   const code       = searchParams.get('code')
   const tokenHash  = searchParams.get('token_hash')
   const type       = searchParams.get('type') as EmailOtpType | null
-  const redirect   = searchParams.get('redirect') ?? '/perfil'
+  // 'redirect' is only set when the callback is called explicitly (e.g. password reset).
+  // When coming from email confirmation (Supabase root redirect), there is no 'redirect'
+  // param — in that case we send the user to /login.
+  const redirect   = searchParams.get('redirect') ?? '/login'
 
   const supabase = await createClient()
 

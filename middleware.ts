@@ -47,6 +47,16 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
+  // ── Auth code on root URL ────────────────────────────────────────────────
+  // Supabase email confirmation redirects to SITE_URL/?code=...
+  // Intercept it here and forward to the real callback handler.
+  if (pathname === '/' && request.nextUrl.searchParams.has('code')) {
+    const code = request.nextUrl.searchParams.get('code')!
+    const callbackUrl = new URL('/api/auth/callback', request.url)
+    callbackUrl.searchParams.set('code', code)
+    return NextResponse.redirect(callbackUrl)
+  }
+
   // Redirect unauthenticated users from protected routes
   if (!user && AUTH_ROUTES.some(r => pathname.startsWith(r))) {
     const url = request.nextUrl.clone()
