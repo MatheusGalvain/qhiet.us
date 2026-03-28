@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { resend } from '@/lib/resend/client'
+import { Resend } from 'resend'
 
 export const dynamic = 'force-dynamic'
 
 const SUPPORT_EMAIL = 'suporteqhiethus@gmail.com'
-const FROM = process.env.RESEND_FROM_EMAIL ?? 'livros@qhiethus.com'
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,8 +32,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Mensagem muito longa (máx. 5000 caracteres).' }, { status: 400 })
     }
 
+    // Instantiate inside the handler so RESEND_API_KEY is only read at runtime
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      console.error('[contact] RESEND_API_KEY not set')
+      return NextResponse.json({ error: 'Serviço de e-mail não configurado.' }, { status: 500 })
+    }
+    const resend = new Resend(apiKey)
+
+    const from = process.env.RESEND_FROM_EMAIL ?? 'livros@qhiethus.com'
+
     const { error } = await resend.emails.send({
-      from: FROM,
+      from,
       to: SUPPORT_EMAIL,
       reply_to: email.trim(),
       subject: `[Fale Conosco] ${title.trim()}`,
