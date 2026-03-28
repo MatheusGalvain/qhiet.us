@@ -7,6 +7,7 @@ import type { Metadata } from 'next'
 import ActivityHeatmap from '@/components/perfil/ActivityHeatmap'
 import NickForm from '@/components/perfil/NickForm'
 import ProfileSidebar from '@/components/perfil/ProfileSidebar'
+import BillingPortalButton from '@/components/perfil/BillingPortalButton'
 
 export const metadata: Metadata = { title: 'Perfil' }
 
@@ -26,7 +27,7 @@ async function getData() {
         id:    user.id,
         email: user.email ?? '',
         name:  user.user_metadata?.name ?? (user.email ?? 'Usuário').split('@')[0],
-        plan:  user.user_metadata?.plan ?? 'profano',
+        plan:  'profano', // Always start unpaid — Stripe webhook sets actual plan
       }, { onConflict: 'id' })
       .select()
       .single()
@@ -296,6 +297,40 @@ export default async function PerfilPage() {
             </p>
             <NickForm currentNick={profile.nick ?? null} currentName={profile.name} nickUpdatedAt={profile.nick_updated_at ?? null} />
           </div>
+
+          {/* Subscription management — only for subscribers */}
+          {profile.is_subscriber && (
+            <div style={{ maxWidth: 480, marginTop: 40, paddingTop: 40, borderTop: '1px solid var(--faint)' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 16 }}>
+                <span style={{ color: 'var(--red-dim)' }}>// </span>Plano Iniciado
+              </p>
+              <div style={{
+                border: '1px solid var(--faint)',
+                padding: '20px 24px',
+                marginBottom: 16,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 12,
+              }}>
+                <div>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: 2, color: 'var(--gold)', marginBottom: 4 }}>
+                    ◈ Plano Iniciado ativo
+                  </p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>
+                    Acesso completo · transmissões + livros
+                  </p>
+                </div>
+                <BillingPortalButton />
+              </div>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--faint)', lineHeight: 1.9 }}>
+                Para cancelar, clique em &ldquo;Gerenciar assinatura&rdquo;. Você será redirecionado
+                para o portal seguro da Stripe onde pode cancelar, alterar o método de pagamento
+                ou ver o histórico de cobranças. O acesso permanece ativo até o fim do período pago.
+              </p>
+            </div>
+          )}
         </section>
 
         {/* Mobile-only logout (sidebar is hidden on mobile) */}

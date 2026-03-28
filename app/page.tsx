@@ -27,6 +27,7 @@ async function getData() {
       .from('transmissoes')
       .select('id, slug, number, title, excerpt, categories, access, read_time_minutes, published_at, xp_reward, status')
       .eq('access', 'locked')
+      .eq('status', 'published')
       .order('published_at', { ascending: false })
       .limit(1)
       .single()
@@ -36,6 +37,7 @@ async function getData() {
       .from('transmissoes')
       .select('id, slug, number, title, excerpt, categories, access, read_time_minutes, published_at, xp_reward, status')
       .eq('access', 'free')
+      .eq('status', 'published')
       .order('published_at', { ascending: false })
       .limit(3)
 

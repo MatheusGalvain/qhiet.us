@@ -27,7 +27,7 @@ export default async function CategoriasPage() {
 
   const [{ data: dbCats }, { data: transmissoes }] = await Promise.all([
     service.from('categories').select('*').order('sort_order'),
-    service.from('transmissoes').select('categories'),
+    service.from('transmissoes').select('categories').eq('status', 'published'),
   ])
 
   // Fall back to CATEGORY_META if table not yet migrated

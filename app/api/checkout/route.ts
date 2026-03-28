@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const session = await createCheckoutSession({
       userId: user.id,
       userEmail: profile?.email ?? user.email!,
-      successUrl: `${appUrl}/perfil?upgrade=success`,
+      successUrl: `${appUrl}/checkout/sucesso`,
       cancelUrl:  `${appUrl}/membros`,
     })
 

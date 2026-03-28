@@ -45,6 +45,9 @@ async function getData(searchParams: PageProps['searchParams']) {
   if (searchParams.q) {
     query = query.ilike('title', `%${searchParams.q}%`)
   }
+  // Only show published articles — never leak drafts to the public
+  query = query.eq('status', 'published')
+
   // Filter by tab — default is 'free', 'locked' shows subscriber transmissoes (visible to all, content-locked)
   if (searchParams.tab === 'locked') {
     query = query.eq('access', 'locked')

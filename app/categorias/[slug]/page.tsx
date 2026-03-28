@@ -66,8 +66,9 @@ async function getData(slug: string) {
   const [{ data: transmissoesData, count }, { data: catContent }] = await Promise.all([
     supabase
       .from('transmissoes')
-      .select('*', { count: 'exact' })
+      .select('id, slug, number, title, excerpt, categories, access, read_time_minutes, published_at, xp_reward, status', { count: 'exact' })
       .contains('categories', [slug])
+      .eq('status', 'published')
       .order('published_at', { ascending: false })
       .limit(12),
     supabase

@@ -23,13 +23,19 @@ export async function POST(request: NextRequest) {
 
     if (existing) return NextResponse.json({ message: 'Already awarded' })
 
-    // Insert XP event
-    await supabase.from('xp_events').insert({
+    // Insert XP event — if this fails (race condition / duplicate), bail out safely
+    const { error: insertError } = await supabase.from('xp_events').insert({
       user_id: user.id,
       transmissao_id: transmissaoId,
       type,
       xp,
     })
+
+    // If insert failed (e.g. unique constraint race), do NOT update profile XP
+    if (insertError) {
+      console.warn('[xp] insert failed, skipping profile update:', insertError.code)
+      return NextResponse.json({ message: 'Already awarded' })
+    }
 
     // Get article categories for domain XP
     const { data: t } = await supabase

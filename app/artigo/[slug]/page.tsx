@@ -19,16 +19,29 @@ interface PageProps {
 
 async function getData(slug: string) {
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  let isAdmin = false
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles').select('is_admin').eq('id', user.id).single()
+    isAdmin = profile?.is_admin ?? false
+  }
+
   const { data: transmissao } = await supabase
     .from('transmissoes').select('*').eq('slug', slug).single()
   if (!transmissao) return null
 
-  const { data: { user } } = await supabase.auth.getUser()
-  let isSubscriber = false
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles').select('is_subscriber, is_admin').eq('id', user.id).single()
-    isSubscriber = profile?.is_subscriber ?? profile?.is_admin ?? false
+  // Block direct URL access to drafts — only admins can preview unpublished articles
+  if (transmissao.status !== 'published' && !isAdmin) return null
+
+  // isSubscriber: re-use the profile query above (isAdmin already fetched)
+  // We need is_subscriber — fetch it now (profile was select('is_admin') above)
+  let isSubscriber = isAdmin // admins always have access
+  if (user && !isAdmin) {
+    const { data: subProfile } = await supabase
+      .from('profiles').select('is_subscriber').eq('id', user.id).single()
+    isSubscriber = subProfile?.is_subscriber ?? false
   }
 
   const hasAccess = transmissao.access === 'free' || isSubscriber
@@ -64,7 +77,7 @@ export default async function ArtigoPage({ params }: PageProps) {
   const { transmissao: t, isSubscriber, hasAccess, quiz, safeQuizQuestions } = data
 
   // XP for reading = 60% of total xp_reward
-  const readingXP = Math.round(t.xp_reward * 0.6)
+  const readingXP = t.xp_reward
 
   return (
     <>
