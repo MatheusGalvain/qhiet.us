@@ -1,16 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+const VALID_TYPES = ['read', 'quiz'] as const
+type XpType = typeof VALID_TYPES[number]
+
+// XP por tipo — valor autoritativo no servidor, nunca do cliente
+const XP_BY_TYPE: Record<XpType, (articleXp: number) => number> = {
+  read: (xp) => xp,
+  quiz: (xp) => Math.round(xp * 0.5), // quiz vale 50% do XP da transmissão
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { transmissaoId, type, xp } = await request.json()
-    if (!transmissaoId || !type || typeof xp !== 'number') {
+    const body = await request.json()
+    const { transmissaoId, type } = body
+
+    // Whitelist de tipos válidos — rejeita qualquer outro valor
+    if (!transmissaoId || !VALID_TYPES.includes(type)) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
     }
+
+    // Busca XP do banco — nunca confia no valor enviado pelo cliente
+    const { data: article } = await supabase
+      .from('transmissoes')
+      .select('xp_reward, categories')
+      .eq('id', transmissaoId)
+      .single()
+
+    if (!article) {
+      return NextResponse.json({ error: 'Article not found' }, { status: 404 })
+    }
+
+    const xp = XP_BY_TYPE[type as XpType](article.xp_reward ?? 30)
 
     // Prevent duplicate XP for same article+type
     const { data: existing } = await supabase
@@ -23,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     if (existing) return NextResponse.json({ message: 'Already awarded' })
 
-    // Insert XP event — if this fails (race condition / duplicate), bail out safely
+    // Insert XP event — UNIQUE constraint protege contra race condition
     const { error: insertError } = await supabase.from('xp_events').insert({
       user_id: user.id,
       transmissao_id: transmissaoId,
@@ -31,20 +56,12 @@ export async function POST(request: NextRequest) {
       xp,
     })
 
-    // If insert failed (e.g. unique constraint race), do NOT update profile XP
     if (insertError) {
       console.warn('[xp] insert failed, skipping profile update:', insertError.code)
       return NextResponse.json({ message: 'Already awarded' })
     }
 
-    // Get article categories for domain XP
-    const { data: t } = await supabase
-      .from('transmissoes')
-      .select('categories')
-      .eq('id', transmissaoId)
-      .single()
-
-    // Update profile: increment xp_total and xp_by_domain
+    // Atualiza xp_total e xp_by_domain no perfil
     const { data: profile } = await supabase
       .from('profiles')
       .select('xp_total, xp_by_domain')
@@ -53,9 +70,10 @@ export async function POST(request: NextRequest) {
 
     if (profile) {
       const newDomain = { ...(profile.xp_by_domain ?? {}) }
-      if (t?.categories) {
-        for (const cat of t.categories) {
-          newDomain[cat] = (newDomain[cat] ?? 0) + Math.floor(xp / (t.categories.length))
+      if (article.categories?.length > 0) {
+        const xpPerCat = Math.floor(xp / article.categories.length)
+        for (const cat of article.categories) {
+          newDomain[cat] = (newDomain[cat] ?? 0) + xpPerCat
         }
       }
       await supabase.from('profiles').update({
