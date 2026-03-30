@@ -109,7 +109,7 @@ export default function Hero({ totalTransmissoes, totalCategorias }: { totalTran
           </div>
 
           <div style={{ borderTop: '1px solid var(--faint)', paddingTop: 24, marginTop: 8 }}>
-            <span className="pb-2" style={{ display: 'flex', justifyContent: 'start', fontSize: 15, color: 'var(--gold)' }}>• Categorias mais acessadas:</span>
+            <span className="pb-2" style={{ display: 'flex', justifyContent: 'start', fontSize: 15, color: 'var(--gold)' }}>Categorias mais acessadas:</span>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
               {Object.entries(CATEGORY_META).slice(0, 3).map(([key, { label, symbol }]) => (
                 <Link key={key} href={`/categorias/${key}`} style={{ textDecoration: 'none', padding: '0 12px', borderRight: '1px solid var(--faint)', cursor: 'pointer' }}>

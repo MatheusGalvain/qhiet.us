@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import HermesBot from '@/components/layout/HermesBot'
 import ContactForm from './ContactForm'
 import type { Metadata } from 'next'
 
@@ -72,6 +73,8 @@ export default async function FaleConoscoPage() {
         initialEmail={initialEmail}
         emailLocked={emailLocked}
       />
+
+      <HermesBot message="Se você tiver alguma dúvida, entre em contato conosco. Responderemos o mais breve possível." />
     </main>
   )
 }

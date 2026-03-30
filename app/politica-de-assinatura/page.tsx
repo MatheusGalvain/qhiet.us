@@ -26,7 +26,6 @@ export default function PoliticaAssinaturaPage() {
         <LegalLI>Sistema completo de XP, rank global e badges.</LegalLI>
         <LegalLI>Quiz Hermes em todas as transmissões.</LegalLI>
         <LegalLI>Trilhas de estudo por domínio.</LegalLI>
-        <LegalLI>Acesso antecipado a novos conteúdos.</LegalLI>
       </LegalUL>
 
       <LegalH2>Cobrança</LegalH2>

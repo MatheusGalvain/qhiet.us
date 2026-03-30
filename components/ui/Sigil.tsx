@@ -3,7 +3,7 @@ interface SigilProps {
   opacity?: number
 }
 
-export default function Sigil({ size = 240, opacity = 0.4 }: SigilProps) {
+export default function Sigil({ size = 240, opacity = 0.7 }: SigilProps) {
   return (
     <svg
       width={size}
@@ -14,9 +14,9 @@ export default function Sigil({ size = 240, opacity = 0.4 }: SigilProps) {
       className="sigil-spin"
     >
       {/* Outer ring */}
-      <circle cx="120" cy="120" r="114" fill="none" stroke="#1a1410" strokeWidth="1" />
+      <circle cx="120" cy="120" r="114" fill="none" stroke="#c8960a" strokeWidth="1" opacity=".5" />
       {/* Inner dashed ring */}
-      <circle cx="120" cy="120" r="94" fill="none" stroke="#221a0e" strokeWidth=".5" strokeDasharray="3 5" />
+      <circle cx="120" cy="120" r="94" fill="none" stroke="#c8960a" strokeWidth=".5" strokeDasharray="3 5" opacity=".35" />
 
       {/* Circular text path */}
       <path
@@ -27,8 +27,9 @@ export default function Sigil({ size = 240, opacity = 0.4 }: SigilProps) {
       <text
         fontFamily="'DM Mono',monospace"
         fontSize="7"
-        fill="#2a1e0c"
+        fill="#c8960a"
         letterSpacing="4"
+        opacity=".55"
       >
         <textPath href="#ct">
           אין סוף · AIN SOPH · SEM FIM · ∞ · PORTA PATET · LUMEN ARDET · אין סוף · AIN SOPH · SEM FIM · ∞ ·
@@ -41,7 +42,7 @@ export default function Sigil({ size = 240, opacity = 0.4 }: SigilProps) {
         fill="none"
         stroke="#c8960a"
         strokeWidth="1"
-        opacity=".4"
+        opacity=".6"
       />
       {/* Star of David (downward) */}
       <polygon
@@ -49,12 +50,12 @@ export default function Sigil({ size = 240, opacity = 0.4 }: SigilProps) {
         fill="none"
         stroke="#c8960a"
         strokeWidth="1"
-        opacity=".4"
+        opacity=".6"
       />
 
       {/* Center eye */}
-      <circle cx="120" cy="120" r="20" fill="none" stroke="#b02a1e" strokeWidth=".8" opacity=".4" />
-      <circle cx="120" cy="120" r="3" fill="#b02a1e" opacity=".3" />
+      <circle cx="120" cy="120" r="20" fill="none" stroke="#b02a1e" strokeWidth=".8" opacity=".65" />
+      <circle cx="120" cy="120" r="3" fill="#b02a1e" opacity=".55" />
     </svg>
   )
 }
@@ -67,16 +68,16 @@ export function SigilInner({ size = 160 }: { size?: number }) {
       height={size}
       viewBox="0 0 240 240"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ position: 'absolute', opacity: 0.25 }}
+      style={{ position: 'absolute', opacity: 0.45 }}
       className="sigil-spin-rev"
     >
-      <circle cx="120" cy="120" r="80" fill="none" stroke="#2a1e0c" strokeWidth=".5" strokeDasharray="2 8" />
+      <circle cx="120" cy="120" r="80" fill="none" stroke="#c8960a" strokeWidth=".5" strokeDasharray="2 8" opacity=".4" />
       <polygon
         points="120,50 148,100 200,100 158,132 174,184 120,150 66,184 82,132 40,100 92,100"
         fill="none"
         stroke="#c8960a"
         strokeWidth=".8"
-        opacity=".3"
+        opacity=".5"
       />
     </svg>
   )

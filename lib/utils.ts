@@ -62,9 +62,12 @@ export function estimateReadTime(content: string): number {
 export const RANK_THRESHOLDS = [
   { name: 'Profano', min: 0, symbol: 'I' },
   { name: 'Neófito', min: 500, symbol: 'II' },
-  { name: 'Iniciado', min: 2000, symbol: 'III' },
-  { name: 'Adepto', min: 5000, symbol: 'IV' },
-  { name: 'Mestre', min: 10000, symbol: 'V' },
+  { name: 'Desperto', min: 2000, symbol: 'III' },
+  { name: 'Discípulo', min: 5000, symbol: 'IV' },
+  { name: 'Adepto', min: 10000, symbol: 'V' },
+  { name: 'Ocultista', min: 20000, symbol: 'VI' },
+  { name: 'Magista', min: 50000, symbol: 'VII' },
+  { name: 'Mestre', min: 100000, symbol: 'VIII' },
 ]
 
 export function getRank(xp: number) {

@@ -10,18 +10,22 @@ async function getData(slug: string) {
 
   // Try DB first, fall back to CATEGORY_META
   let meta: { label: string; symbol: string; color: string; sort_order: number; tags: string[] } | null = null
+  let categoryId: string | null = null
   try {
     const { data: dbCat } = await supabase
       .from('categories')
-      .select('label, symbol, color, sort_order, tags')
+      .select('id, label, symbol, color, sort_order, tags')
       .eq('slug', slug)
       .single()
-    if (dbCat) meta = {
-      label:      dbCat.label      ?? '',
-      symbol:     dbCat.symbol     ?? '◉',
-      color:      dbCat.color      ?? '#b02a1e',
-      sort_order: dbCat.sort_order ?? 99,
-      tags:       dbCat.tags       ?? [],
+    if (dbCat) {
+      categoryId = dbCat.id
+      meta = {
+        label:      dbCat.label      ?? '',
+        symbol:     dbCat.symbol     ?? '◉',
+        color:      dbCat.color      ?? '#b02a1e',
+        sort_order: dbCat.sort_order ?? 99,
+        tags:       dbCat.tags       ?? [],
+      }
     }
   } catch {}
 
@@ -37,14 +41,14 @@ async function getData(slug: string) {
     .eq('category', slug)
     .single()
 
-  return { meta, content: content ?? null }
+  return { meta, content: content ?? null, categoryId }
 }
 
 export default async function AdminCategoryEditorPage({ params }: PageProps) {
   const data = await getData(params.slug)
   if (!data) notFound()
 
-  const { meta, content } = data
+  const { meta, content, categoryId } = data
 
   return (
     <div>
@@ -65,6 +69,7 @@ export default async function AdminCategoryEditorPage({ params }: PageProps) {
 
       <CategoryContentEditor
         slug={params.slug}
+        categoryId={categoryId ?? ''}
         initialContent={content}
         initialMeta={meta}
       />

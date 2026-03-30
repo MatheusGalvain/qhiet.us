@@ -75,6 +75,7 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
     getData(searchParams),
     getActiveCategories(),
   ])
+  const labelMap = Object.fromEntries(activeCategories.map(c => [c.slug, { label: c.label, symbol: c.symbol, parent_id: null, parent_slug: null }]))
   const activeTab = searchParams.tab ?? 'free'
 
   return (
@@ -122,7 +123,7 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
       {/* GRID */}
       <div className="grid-3col section-pad">
         {transmissoes.map(t => (
-          <TransmissaoCard key={t.id} transmissao={t} isSubscriber={isSubscriber} />
+          <TransmissaoCard key={t.id} transmissao={t} isSubscriber={isSubscriber} labelMap={labelMap} />
         ))}
         {transmissoes.length === 0 && (
           <div style={{ gridColumn: '1/-1', padding: '64px 0', textAlign: 'center' }}>

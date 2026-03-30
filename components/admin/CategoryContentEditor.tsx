@@ -23,9 +23,10 @@ interface CategoryMeta {
 }
 
 interface Props {
-  slug:         string
+  slug:           string
+  categoryId:     string
   initialContent: CategoryContent | null
-  initialMeta:  CategoryMeta
+  initialMeta:    CategoryMeta
 }
 
 const BLANK_CONTENT: CategoryContent = {
@@ -74,9 +75,14 @@ const sectionStyle: React.CSSProperties = {
   marginBottom: 20,
 }
 
-export default function CategoryContentEditor({ slug, initialContent, initialMeta }: Props) {
+function slugify(str: string) {
+  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-')
+}
+
+export default function CategoryContentEditor({ slug, categoryId, initialContent, initialMeta }: Props) {
   /* ── Meta (categories table) ── */
   const [meta, setMeta] = useState<CategoryMeta>(initialMeta)
+  const [editedSlug, setEditedSlug] = useState(slug)
   const [newTag, setNewTag] = useState('')
 
   const updateMeta = <K extends keyof CategoryMeta>(k: K, v: CategoryMeta[K]) =>
@@ -114,25 +120,37 @@ export default function CategoryContentEditor({ slug, initialContent, initialMet
     setSaving(true)
     setError(null)
     try {
-      // 1. Save meta → categories table
-      const metaRes = await fetch('/api/admin/categories', {
-        method: 'POST',
+      const slugChanged = editedSlug !== slug
+
+      // 1. Save meta + optional slug rename via PATCH on [id]
+      const metaRes = await fetch(`/api/admin/categories/${categoryId}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, ...meta }),
+        body: JSON.stringify({
+          ...meta,
+          slug: editedSlug,
+          ...(slugChanged ? { originalSlug: slug } : {}),
+        }),
       })
       if (!metaRes.ok) {
         const d = await metaRes.json()
         throw new Error(d.error ?? 'Erro ao salvar categoria')
       }
 
-      // 2. Save content → category_content table
+      // 2. Save content → category_content table (use current slug for FK)
       const supabase = createClient()
       const { error: err } = await supabase
         .from('category_content')
-        .upsert({ ...content, category: slug }, { onConflict: 'category' })
+        .upsert({ ...content, category: slugChanged ? editedSlug : slug }, { onConflict: 'category' })
       if (err) throw err
 
       setSaved(true)
+
+      // If slug changed, redirect to new URL
+      if (slugChanged) {
+        window.location.href = `/admin/categorias/${editedSlug}`
+        return
+      }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erro ao salvar')
     } finally {
@@ -225,6 +243,23 @@ export default function CategoryContentEditor({ slug, initialContent, initialMet
               style={{ ...inputStyle, resize: undefined, width: '100%' }}
             />
           </div>
+        </div>
+
+        {/* Slug editável */}
+        <div style={{ marginTop: 20 }}>
+          <span style={labelStyle}>Slug (URL)</span>
+          <input
+            type="text"
+            value={editedSlug}
+            onChange={e => setEditedSlug(slugify(e.target.value))}
+            style={{ ...inputStyle, resize: undefined, fontFamily: 'var(--font-mono)', fontSize: 12 }}
+            placeholder="ex: hermetismo"
+          />
+          {editedSlug !== slug && (
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red-dim)', marginTop: 4, letterSpacing: 1 }}>
+              ⚠ Slug alterado: todas as transmissões vinculadas serão atualizadas ao salvar.
+            </p>
+          )}
         </div>
 
         {/* Símbolo */}

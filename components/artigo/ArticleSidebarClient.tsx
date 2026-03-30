@@ -8,9 +8,12 @@ interface Props {
   transmissao: Transmissao
   hasAccess: boolean
   isFree?: boolean
+  quizXpReward?: number | null
+  questionCount?: number
+  hasQuiz?: boolean
 }
 
-export default function ArticleSidebarClient({ transmissao: t, hasAccess, isFree = false }: Props) {
+export default function ArticleSidebarClient({ transmissao: t, hasAccess, isFree = false, quizXpReward = null, questionCount = 0, hasQuiz = false }: Props) {
   const [pct, setPct] = useState(0)
 
   useEffect(() => {
@@ -37,11 +40,18 @@ export default function ArticleSidebarClient({ transmissao: t, hasAccess, isFree
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const readXP = Math.round(t.xp_reward * 0.6)
-  const quizXP = Math.round(t.xp_reward * 0.4)
-  const q1xp = Math.round(quizXP * 0.3)
-  const q2xp = Math.round(quizXP * 0.6)
-  const q3xp = quizXP
+  // XP real: leitura usa t.xp_reward; quiz usa quiz.xp_reward dividido proporcionalmente por acertos
+  const readXP = t.xp_reward
+  const totalMax = readXP + (quizXpReward ?? 0)
+
+  // Gera linhas dinâmicas do quiz: 1 acerto até N acertos
+  const quizRows = hasQuiz && quizXpReward && questionCount > 0
+    ? Array.from({ length: questionCount }, (_, i) => {
+        const k = i + 1
+        const xp = Math.round((k / questionCount) * quizXpReward)
+        return { k, xp, isMax: k === questionCount }
+      })
+    : []
 
   const barColor = pct >= 100 ? 'var(--gold)' : 'var(--red)'
 
@@ -69,54 +79,81 @@ export default function ArticleSidebarClient({ transmissao: t, hasAccess, isFree
       </div>
 
       {/* XP breakdown — only for subscriber-only articles */}
-      {!isFree && <div style={{ border: '1px solid var(--faint)', padding: 20 }}>
-        <p style={{
-          fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4,
-          color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 16,
-        }}>
-          <span style={{ color: 'var(--red-dim)' }}>// </span>Conhecimento disponível
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {[
-            ['Leitura completa', `+${readXP}`, false],
-            ['Quiz — 1 acerto',  `+${q1xp}`,  false],
-            ['Quiz — 2 acertos', `+${q2xp}`,  false],
-            ['Quiz — 3 acertos', `+${q3xp}`,  true],
-          ].map(([label, val, isMax]) => (
-            <div key={label as string} style={{
+      {!isFree && (
+        <div style={{ border: '1px solid var(--faint)', padding: 20 }}>
+          <p style={{
+            fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4,
+            color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 16,
+          }}>
+            <span style={{ color: 'var(--red-dim)' }}>// </span>Conhecimento disponível
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {/* Linha de leitura */}
+            <div style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               padding: '8px 0',
-              borderBottom: isMax ? 'none' : '1px solid var(--faint)',
-              borderTop: isMax ? '1px solid var(--faint)' : 'none',
+              borderBottom: '1px solid var(--faint)',
             }}>
-              <span style={{
-                fontFamily: 'var(--font-mono)', fontSize: 11,
-                letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase',
-              }}>
-                {label as string}
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>
+                Leitura completa
               </span>
-              <span style={{
-                fontFamily: 'var(--font-display)', fontSize: 18,
-                color: isMax ? 'var(--gold)' : 'var(--muted)', letterSpacing: 1,
-              }}>
-                {val as string}{' '}
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--muted)', letterSpacing: 1 }}>
+                +{readXP}{' '}
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>xp</span>
               </span>
             </div>
-          ))}
+
+            {/* Linhas dinâmicas do quiz */}
+            {hasQuiz ? (
+              quizRows.length > 0 ? quizRows.map(({ k, xp, isMax }) => (
+                <div key={k} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '8px 0',
+                  borderBottom: isMax ? 'none' : '1px solid var(--faint)',
+                  borderTop: isMax ? '1px solid var(--faint)' : 'none',
+                  marginTop: isMax ? 2 : 0,
+                }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>
+                    Quiz — {k} {k === 1 ? 'acerto' : 'acertos'}
+                  </span>
+                  <span style={{
+                    fontFamily: 'var(--font-display)', fontSize: 18,
+                    color: isMax ? 'var(--gold)' : 'var(--muted)', letterSpacing: 1,
+                  }}>
+                    +{xp}{' '}
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)' }}>xp</span>
+                  </span>
+                </div>
+              )) : null
+            ) : (
+              /* Sem quiz */
+              <div style={{
+                padding: '10px 0',
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <span style={{ color: 'var(--cream)', fontSize: 12 }}>○</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--cream)', textTransform: 'uppercase' }}>
+                  Não há quiz para esta transmissão
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Total máximo */}
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--faint)',
+          }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>
+              Máximo neste texto
+            </span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: 'var(--cream)', letterSpacing: 2 }}>
+              {totalMax} xp
+            </span>
+          </div>
         </div>
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--faint)',
-        }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>
-            Máximo neste texto
-          </span>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: 'var(--cream)', letterSpacing: 2 }}>
-            {t.xp_reward} xp
-          </span>
-        </div>
-      </div>}
+      )}
 
       {/* Article meta */}
       <div style={{ border: '1px solid var(--faint)', padding: 20 }}>

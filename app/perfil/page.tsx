@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { getCategoryLabelMap, resolveCategoryLabel, resolveCategorySymbol } from '@/lib/getCategoryLabelMap'
+import type { CategoryLabelMap } from '@/lib/getCategoryLabelMap'
 import Link from 'next/link'
 import type { Profile } from '@/types'
 import { getRank, getNextRank, RANK_THRESHOLDS, formatDatePT, formatNumber, getCategorySymbol, padNumber } from '@/lib/utils'
@@ -9,8 +11,11 @@ import NickForm from '@/components/perfil/NickForm'
 import ProfileSidebar from '@/components/perfil/ProfileSidebar'
 import BillingPortalButton from '@/components/perfil/BillingPortalButton'
 import DeleteAccountButton from '@/components/perfil/DeleteAccountButton'
+import DomainCarousel from '@/components/perfil/DomainCarousel'
+import TrailBadges from '@/components/perfil/TrailBadges'
 
 export const metadata: Metadata = { title: 'Perfil' }
+export const revalidate = 0
 
 const HISTORY_PER_PAGE = 5
 
@@ -75,6 +80,34 @@ async function getData(page: number) {
     ? await booksQuery
     : await booksQuery.or('plan_access.cs.{profano},plan.eq.profano')
 
+  // Trail completions — badges para todos os usuários
+  let trailCompletions: any[] = []
+  try {
+    const { data: tcData } = await service
+      .from('user_trail_completions')
+      .select('trail_id, xp_earned, completed_at')
+      .eq('user_id', user.id)
+      .order('completed_at', { ascending: false })
+
+    if (tcData && tcData.length > 0) {
+      const trailIds = tcData.map((c: any) => c.trail_id)
+      const { data: trailsData } = await service
+        .from('trails')
+        .select('id, title, category')
+        .in('id', trailIds)
+
+      const trailMap: Record<string, any> = {}
+      for (const t of trailsData ?? []) trailMap[t.id] = t
+
+      trailCompletions = tcData.map((c: any) => ({
+        xp_earned: c.xp_earned,
+        completed_at: c.completed_at,
+        trails: trailMap[c.trail_id] ?? null,
+      }))
+    }
+  } catch (_) {}
+
+
   // Activity heatmap — fetch reading history from Jan 1 to Dec 31 of current year
   const currentYear = new Date().getFullYear()
   const yearStart = new Date(currentYear, 0, 1).toISOString()
@@ -96,7 +129,7 @@ async function getData(page: number) {
 
   const totalPages = Math.max(1, Math.ceil((historyTotal ?? 0) / HISTORY_PER_PAGE))
 
-  return { profile: profile as Profile, xpEvents: xpEvents ?? [], books: books ?? [], activityMap, totalActiveDays, historyTotal: historyTotal ?? 0, totalPages, currentPage: page }
+  return { profile: profile as Profile, xpEvents: xpEvents ?? [], books: books ?? [], activityMap, totalActiveDays, historyTotal: historyTotal ?? 0, totalPages, currentPage: page, trailCompletions }
 }
 
 export default async function PerfilPage({
@@ -105,7 +138,7 @@ export default async function PerfilPage({
   searchParams: { page?: string }
 }) {
   const page = Math.max(1, parseInt(searchParams?.page ?? '1', 10) || 1)
-  const { profile, xpEvents, books, activityMap, totalActiveDays, historyTotal, totalPages, currentPage } = await getData(page)
+  const [{ profile, xpEvents, books, activityMap, totalActiveDays, historyTotal, totalPages, currentPage, trailCompletions }, labelMap] = await Promise.all([getData(page), getCategoryLabelMap()])
   const rank = getRank(profile.xp_total)
   const nextRank = getNextRank(profile.xp_total)
   const xpToNext = nextRank ? nextRank.min - profile.xp_total : 0
@@ -171,10 +204,10 @@ export default async function PerfilPage({
                   const isCurrent = rank.name === r.name
                   return (
                     <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '8px 0', borderBottom: '1px solid var(--faint)' }}>
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, width: 24, textAlign: 'center', color: isDone ? 'var(--red-dim)' : isCurrent ? 'var(--gold)' : 'var(--faint)' }}>{r.symbol}</span>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, width: 24, textAlign: 'center', color: isDone ? 'var(--red-dim)' : isCurrent ? 'var(--gold)' : 'var(--faint-col)' }}>{r.symbol}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: isDone ? 'var(--muted)' : isCurrent ? 'var(--gold)' : 'var(--faint)' }}>{r.name}</p>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 1, color: isCurrent ? 'var(--muted)' : 'var(--faint)' }}>{r.min} XP</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: isDone ? 'var(--muted)' : isCurrent ? 'var(--gold)' : 'var(--faint-col)' }}>{r.name}</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 1, color: isCurrent ? 'var(--muted)' : 'var(--faint-col)' }}>{r.min} XP</p>
                       </div>
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: isDone ? 'var(--red-dim)' : isCurrent ? 'var(--gold)' : 'transparent' }}>
                         {isDone ? '✓' : isCurrent ? '→' : '○'}
@@ -188,24 +221,27 @@ export default async function PerfilPage({
 
           {/* XP by domain — só exibe categorias com mais de 30 XP */}
           {(() => {
-            const domainEntries = Object.entries(profile.xp_by_domain ?? {}).filter(([, xp]) => Number(xp) > 30)
+            const domainEntries = Object.entries(profile.xp_by_domain ?? {})
+              .filter(([, xp]) => Number(xp) > 30)
+              .map(([cat, xp]) => ({
+                cat,
+                xp: Number(xp),
+                label: resolveCategoryLabel(cat, labelMap),
+                symbol: resolveCategorySymbol(cat, labelMap) ?? getCategorySymbol(cat),
+                xpTotal: profile.xp_total,
+              }))
             if (domainEntries.length === 0) return null
-            return (
-              <div className="domain-xp-grid">
-                {domainEntries.map(([cat, xp], i) => (
-                  <div key={cat} style={{ padding: 'clamp(14px,2vw,20px) clamp(14px,2vw,24px)', borderRight: i % 3 !== 2 ? '1px solid var(--faint)' : 'none', borderBottom: i < 3 ? '1px solid var(--faint)' : 'none' }}>
-                    <p style={{ fontSize: 18, color: 'var(--gold)', opacity: 0.5, marginBottom: 6 }}>{getCategorySymbol(cat)}</p>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>{cat}</p>
-                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,28px)', color: 'var(--cream)', letterSpacing: 2 }}>{formatNumber(Number(xp))}</p>
-                    <div style={{ height: 2, background: 'var(--faint)', marginTop: 8 }}>
-                      <div style={{ height: '100%', width: `${Math.min((Number(xp) / Math.max(profile.xp_total, 1)) * 100, 100)}%`, background: 'var(--red)' }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )
+            return <DomainCarousel entries={domainEntries} />
           })()}
+
         </section>
+
+        {/* ═══ TRILHAS CONCLUÍDAS ═══ */}
+        {trailCompletions.length > 0 && (
+          <section id="trilhas-badges" style={{ marginBottom: 56, scrollMarginTop: 'calc(var(--nav-h) + 8px)' }}>
+            <TrailBadges completions={trailCompletions as any} labelMap={labelMap} />
+          </section>
+        )}
 
         {/* ═══ ACTIVITY HEATMAP ═══ */}
         <section id="atividade" style={{ marginBottom: 56, scrollMarginTop: 'calc(var(--nav-h) + 8px)' }}>
@@ -243,8 +279,8 @@ export default async function PerfilPage({
                   </p>
                   {event.transmissoes?.categories?.[0] && (
                     <p className="history-cat" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--red)', textTransform: 'uppercase', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ color: 'var(--gold)' }}>{getCategorySymbol(event.transmissoes.categories[0])}</span>
-                      {event.transmissoes.categories[0]}{event.type === 'quiz' ? ' · Quiz' : ''}
+                      <span style={{ color: 'var(--gold)' }}>{resolveCategorySymbol(event.transmissoes.categories[0], labelMap) ?? getCategorySymbol(event.transmissoes.categories[0])}</span>
+                      {resolveCategoryLabel(event.transmissoes.categories[0], labelMap)}{event.type === 'quiz' ? ' · Quiz' : ''}
                     </p>
                   )}
                 </div>

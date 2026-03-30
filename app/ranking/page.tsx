@@ -1,6 +1,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import HermesBot from '@/components/layout/HermesBot'
 import type { Metadata } from 'next'
+import { getCategoryLabelMap, resolveCategoryLabel } from '@/lib/getCategoryLabelMap'
 
 export const metadata: Metadata = {
   title: 'Ranking Global',
@@ -31,15 +32,6 @@ function getFavoriteDomain(xp_by_domain: Record<string, number>): string | null 
   const entries = Object.entries(xp_by_domain).filter(([, v]) => v > 0)
   if (!entries.length) return null
   return entries.reduce((a, b) => b[1] > a[1] ? b : a)[0]
-}
-
-const DOMAIN_LABEL: Record<string, string> = {
-  hermetismo: 'Hermetismo',
-  cabala: 'Cabala',
-  gnosticismo: 'Gnosticismo',
-  alquimia: 'Alquimia',
-  tarot: 'Tarot',
-  rosacruz: 'Rosa-Cruz',
 }
 
 const RANK_SYMBOL: Record<number, string> = { 1: '◈', 2: '◉', 3: '◎' }
@@ -94,7 +86,7 @@ async function getData() {
 }
 
 export default async function RankingPage() {
-  const { entries, myRank, isLoggedIn } = await getData()
+  const [{ entries, myRank, isLoggedIn }, labelMap] = await Promise.all([getData(), getCategoryLabelMap()])
 
   const top3 = entries.slice(0, 3)
   const rest = entries.slice(3)
@@ -116,7 +108,7 @@ export default async function RankingPage() {
           fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3,
           color: 'var(--muted)', textTransform: 'uppercase', marginTop: 12, marginBottom: 0, paddingBottom: 24,
         }}>
-          Os buscadores mais dedicados · XP acumulado por leituras e quizzes
+          Os buscadores mais dedicados · XP acumulado por leituras e quizzes · obs: Acima de 30 de XP para ser listado
         </p>
       </div>
 
@@ -212,7 +204,7 @@ export default async function RankingPage() {
                         fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2,
                         color: 'var(--muted)', border: '1px solid var(--faint)',
                         padding: '3px 10px', textTransform: 'uppercase',
-                      }}>{DOMAIN_LABEL[fav] ?? fav}</span>
+                      }}>{resolveCategoryLabel(fav, labelMap)}</span>
                     )}
                   </div>
                 </div>
@@ -242,6 +234,7 @@ export default async function RankingPage() {
 
                 const percentage = (entry.xp_total / maxXP) * 100
                 const isMe = entry.rank === myRank
+                const fav = getFavoriteDomain(entry.xp_by_domain)
 
                 return (
                   <div
@@ -307,6 +300,20 @@ export default async function RankingPage() {
                             letterSpacing: 2,
                           }}>
                             VOCÊ
+                          </span>
+                        )}
+
+                        {fav && (
+                          <span style={{
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: 10,
+                            letterSpacing: 2,
+                            color: 'var(--muted)',
+                            border: '1px solid var(--faint)',
+                            padding: '2px 8px',
+                            textTransform: 'uppercase',
+                          }}>
+                            {resolveCategoryLabel(fav, labelMap)}
                           </span>
                         )}
                       </div>

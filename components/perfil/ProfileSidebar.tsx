@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Avatar from '@/components/ui/Avatar'
 import { createClient } from '@/lib/supabase/client'
+import ProfileNameEditor from '@/components/perfil/ProfileNameEditor'
 
 interface Props {
   name: string
@@ -15,12 +15,20 @@ interface Props {
 
 
 
-const sidebarLinks = [
+const baseSidebarLinks = [
   { href: '#xp',        label: 'XP & Rank',   icon: '✦' },
   { href: '#atividade', label: 'Atividade',    icon: '◈' },
   { href: '#historico', label: 'Histórico',    icon: '◎' },
   { href: '#livros',    label: 'Livros',        icon: '☿' },
   { href: '#config',    label: 'Configurações', icon: '○' },
+]
+
+// Trilhas: visível para todos (trilha gratuita disponível para não-assinantes)
+const trilhasLink = { href: '/perfil/trilhas', label: 'Trilhas', icon: '◉' }
+
+// Exclusivos assinante
+const subscriberLinks = [
+  { href: '/perfil/grimorio', label: 'Grimório', icon: '✧' },
 ]
 
 export default function ProfileSidebar({ name, email, isSubscriber, rankName, rankSymbol }: Props) {
@@ -47,9 +55,8 @@ export default function ProfileSidebar({ name, email, isSubscriber, rankName, ra
     <>
     {/* Mobile identity strip — visible on mobile only (sidebar is horizontal tabs on mobile) */}
     <div className="profile-mobile-identity" style={{ padding: '16px var(--px-sm) 16px', borderBottom: '1px solid var(--faint)' }}>
-      <Avatar name={name} size="sm" />
+      <ProfileNameEditor initialName={name} size="sm" />
       <div>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 2, color: 'var(--cream)' }}>{name}</p>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--red)', textTransform: 'uppercase', marginTop: 2 }}>
           {rankSymbol} {rankName} · {isSubscriber ? 'Iniciado' : 'Profano'}
         </p>
@@ -116,12 +123,7 @@ export default function ProfileSidebar({ name, email, isSubscriber, rankName, ra
           whiteSpace: 'nowrap',
         }}
       >
-        <div style={{ marginBottom: 14 }}>
-          <Avatar name={name} size="lg" />
-        </div>
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, letterSpacing: 3, color: 'var(--cream)' }}>
-          {name}
-        </p>
+        <ProfileNameEditor initialName={name} size="lg" />
         <span style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3,
@@ -134,7 +136,7 @@ export default function ProfileSidebar({ name, email, isSubscriber, rankName, ra
 
       {/* ── Nav ── */}
       <ul className="profile-sidebar-nav" style={{ listStyle: 'none', padding: '8px 0', flex: 1 }}>
-        {sidebarLinks.map(({ href, label, icon }) => (
+        {baseSidebarLinks.map(({ href, label, icon }) => (
           <li key={href}>
             <a
               href={href}
@@ -148,7 +150,7 @@ export default function ProfileSidebar({ name, email, isSubscriber, rankName, ra
                 fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase',
                 color: 'var(--muted)', textDecoration: 'none',
                 transition: 'all .2s',
-                borderLeft: collapsed ? '2px solid transparent' : '2px solid transparent',
+                borderLeft: '2px solid transparent',
                 whiteSpace: 'nowrap',
               }}
             >
@@ -159,6 +161,73 @@ export default function ProfileSidebar({ name, email, isSubscriber, rankName, ra
             </a>
           </li>
         ))}
+
+        {/* Trilhas — visível para todos */}
+        <li>
+          <Link
+            href={trilhasLink.href}
+            title={collapsed ? trilhasLink.label : undefined}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: collapsed ? '12px 0' : '12px 32px',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase',
+              color: 'var(--muted)', textDecoration: 'none',
+              transition: 'all .2s',
+              borderLeft: '2px solid transparent',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <span style={{ fontSize: 14, color: 'var(--gold)', opacity: 0.65, width: 16, textAlign: 'center', flexShrink: 0 }}>
+              {trilhasLink.icon}
+            </span>
+            {!collapsed && trilhasLink.label}
+          </Link>
+        </li>
+
+        {/* Links exclusivos de assinante */}
+        {isSubscriber && (
+          <>
+            {!collapsed && (
+              <li>
+                <div style={{
+                  padding: '10px 32px 4px',
+                  fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3,
+                  color: 'var(--red)', textTransform: 'uppercase', opacity: 0.7,
+                }}>
+                  Iniciado
+                </div>
+              </li>
+            )}
+            {subscriberLinks.map(({ href, label, icon }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  title={collapsed ? label : undefined}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: collapsed ? '12px 0' : '12px 32px',
+                    justifyContent: collapsed ? 'center' : 'flex-start',
+                    fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase',
+                    color: 'var(--muted)', textDecoration: 'none',
+                    transition: 'all .2s',
+                    borderLeft: '2px solid transparent',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <span style={{ fontSize: 14, color: 'var(--red)', opacity: 0.8, width: 16, textAlign: 'center', flexShrink: 0 }}>
+                    {icon}
+                  </span>
+                  {!collapsed && label}
+                </Link>
+              </li>
+            ))}
+          </>
+        )}
       </ul>
 
       {/* ── Upgrade CTA ── */}

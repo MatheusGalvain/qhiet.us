@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { Transmissao } from '@/types'
 import { padNumber, formatDatePT } from '@/lib/utils'
+import { getCategoryLabelMap, resolveCategoryLabel, resolveCategorySymbol } from '@/lib/getCategoryLabelMap'
+import type { CategoryLabelMap } from '@/lib/getCategoryLabelMap'
 
 export const revalidate = 3600
 
@@ -86,7 +88,7 @@ async function getData() {
 }
 
 export default async function HomePage() {
-  const { featured, grid, total, totalcat, nextPostDays, monthBook } = await getData()
+  const [{ featured, grid, total, totalcat, nextPostDays, monthBook }, labelMap] = await Promise.all([getData(), getCategoryLabelMap()])
 
   return (
     <>
@@ -128,7 +130,7 @@ export default async function HomePage() {
 
         {/* Featured article */}
         {featured ? (
-          <FeaturedArticle transmissao={featured} nextPostDays={nextPostDays} />
+          <FeaturedArticle transmissao={featured} nextPostDays={nextPostDays} labelMap={labelMap} />
         ) : (
           <FeaturedArticleFallback nextPostDays={nextPostDays} />
         )}
@@ -136,7 +138,7 @@ export default async function HomePage() {
         {/* 3-card grid */}
         <div className="articles-grid">
           {grid.length > 0
-            ? grid.map(t => <GridCard key={t.id} post={t} />)
+            ? grid.map(t => <GridCard key={t.id} post={t} labelMap={labelMap} />)
             : <FallbackGridCards />
           }
         </div>
@@ -149,6 +151,13 @@ export default async function HomePage() {
             Ver todas as transmissões →
           </Link>
         </div>
+      </section>
+
+      {/* BANNER */}
+      <section className='w-full py-3 lg:py-5'>
+        <Link href="/transmissoes" >
+          <img src="/assets/banner-reduce.png"></img>
+        </Link>
       </section>
 
       {/* MEMBERSHIP SECTION */}
@@ -168,8 +177,8 @@ function countdownLabel(days: number | null): { line: string; num: string } {
 }
 
 /* ─── Featured Article ─── */
-function FeaturedArticle({ transmissao: t, nextPostDays }: { transmissao: Transmissao; nextPostDays: number | null }) {
-  const catLabel = t.categories.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(' · ')
+function FeaturedArticle({ transmissao: t, nextPostDays, labelMap = {} }: { transmissao: Transmissao; nextPostDays: number | null; labelMap?: CategoryLabelMap }) {
+  const catLabel = t.categories.map(c => resolveCategoryLabel(c, labelMap)).join(' · ')
   const preview = t.excerpt || (t.content ? t.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().split(' ').slice(0, 30).join(' ') + '…' : '…')
   const dateStr = formatDatePT(t.published_at).toUpperCase()
   const { line: cLine, num: cNum } = countdownLabel(nextPostDays)
@@ -265,10 +274,8 @@ function FeaturedArticleFallback({ nextPostDays }: { nextPostDays: number | null
 }
 
 /* ─── Grid Card ─── */
-function GridCard({ post }: { post: Transmissao }) {
-  const catLabel = post.categories[0]
-    ? post.categories[0].charAt(0).toUpperCase() + post.categories[0].slice(1)
-    : ''
+function GridCard({ post, labelMap = {} }: { post: Transmissao; labelMap?: CategoryLabelMap }) {
+  const catLabel = post.categories[0] ? resolveCategoryLabel(post.categories[0], labelMap) : ''
   return (
     <Link href={`/artigo/${post.slug}`} className="ag-card">
       <div className="ag-num">{padNumber(post.number)}</div>
@@ -329,7 +336,7 @@ function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
               <span className="plan-period"> / gratuito</span>
             </div>
             <div className="plan-features">
-              {['Textos introdutórios', '1 livro/mês por e-mail', 'Newsletter mensal'].map(f => (
+              {['Textos introdutórios', '1 livro/mês'].map(f => (
                 <p key={f} className="plan-feature">{f}</p>
               ))}
             </div>
@@ -344,7 +351,7 @@ function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
               <span className="plan-period"> / por mês</span>
             </div>
             <div className="plan-features">
-              {['Acesso completo', '4 livros/mês', 'Trilhas de estudo', 'Acesso antecipado'].map(f => (
+              {['Acesso completo', '4 livros/mês', 'Trilhas de estudo'].map(f => (
                 <p key={f} className="plan-feature">{f}</p>
               ))}
             </div>
@@ -352,6 +359,7 @@ function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
           </div>
         </div>
       </div>
+
 
       {/* Right — book of the month (profano) */}
       <div className="mem-right">
@@ -387,6 +395,7 @@ function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
           </div>
         </div>
       </div>
+
     </section>
   )
 }

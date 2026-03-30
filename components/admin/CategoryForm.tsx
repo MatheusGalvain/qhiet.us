@@ -15,6 +15,7 @@ interface CategoryData {
 interface Props {
   mode: 'create' | 'edit'
   initial?: Partial<CategoryData>
+  categoryId?: string   // needed for PATCH (edit mode)
 }
 
 const PRESET_SYMBOLS = ['☿', '✡', '⊕', '☽', '⊗', '△', '◈', '◉', '◎', '✦', '⊛', '⊜', '☼', '☯', '⚶', '♄', '♃', '♂']
@@ -60,11 +61,12 @@ function slugify(str: string) {
     .replace(/\s+/g, '-')
 }
 
-export default function CategoryForm({ mode, initial = {} }: Props) {
+export default function CategoryForm({ mode, initial = {}, categoryId }: Props) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [slugManual, setSlugManual] = useState(mode === 'edit')
+  const originalSlug = initial.slug ?? ''
 
   const [form, setForm] = useState<CategoryData>({
     slug:        initial.slug        ?? '',
@@ -90,11 +92,19 @@ export default function CategoryForm({ mode, initial = {} }: Props) {
     setSaving(true)
     setError(null)
 
-    const res = await fetch('/api/admin/categories', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
+    const isSlugChanged = mode === 'edit' && form.slug !== originalSlug
+
+    const res = mode === 'edit' && categoryId
+      ? await fetch(`/api/admin/categories/${categoryId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...form, originalSlug: isSlugChanged ? originalSlug : undefined }),
+        })
+      : await fetch('/api/admin/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
+        })
 
     if (!res.ok) {
       const data = await res.json()
@@ -144,9 +154,8 @@ export default function CategoryForm({ mode, initial = {} }: Props) {
           onChange={e => { setSlugManual(true); set('slug', slugify(e.target.value)) }}
           placeholder="magia-cerimonial"
           style={{ ...inputStyle, fontFamily: 'var(--font-mono)', fontSize: 13 }}
-          readOnly={mode === 'edit'}
-        />
-        {mode === 'edit' && <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>O slug não pode ser alterado após criação.</p>}
+          />
+        {mode === 'edit' && <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red-dim)', marginTop: 4 }}>⚠ Alterar o slug atualiza automaticamente todas as transmissões vinculadas.</p>}
       </div>
 
       {/* Symbol */}

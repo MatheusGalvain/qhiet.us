@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCategoryLabelMap } from '@/lib/getCategoryLabelMap'
 import ReadingProgress from '@/components/artigo/ReadingProgress'
 import ReadingCompleteButton from '@/components/artigo/ReadingCompleteButton'
 import PaywallOverlay from '@/components/artigo/PaywallOverlay'
@@ -71,7 +72,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function ArtigoPage({ params }: PageProps) {
-  const data = await getData(params.slug)
+  const [data, labelMap] = await Promise.all([getData(params.slug), getCategoryLabelMap()])
   if (!data) notFound()
 
   const { transmissao: t, isSubscriber, hasAccess, quiz, safeQuizQuestions } = data
@@ -111,7 +112,7 @@ export default async function ArtigoPage({ params }: PageProps) {
           {/* Categories */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
             {t.categories.map(cat => (
-              <CategoryTag key={cat} category={cat} linked />
+              <CategoryTag key={cat} category={cat} linked labelMap={labelMap} />
             ))}
           </div>
 
@@ -180,7 +181,14 @@ export default async function ArtigoPage({ params }: PageProps) {
 
         {/* SIDEBAR — sticky on desktop, inline on mobile */}
         <aside className="article-sidebar">
-          <ArticleSidebarClient transmissao={t} hasAccess={hasAccess} isFree={t.access === 'free'} />
+          <ArticleSidebarClient
+            transmissao={t}
+            hasAccess={hasAccess}
+            isFree={t.access === 'free'}
+            quizXpReward={quiz?.xp_reward ?? null}
+            questionCount={quiz ? (quiz.questions as any[]).length : 0}
+            hasQuiz={!!quiz}
+          />
         </aside>
       </div>
 
