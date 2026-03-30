@@ -154,7 +154,7 @@ export default async function TrilhasPage() {
                     </h2>
 
                     {trail.description && (
-                      <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 16, maxWidth: 520 }}>
+                      <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--muted)', lineHeight: 1.7, marginBottom: 16 }}>
                         {trail.description}
                       </p>
                     )}
