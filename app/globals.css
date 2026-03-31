@@ -809,7 +809,8 @@ body {
 }
 
 .profile-sidebar {
-  border-right: 1px solid var(--red-dim);
+  border-right: 1px solid var(--faint);
+  background-color: #1b1b1a;
   padding: 40px 0;
   display: flex;
   flex-direction: column;

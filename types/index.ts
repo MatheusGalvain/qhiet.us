@@ -8,7 +8,6 @@ export type AccessLevel = 'free' | 'locked'
 
 export type Category =
   | 'hermetismo'
-  | 'cabala'
   | 'gnosticismo'
   | 'alquimia'
   | 'tarot'
@@ -16,7 +15,6 @@ export type Category =
 
 export const CATEGORY_META: Record<Category, { label: string; symbol: string; slug: string }> = {
   hermetismo:  { label: 'Hermetismo',  symbol: '☿', slug: 'hermetismo' },
-  cabala:      { label: 'Cabala',      symbol: '✡', slug: 'cabala' },
   gnosticismo: { label: 'Gnosticismo', symbol: '⊕', slug: 'gnosticismo' },
   alquimia:    { label: 'Alquimia',    symbol: '☽', slug: 'alquimia' },
   tarot:       { label: 'Tarot',       symbol: '⊗', slug: 'tarot' },

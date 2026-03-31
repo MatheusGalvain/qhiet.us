@@ -154,7 +154,7 @@ export default function ProfileSidebar({ name, email, isSubscriber, rankName, ra
                 whiteSpace: 'nowrap',
               }}
             >
-              <span style={{ fontSize: 14, color: 'var(--gold)', opacity: 0.65, width: 16, textAlign: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: 18, color: 'var(--gold)', opacity: 0.65, width: 20, textAlign: 'center', flexShrink: 0 }}>
                 {icon}
               </span>
               {!collapsed && label}

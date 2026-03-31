@@ -108,6 +108,47 @@ async function getData(page: number) {
   } catch (_) {}
 
 
+  // Trails in progress (started but not yet completed)
+  let trailsInProgress: Array<{ id: string; title: string; category: string; done: number; total: number }> = []
+  try {
+    const { data: progressRows } = await service
+      .from('user_trail_progress')
+      .select('trail_id, transmissao_id')
+      .eq('user_id', user.id)
+
+    const completedIds = new Set(
+      (await service
+        .from('user_trail_completions')
+        .select('trail_id')
+        .eq('user_id', user.id))
+        .data?.map((c: any) => c.trail_id) ?? []
+    )
+
+    const progressCount: Record<string, number> = {}
+    for (const row of progressRows ?? []) {
+      if (!completedIds.has(row.trail_id)) {
+        progressCount[row.trail_id] = (progressCount[row.trail_id] ?? 0) + 1
+      }
+    }
+
+    const inProgressIds = Object.keys(progressCount)
+    if (inProgressIds.length > 0) {
+      const { data: trailsData } = await service
+        .from('trails')
+        .select('id, title, category, trail_transmissoes(id)')
+        .in('id', inProgressIds)
+        .eq('is_published', true)
+
+      trailsInProgress = (trailsData ?? []).map((t: any) => ({
+        id: t.id,
+        title: t.title,
+        category: t.category ?? '',
+        done: progressCount[t.id] ?? 0,
+        total: (t.trail_transmissoes ?? []).length,
+      }))
+    }
+  } catch (_) {}
+
   // Activity heatmap — fetch reading history from Jan 1 to Dec 31 of current year
   const currentYear = new Date().getFullYear()
   const yearStart = new Date(currentYear, 0, 1).toISOString()
@@ -129,7 +170,7 @@ async function getData(page: number) {
 
   const totalPages = Math.max(1, Math.ceil((historyTotal ?? 0) / HISTORY_PER_PAGE))
 
-  return { profile: profile as Profile, xpEvents: xpEvents ?? [], books: books ?? [], activityMap, totalActiveDays, historyTotal: historyTotal ?? 0, totalPages, currentPage: page, trailCompletions }
+  return { profile: profile as Profile, xpEvents: xpEvents ?? [], books: books ?? [], activityMap, totalActiveDays, historyTotal: historyTotal ?? 0, totalPages, currentPage: page, trailCompletions, trailsInProgress }
 }
 
 export default async function PerfilPage({
@@ -138,7 +179,7 @@ export default async function PerfilPage({
   searchParams: { page?: string }
 }) {
   const page = Math.max(1, parseInt(searchParams?.page ?? '1', 10) || 1)
-  const [{ profile, xpEvents, books, activityMap, totalActiveDays, historyTotal, totalPages, currentPage, trailCompletions }, labelMap] = await Promise.all([getData(page), getCategoryLabelMap()])
+  const [{ profile, xpEvents, books, activityMap, totalActiveDays, historyTotal, totalPages, currentPage, trailCompletions, trailsInProgress }, labelMap] = await Promise.all([getData(page), getCategoryLabelMap()])
   const rank = getRank(profile.xp_total)
   const nextRank = getNextRank(profile.xp_total)
   const xpToNext = nextRank ? nextRank.min - profile.xp_total : 0
@@ -236,6 +277,65 @@ export default async function PerfilPage({
           })()}
 
         </section>
+
+        {/* ═══ TRILHAS EM ANDAMENTO ═══ */}
+        {trailsInProgress.length > 0 && (
+          <section id="trilhas-andamento" style={{ marginBottom: 56, scrollMarginTop: 'calc(var(--nav-h) + 8px)' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 28 }}>
+              <h2 className="flex items-center justify-center gap-3" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}>
+                <span className="text-2xl">◎</span> TRILHAS EM ANDAMENTO
+              </h2>
+              <Link href="/perfil/trilhas" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', textDecoration: 'none' }}>
+                Ver todas →
+              </Link>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {trailsInProgress.map(t => {
+                const pct = t.total > 0 ? Math.round((t.done / t.total) * 100) : 0
+                return (
+                  <Link
+                    key={t.id}
+                    href={`/perfil/trilhas/${t.id}`}
+                    style={{ textDecoration: 'none', display: 'block' }}
+                  >
+                    <div style={{
+                      border: '1px solid var(--red-dim)',
+                      background: 'rgba(180,30,20,0.02)',
+                      padding: 'clamp(14px,2vw,22px)',
+                      transition: 'border-color .2s',
+                    }}
+                      onMouseOver={undefined}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1, minWidth: 180 }}>
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--red)', textTransform: 'uppercase', marginBottom: 6 }}>
+                            ◎ Em andamento
+                          </p>
+                          <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px,2vw,22px)', letterSpacing: 2, color: 'var(--cream)', marginBottom: 10, lineHeight: 1.2 }}>
+                            {t.title}
+                          </p>
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 5 }}>
+                              <span>{t.done} de {t.total} transmissões</span>
+                              <span>{pct}%</span>
+                            </div>
+                            <div style={{ height: 2, background: 'var(--faint)', maxWidth: 400 }}>
+                              <div style={{ height: '100%', width: `${pct}%`, background: 'var(--red)', transition: 'width .5s ease' }} />
+                            </div>
+                          </div>
+                        </div>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--red)', textTransform: 'uppercase', flexShrink: 0 }}>
+                          Continuar →
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </section>
+        )}
 
         {/* ═══ TRILHAS CONCLUÍDAS ═══ */}
         {trailCompletions.length > 0 && (

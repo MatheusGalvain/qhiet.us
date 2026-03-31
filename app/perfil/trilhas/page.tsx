@@ -68,6 +68,10 @@ export default async function TrilhasPage() {
     return cats.length > 0 ? cats : (trail.category ? [trail.category] : [])
   }
 
+  const inProgressTrails = trails.filter((t: any) =>
+    (progressMap[t.id]?.size ?? 0) > 0 && !completedTrails.has(t.id)
+  )
+
   return (
     <div style={{ padding: 'clamp(28px,4vw,48px) var(--px)' }}>
       <div style={{ borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 40 }}>
@@ -92,6 +96,69 @@ export default async function TrilhasPage() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+          {/* ── Em andamento ── */}
+          {inProgressTrails.length > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 20, letterSpacing: 3, color: 'var(--cream)', textTransform: 'uppercase', marginBottom: 16 }}>
+                — Em andamento
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {inProgressTrails.map((trail: any) => {
+                  const txList = trail.trail_transmissoes ?? []
+                  const total = txList.length
+                  const done = progressMap[trail.id]?.size ?? 0
+                  const pct = total > 0 ? Math.round((done / total) * 100) : 0
+                  const cats = allCategories(trail)
+                  return (
+                    <div
+                      key={trail.id}
+                      style={{
+                        border: '1px solid var(--red-dim)',
+                        background: 'rgba(180,30,20,0.03)',
+                        padding: 'clamp(16px,2vw,24px)',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1, minWidth: 200 }}>
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                            {cats.map((cat: string) => (
+                              <span key={cat} style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', border: '1px solid var(--faint)', padding: '2px 8px' }}>
+                                {resolveCategoryLabel(cat, labelMap)}
+                              </span>
+                            ))}
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--red)', textTransform: 'uppercase', border: '1px solid var(--red-dim)', padding: '2px 8px' }}>
+                              ◎ Em andamento
+                            </span>
+                          </div>
+                          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(18px,2.5vw,24px)', letterSpacing: 2, color: 'var(--cream)', marginBottom: 10, lineHeight: 1.2 }}>
+                            {trail.title}
+                          </h3>
+                          <div style={{ maxWidth: 380 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 6 }}>
+                              <span>{done} de {total} transmissões</span>
+                              <span>{pct}%</span>
+                            </div>
+                            <div style={{ height: 2, background: 'var(--faint)' }}>
+                              <div style={{ height: '100%', width: `${pct}%`, background: 'var(--red)', transition: 'width .5s ease' }} />
+                            </div>
+                          </div>
+                        </div>
+                        <Link href={`/perfil/trilhas/${trail.id}`} className="btn-primary" style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
+                          Continuar →
+                        </Link>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div style={{ borderBottom: '1px solid var(--faint)', marginTop: 28 }} />
+            </div>
+          )}
+
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 20, letterSpacing: 3, color: 'var(--cream)', textTransform: 'uppercase', marginBottom: 16 }}>
+              — Trilhas Disponíveis
+          </p>
           {/* Free + subscriber trails */}
           {trails.map((trail: any) => {
             const txList = trail.trail_transmissoes ?? []
@@ -127,7 +194,7 @@ export default async function TrilhasPage() {
                       : `Trilha para ${trail.duration_days} dias — ~${txPerWeek} transmis${txPerWeek > 1 ? 'sões' : 'são'}/semana`}
                   </div>
                 )}
-
+              
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' }}>
                   <div style={{ flex: 1, minWidth: 240 }}>
                     {/* Categories + completed badge */}

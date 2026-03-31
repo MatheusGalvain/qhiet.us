@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   description:
     'Portal de conhecimento gnóstico, cabalístico e hermético. Transmissões, categorias e comunidade para os que buscam além do véu.',
-  keywords: ['hermetismo', 'cabala', 'gnosticismo', 'alquimia', 'tarot', 'ocultismo', 'esoterismo'],
+  keywords: ['hermetismo', 'gnosticismo', 'alquimia', 'tarot', 'ocultismo', 'esoterismo'],
   openGraph: {
     title: 'QHIETHUS — Portal Oculto',
     description: 'Conhecimento além do véu.',
