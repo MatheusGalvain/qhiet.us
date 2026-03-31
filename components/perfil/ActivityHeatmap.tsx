@@ -101,8 +101,8 @@ export default function ActivityHeatmap({ activityMap, totalActiveDays }: Props)
         flexWrap: 'wrap', gap: 8,
         borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 24,
       }}>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}>
-          ATIVIDADE
+        <h2 className="flex items-center justify-center gap-3" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}>
+          <span className="text-2xl">◈</span> ATIVIDADE
         </h2>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
           {totalActiveDays} dia{totalActiveDays !== 1 ? 's' : ''} ativos em {currentYear}

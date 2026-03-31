@@ -20,6 +20,11 @@ function daysUntil(dateStr: string | null | undefined): number | null {
   return diff
 }
 
+const month = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const currentDate = new Date();
+const currentMonthIndex = currentDate.getMonth() + 1;
+const currentMonthName = currentDate.toLocaleString('pt-BR', { month: 'long' });
+
 async function getData() {
   try {
     const supabase = await createClient()
@@ -355,7 +360,7 @@ function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
                 <p key={f} className="plan-feature">{f}</p>
               ))}
             </div>
-            <Link href="/membros" className="plan-cta">Ascender →</Link>
+            <Link href="/membros" className="plan-cta">Assinar →</Link>
           </div>
         </div>
       </div>
@@ -365,7 +370,7 @@ function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
       <div className="mem-right">
         <div>
           <p className="book-label">
-            // Livro do Mês{monthBook?.month ? ` · ${new Date(monthBook.month + '-02').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase())}` : ''}
+            // Livro do Mês · {currentMonthName ?? ""} 2026
           </p>
           <div className="book-card">
             <div className="book-cover">
@@ -378,7 +383,7 @@ function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
               <p className="book-title">{monthBook?.title ?? '—'}</p>
               <span className="book-author">{monthBook?.author ?? ''}</span>
               <p className="book-desc" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginTop: 8 }}>
-                Enviado por e-mail ao se cadastrar gratuitamente.
+                Disponível durante um mês na plataforma.
               </p>
             </div>
           </div>
@@ -387,7 +392,7 @@ function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
         <div className="readbook">
           <div className="rb-item">
             <span className="rb-tag free">◉ LEITURA LIVRE</span>
-            <p className="rb-text">Acesso ao conteúdo introdutório. Um livro por mês enviado por e-mail ao se cadastrar gratuitamente.</p>
+            <p className="rb-text">Acesso ao conteúdo introdutório. Um livro mensal disponível na plataforma.</p>
           </div>
           <div className="rb-item">
             <span className="rb-tag paid">◈ PLANO INICIADO</span>

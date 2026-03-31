@@ -22,7 +22,7 @@ export default function PoliticaAssinaturaPage() {
       </LegalP>
       <LegalUL>
         <LegalLI>Acesso a todas as transmissões, incluindo conteúdo exclusivo para assinantes.</LegalLI>
-        <LegalLI>4 livros de domínio público por mês enviados diretamente ao seu e-mail.</LegalLI>
+        <LegalLI>4 livros de domínio público por mês disponíveis na plataforma.</LegalLI>
         <LegalLI>Sistema completo de XP, rank global e badges.</LegalLI>
         <LegalLI>Quiz Hermes em todas as transmissões.</LegalLI>
         <LegalLI>Trilhas de estudo por domínio.</LegalLI>

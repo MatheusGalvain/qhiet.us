@@ -125,7 +125,7 @@ export default async function MembrosPage() {
           { n: '03', title: 'Livros Mensais', desc: 'Todo mês, livros de referência chegam direto no seu e-mail. Profanos recebem 1 — Iniciados recebem 4 títulos curados.' },
         ].map(({ n, title, desc }) => (
           <div key={n} className="what-col" style={{ padding: 'clamp(28px,4vw,48px) clamp(20px,3vw,40px)', borderRight: '1px solid var(--faint)' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 64, color: 'var(--faint)', lineHeight: 1, marginBottom: 12 }}>{n}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 64, color: 'var(--cream-dim)', lineHeight: 1, marginBottom: 12 }}>{n}</div>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,2.5vw,28px)', letterSpacing: 2, color: 'var(--cream)', marginBottom: 14 }}>{title}</h3>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--muted)', lineHeight: 1.8 }}>{desc}</p>
           </div>
@@ -135,7 +135,7 @@ export default async function MembrosPage() {
       {/* PLANOS */}
       <div style={{ borderBottom: '1px solid var(--faint)' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, padding: '20px var(--px)', borderBottom: '1px solid var(--faint)' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px,6vw,64px)', letterSpacing: 3, color: 'var(--cream)' }}>PLANOS</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px,6vw,64px)', letterSpacing: 3, color: 'var(--red)' }}>PLANOS</h2>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--muted)' }}>Sem fidelidade. Cancele quando quiser.</p>
         </div>
 
@@ -163,10 +163,10 @@ export default async function MembrosPage() {
           </div>
 
           {/* INICIADO */}
-          <div className="plan-col" style={{ background: 'linear-gradient(135deg,var(--surface),rgba(176,42,30,.04))' }}>
+        <div className="plan-col" style={{ background: 'linear-gradient(135deg,var(--surface),rgba(130,111,18,.05))' }}>
             <div style={{ position: 'relative', marginBottom: 20 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--red)', border: '1px solid var(--red-dim)', padding: '4px 12px', display: 'inline-block', position: 'relative' }}>
-                <span style={{ position: 'absolute', top: -20, right: 0, fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, background: 'var(--red)', color: '#fff', padding: '2px 8px' }}>POPULAR</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--gold)', border: '1px solid var(--gold-dim)', padding: '4px 12px', display: 'inline-block', position: 'relative' }}>
+                <span style={{ position: 'absolute', top: -20, right: 0, fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, background: 'var(--gold)', color: '#fff', padding: '2px 8px' }}>POPULAR</span>
                 ◈ Assinante
               </span>
             </div>
@@ -174,12 +174,12 @@ export default async function MembrosPage() {
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(48px,6vw,72px)', color: 'var(--cream)', letterSpacing: 2, lineHeight: 1 }}>R$19,99</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: 2 }}>/mês</span>
             </div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,32px)', letterSpacing: 4, color: 'var(--red)', marginBottom: 24 }}>INICIADO</p>
-            <div style={{ height: 1, background: 'var(--faint)', margin: '24px 0' }} />
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,32px)', letterSpacing: 4, color: 'var(--gold)', marginBottom: 24 }}>INICIADO</p>
+            <div style={{ height: 1, background: 'var(--gold)', margin: '24px 0' }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1 }}>
               {PLAN_FEATURES.iniciado.map(({ check, text }, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontFamily: 'var(--font-body)', fontSize: 'clamp(14px,1.5vw,16px)', color: 'var(--muted)', lineHeight: 1.5 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red)', flexShrink: 0, marginTop: 3 }}>◉</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--gold)', flexShrink: 0, marginTop: 3 }}>◉</span>
                   <span dangerouslySetInnerHTML={{ __html: text }} />
                 </div>
               ))}
@@ -248,14 +248,15 @@ function ActivePlanBadge({ fullWidth = false }: { fullWidth?: boolean }) {
       width: fullWidth ? '100%' : 'auto',
       display: 'inline-flex',
       alignItems: 'center',
+      background: 'var(--gold)',
       gap: 10,
       padding: fullWidth ? '16px' : '12px 20px',
-      border: '1px solid var(--red-dim)',
+      border: '1px solid var(--gold-dim)',
       fontFamily: 'var(--font-mono)',
       fontSize: 12,
       letterSpacing: 3,
       textTransform: 'uppercase' as const,
-      color: 'var(--red)',
+      color: 'black',
       justifyContent: fullWidth ? 'center' : 'flex-start',
     }}>
       <span style={{ fontSize: 14 }}>◈</span>

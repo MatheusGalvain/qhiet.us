@@ -164,7 +164,8 @@ export default async function PerfilPage({
         {/* ═══ XP & RANK ═══ */}
         <section id="xp" style={{ marginBottom: 56, scrollMarginTop: 'calc(var(--nav-h) + 8px)' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 28 }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}>XP & RANK</h2>
+            <h2 className="flex items-center justify-center gap-3" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}>
+              <span className="text-2xl">✦</span> XP & RANK</h2>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>Posição no ranking global</p>
           </div>
 
@@ -251,7 +252,7 @@ export default async function PerfilPage({
         {/* ═══ HISTÓRICO ═══ */}
         <section id="historico" style={{ marginBottom: 56, scrollMarginTop: 'calc(var(--nav-h) + 8px)' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 28 }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}>HISTÓRICO</h2>
+            <h2 className="flex items-center justify-center gap-3" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}><span className="text-2xl">◎</span>HISTÓRICO</h2>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
               {historyTotal} {historyTotal === 1 ? 'atividade' : 'atividades'}
             </p>
@@ -350,7 +351,7 @@ export default async function PerfilPage({
         {/* ═══ LIVROS ═══ */}
         <section id="livros" style={{ marginBottom: 56, scrollMarginTop: 'calc(var(--nav-h) + 8px)' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 28 }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}>LIVROS</h2>
+            <h2 className="flex items-center justify-center gap-3" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}><span className="text-2xl">☿</span>LIVROS</h2>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
               {profile.is_subscriber ? '4 livros/mês · Iniciado' : '1 livro/mês · Profano'}
             </p>
@@ -412,7 +413,7 @@ export default async function PerfilPage({
         {/* ═══ CONFIGURAÇÕES ═══ */}
         <section id="config" style={{ marginBottom: 56, scrollMarginTop: 'calc(var(--nav-h) + 8px)' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 28 }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}>CONFIGURAÇÕES</h2>
+            <h2 className="flex items-center justify-center gap-3" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}><span className="text-2xl">○</span>CONFIGURAÇÕES</h2>
           </div>
 
           <div style={{ maxWidth: 480 }}>
@@ -474,7 +475,6 @@ export default async function PerfilPage({
         <div className="profile-mobile-actions">
           <LogoutButton />
         </div>
-
       </div>
     </div>
   )

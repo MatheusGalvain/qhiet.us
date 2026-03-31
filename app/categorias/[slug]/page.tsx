@@ -113,7 +113,7 @@ export default async function CategoriaPage({ params }: PageProps) {
             {meta.symbol}
           </span>
           <div>
-            <p className="eyebrow" style={{ marginBottom: 8 }}>Domínio · {total} transmissões</p>
+            <p className="eyebrow" style={{ marginBottom: 8 }}>Categoria · {total} transmissões</p>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px,6vw,80px)', letterSpacing: 4, color: 'var(--cream)', lineHeight: 1 }}>
               {meta.label.toUpperCase()}
             </h1>

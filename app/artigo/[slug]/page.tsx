@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getCategoryLabelMap } from '@/lib/getCategoryLabelMap'
+import TransmissaoCard from '@/components/transmissoes/TransmissaoCard'
 import ReadingProgress from '@/components/artigo/ReadingProgress'
 import ReadingCompleteButton from '@/components/artigo/ReadingCompleteButton'
 import PaywallOverlay from '@/components/artigo/PaywallOverlay'
@@ -61,8 +62,13 @@ async function getData(slug: string) {
     ? (quiz.questions as QuizQuestion[])
     : []
   // ─────────────────────────────────────────────────────────────────────────────────
-
-  return { transmissao: safeTransmissao, isSubscriber, hasAccess, quiz, safeQuizQuestions }
+  const { data: transmissoes } = await supabase
+    .from('transmissoes')
+    .select('*')
+    .eq('status', 'published')
+    .neq('id', transmissao.id)
+    .limit(6)
+  return { transmissao: safeTransmissao, transmissoes: transmissoes ?? [], isSubscriber, hasAccess, quiz, safeQuizQuestions }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -75,7 +81,7 @@ export default async function ArtigoPage({ params }: PageProps) {
   const [data, labelMap] = await Promise.all([getData(params.slug), getCategoryLabelMap()])
   if (!data) notFound()
 
-  const { transmissao: t, isSubscriber, hasAccess, quiz, safeQuizQuestions } = data
+  const { transmissao: t, transmissoes, isSubscriber, hasAccess, quiz, safeQuizQuestions } = data
 
   // XP for reading = 60% of total xp_reward
   const readingXP = t.xp_reward
@@ -190,6 +196,25 @@ export default async function ArtigoPage({ params }: PageProps) {
             hasQuiz={!!quiz}
           />
         </aside>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px var(--px)', borderBottom: '1px solid var(--faint)', marginTop: 0 }}>
+        <Link href="/transmissoes" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
+          ← Todas as Transmissões
+        </Link>
+      </div>
+      <div className="grid-3col section-pad">
+          {transmissoes.slice(0, 3).map(t => (
+            <TransmissaoCard key={t.id} transmissao={t} isSubscriber={isSubscriber} />
+          ))}
+
+          {transmissoes.length === 0 && (
+            <div style={{ gridColumn: '1/-1', padding: '64px 0', textAlign: 'center' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase' }}>
+                Em breve — transmissões chegando
+              </p>
+            </div>
+          )}
       </div>
 
       <HermesBot message={`Você está lendo "${t.title}". Explore mais transmissões sobre ${t.categories[0]}.`} />

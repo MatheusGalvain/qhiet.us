@@ -104,7 +104,7 @@ export default async function CategoriasPage() {
         </Link>
       </div>
 
-      <HermesBot message="Escolha um domínio para explorar suas transmissões ou navegue por todas." />
+      <HermesBot message="Escolha uma categoria para explorar suas transmissões ou navegue por todas." />
     </>
   )
 }
