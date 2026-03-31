@@ -371,7 +371,7 @@ export default async function PerfilPage({
                   transition: 'background .2s',
                 }}
               >
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,32px)', color: 'var(--faint)', letterSpacing: 2 }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,32px)', color: 'var(--cream-dim)', letterSpacing: 2 }}>
                   {event.transmissoes ? padNumber(event.transmissoes.number) : '—'}
                 </span>
                 <div style={{ minWidth: 0 }}>
@@ -494,7 +494,7 @@ export default async function PerfilPage({
                 <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 15, color: 'var(--cream)', marginBottom: 4, flex: 1 }}>{book.title}</p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 4 }}>{book.author}</p>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: isPremium ? 'var(--gold)' : 'var(--red-dim)', textTransform: 'uppercase', marginBottom: 10 }}>{book.month}</p>
-                <span style={{ display: 'block', width: '100%', padding: 8, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', background: 'transparent', border: `1px solid ${isPremium ? 'var(--gold)' : 'var(--faint)'}`, color: isPremium ? 'var(--gold)' : 'var(--muted)' }}>
+                <span style={{ display: 'block', width: '100%', padding: 8, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', background: 'transparent', border: `1px solid ${isPremium ? 'var(--gold)' : 'var(--cream-dim)'}`, color: isPremium ? 'var(--gold)' : 'var(--muted)' }}>
                   Acessar →
                 </span>
               </a>
@@ -517,11 +517,11 @@ export default async function PerfilPage({
           </div>
 
           <div style={{ maxWidth: 480 }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-              <span style={{ color: 'var(--red-dim)' }}>// </span>Identidade no Ranking
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 6 }}>
+              Conta
             </p>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', marginBottom: 24 }}>
-              Conta: {profile.email}
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, letterSpacing: 1, color: 'var(--cream)', marginBottom: 28 }}>
+              {profile.email}
             </p>
             <NickForm currentNick={profile.nick ?? null} currentName={profile.name} nickUpdatedAt={profile.nick_updated_at ?? null} />
           </div>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 const COOLDOWN_DAYS = 20
@@ -14,10 +13,13 @@ interface Props {
 
 function daysUntilUnlock(updatedAt: string | null): number {
   if (!updatedAt) return 0
-  const updatedMs = new Date(updatedAt).getTime()
-  const nowMs = Date.now()
-  const diffDays = (nowMs - updatedMs) / (1000 * 60 * 60 * 24)
+  const diffDays = (Date.now() - new Date(updatedAt).getTime()) / 86400000
   return Math.max(0, Math.ceil(COOLDOWN_DAYS - diffDays))
+}
+
+function unlockDate(updatedAt: string): string {
+  const d = new Date(new Date(updatedAt).getTime() + COOLDOWN_DAYS * 86400000)
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })
 }
 
 export default function NickForm({ currentNick, currentName, nickUpdatedAt }: Props) {
@@ -29,61 +31,25 @@ export default function NickForm({ currentNick, currentName, nickUpdatedAt }: Pr
 
   const daysLeft = daysUntilUnlock(nickUpdatedAt)
   const locked = daysLeft > 0
-  const isUnchanged = nick.trim() === (currentNick ?? '')
-
-  function validate(value: string): string | null {
-    const v = value.trim()
-    if (v.length < 2)  return 'Nick deve ter ao menos 2 caracteres.'
-    if (v.length > 24) return 'Nick deve ter no máximo 24 caracteres.'
-    if (/\s{2,}/.test(v)) return 'Nick não pode ter espaços duplos.'
-    if (!/^[a-zA-Z0-9 _\-\.àáâãéêíóôõúüçÀÁÂÃÉÊÍÓÔÕÚÜÇ]+$/.test(v))
-      return 'Nick só pode ter letras, números, espaço, _ - .'
-    return null
-  }
+  const trimmed = nick.trim()
+  const isUnchanged = trimmed === (currentNick ?? '')
+  const charCount = trimmed.length
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSuccess(false)
     setError(null)
 
-    if (locked) {
-      setError(`Você poderá alterar seu nick em ${daysLeft} dia${daysLeft > 1 ? 's' : ''}.`)
-      return
-    }
-
-    const validationError = validate(nick)
-    if (validationError) { setError(validationError); return }
-
     startTransition(async () => {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { setError('Sessão expirada. Faça login novamente.'); return }
+      const res = await fetch('/api/profile/nick', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nick }),
+      })
+      const json = await res.json()
 
-      // Check uniqueness (case-insensitive) before saving
-      const trimmed = nick.trim()
-      const { data: existing } = await supabase
-        .from('profiles')
-        .select('id')
-        .ilike('nick', trimmed)
-        .neq('id', user.id)
-        .maybeSingle()
-
-      if (existing) {
-        setError('Este nick já está em uso. Escolha outro.')
-        return
-      }
-
-      const { error: dbError } = await supabase
-        .from('profiles')
-        .update({ nick: trimmed, nick_updated_at: new Date().toISOString() })
-        .eq('id', user.id)
-
-      if (dbError) {
-        if (dbError.code === '23505') {
-          setError('Este nick já está em uso. Escolha outro.')
-        } else {
-          setError(dbError.message)
-        }
+      if (!res.ok) {
+        setError(json.error ?? 'Erro ao salvar.')
         return
       }
 
@@ -92,26 +58,37 @@ export default function NickForm({ currentNick, currentName, nickUpdatedAt }: Pr
     })
   }
 
-  const charCount = nick.trim().length
-
   return (
-    <form onSubmit={handleSubmit}>
-      <div style={{ marginBottom: 20 }}>
-        <label style={{
-          display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11,
-          letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 6,
-        }}>
-          Nick de ranking
-        </label>
-        <p style={{
-          fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--muted)',
-          lineHeight: 1.6, marginBottom: 12,
-        }}>
-          Nome público exibido na tabela de ranking. Máximo 24 caracteres.
-          Após salvar, só pode ser alterado novamente em {COOLDOWN_DAYS} dias.
-        </p>
+    <div>
+      {/* Label */}
+      <p style={{
+        fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 3,
+        color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 6,
+      }}>
+        Nick público
+      </p>
+      <p style={{
+        fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--muted)',
+        lineHeight: 1.6, marginBottom: 16,
+      }}>
+        Nome exibido no ranking e no perfil público. Máximo 24 caracteres. Após salvar, só pode ser alterado em {COOLDOWN_DAYS} dias.
+      </p>
 
-        <div style={{ position: 'relative', maxWidth: 320 }}>
+      {/* Cooldown bar */}
+      {locked && (
+        <div style={{
+          border: '1px solid var(--gold-dim)', background: 'rgba(200,150,10,0.05)',
+          padding: '10px 16px', marginBottom: 16,
+          fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2,
+          color: 'var(--gold)', textTransform: 'uppercase',
+        }}>
+          ◈ Bloqueado · libera em {unlockDate(nickUpdatedAt!)} ({daysLeft}d)
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit}>
+        {/* Input + button inline */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'stretch', maxWidth: 400, marginBottom: 8 }}>
           <input
             type="text"
             value={nick}
@@ -119,66 +96,68 @@ export default function NickForm({ currentNick, currentName, nickUpdatedAt }: Pr
             maxLength={24}
             placeholder={currentNick ?? currentName}
             disabled={locked || isPending}
+            autoComplete="off"
+            spellCheck={false}
             className="form-input"
             style={{
-              width: '100%',
-              opacity: locked ? 0.5 : 1,
+              flex: 1,
+              opacity: locked ? 0.45 : 1,
               cursor: locked ? 'not-allowed' : 'text',
             }}
           />
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={locked || isPending || isUnchanged || charCount < 2}
+            style={{
+              opacity: locked || isUnchanged || charCount < 2 ? 0.35 : 1,
+              cursor: locked || isUnchanged || charCount < 2 ? 'not-allowed' : 'pointer',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          >
+            {isPending ? 'Salvando…' : 'Salvar →'}
+          </button>
         </div>
 
         {/* Counter */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: 320, marginTop: 6 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--faint)' }}>
-            {charCount} / 24
-          </span>
-          {locked && (
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--gold)', textTransform: 'uppercase' }}>
-              ○ Bloqueado · {daysLeft}d restantes
-            </span>
-          )}
-          {!locked && nickUpdatedAt && (
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--faint)' }}>
-              Último: {new Date(nickUpdatedAt).toLocaleDateString('pt-BR')}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Cooldown info bar */}
-      {locked && (
-        <div style={{
-          border: '1px solid var(--gold-dim)', background: 'rgba(200,150,10,0.06)',
-          padding: '10px 16px', marginBottom: 16,
-          fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--gold)',
-          textTransform: 'uppercase',
+        <p style={{
+          fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1,
+          color: 'var(--faint)', marginBottom: 16,
         }}>
-          ◈ Nick bloqueado por mais {daysLeft} dia{daysLeft > 1 ? 's' : ''}.
-          Poderá ser alterado em{' '}
-          {new Date(new Date(nickUpdatedAt!).getTime() + COOLDOWN_DAYS * 86400000).toLocaleDateString('pt-BR')}.
-        </div>
-      )}
-
-      {success && (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 16 }}>
-          ✦ Nick atualizado — aparecerá no ranking em instantes.
+          {charCount}/24
         </p>
-      )}
-      {error && (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--red)', marginBottom: 16, borderLeft: '2px solid var(--red)', paddingLeft: 10 }}>
-          {error}
-        </p>
-      )}
 
-      <button
-        type="submit"
-        className="btn-primary"
-        disabled={locked || isPending || isUnchanged}
-        style={{ opacity: locked || isUnchanged ? 0.45 : 1, cursor: locked || isUnchanged ? 'not-allowed' : 'pointer' }}
-      >
-        {isPending ? 'Salvando…' : locked ? `Bloqueado · ${daysLeft}d` : 'Salvar nick →'}
-      </button>
-    </form>
+        {/* Error */}
+        {error && (
+          <div style={{
+            display: 'flex', alignItems: 'flex-start', gap: 10,
+            padding: '10px 14px', marginBottom: 12,
+            border: '1px solid var(--red-dim)',
+            background: 'rgba(180,30,20,0.06)',
+          }}>
+            <span style={{ color: 'var(--red)', fontFamily: 'var(--font-mono)', fontSize: 12, marginTop: 1 }}>✕</span>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--red)', lineHeight: 1.6 }}>
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* Success */}
+        {success && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '10px 14px',
+            border: '1px solid var(--gold-dim)',
+            background: 'rgba(200,150,10,0.06)',
+          }}>
+            <span style={{ color: 'var(--gold)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>✦</span>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--gold)', textTransform: 'uppercase' }}>
+              Nick atualizado — aparecerá no ranking em instantes.
+            </p>
+          </div>
+        )}
+      </form>
+    </div>
   )
 }

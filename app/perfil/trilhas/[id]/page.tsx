@@ -133,7 +133,7 @@ export default async function TrailDetailPage({ params }: { params: { id: string
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>
               ◈ Grimório disponível para Iniciados
             </span>
-            <Link href="/assinar" style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--gold)', textTransform: 'uppercase', textDecoration: 'none' }}>
+            <Link href="/membros" style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--gold)', textTransform: 'uppercase', textDecoration: 'none' }}>
               Tornar-se Iniciado →
             </Link>
           </div>

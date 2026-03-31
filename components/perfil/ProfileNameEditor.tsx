@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useTransition, useRef, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 function getInitial(name: string): string {
@@ -57,16 +56,14 @@ export default function ProfileNameEditor({ initialName, size = 'lg' }: Props) {
     if (trimmed.length > 60) { setError('Nome muito longo.'); return }
 
     startTransition(async () => {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { setError('Sessão expirada.'); return }
+      const res = await fetch('/api/profile/name', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: trimmed }),
+      })
+      const json = await res.json()
 
-      const { error: dbError } = await supabase
-        .from('profiles')
-        .update({ name: trimmed })
-        .eq('id', user.id)
-
-      if (dbError) { setError(dbError.message); return }
+      if (!res.ok) { setError(json.error ?? 'Erro ao salvar.'); return }
 
       setName(trimmed)
       setEditing(false)
@@ -101,7 +98,7 @@ export default function ProfileNameEditor({ initialName, size = 'lg' }: Props) {
             width: 22,
             height: 22,
             background: 'var(--bg)',
-            border: '1px solid var(--faint)',
+            border: '1px solid var(--cream-dim)',
             color: 'var(--muted)',
             cursor: 'pointer',
             display: 'flex',
@@ -117,7 +114,7 @@ export default function ProfileNameEditor({ initialName, size = 'lg' }: Props) {
           }}
           onMouseLeave={e => {
             ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--muted)'
-            ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--faint)'
+            ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--cream-dim)'
           }}
         >
           ✎
@@ -183,12 +180,12 @@ export default function ProfileNameEditor({ initialName, size = 'lg' }: Props) {
                 flex: 1,
                 background: 'transparent',
                 border: '1px solid var(--red-dim)',
-                color: 'var(--red)',
+                color: 'var(--cream-dim)',
                 fontFamily: 'var(--font-mono)', fontSize: 10,
                 letterSpacing: 2, textTransform: 'uppercase',
                 padding: '7px 0',
                 cursor: 'pointer',
-                opacity: isPending || draft.trim() === name ? 0.45 : 1,
+                opacity: isPending || draft.trim() === name ? 0.8 : 1,
                 transition: 'border-color .15s, color .15s',
               }}
               onMouseEnter={e => {
@@ -196,8 +193,8 @@ export default function ProfileNameEditor({ initialName, size = 'lg' }: Props) {
                 ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--cream)'
               }}
               onMouseLeave={e => {
-                ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--red-dim)'
-                ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--red)'
+                ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--red)'
+                ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--cream)'
               }}
             >
               {isPending ? 'Salvando…' : 'Salvar'}

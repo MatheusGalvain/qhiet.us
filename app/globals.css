@@ -376,7 +376,7 @@ body {
 ═══════════════════════════════════════ */
 .form-input {
   background: transparent;
-  border: 1px solid var(--faint);
+  border: 1px solid var(--cream-dim);
   padding: 14px 16px;
   font-family: var(--font-body);
   font-size: 16px;
@@ -385,8 +385,8 @@ body {
   transition: border-color 0.2s;
   width: 100%;
 }
-.form-input::placeholder { color: var(--faint); }
-.form-input:focus { border-color: var(--muted); }
+.form-input::placeholder { color: var(--cream-dim); }
+.form-input:focus { border-color: var(--cream); }
 
 .form-label {
   font-family: var(--font-mono);

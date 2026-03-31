@@ -130,7 +130,10 @@ export default function ProfileSidebar({ name, email, isSubscriber, rankName, ra
           color: isSubscriber ? 'var(--red)' : 'var(--muted)',
           textTransform: 'uppercase', marginTop: 4,
         }}>
-          {rankSymbol} {rankName} · {isSubscriber ? 'Iniciado' : 'Profano'}
+          <div className='flex flex-col gap-3'>
+            <p style={{ fontSize: 12, textTransform: 'lowercase', letterSpacing: 1, }}>{email}</p>
+            <p>{rankSymbol} {rankName} · {isSubscriber ? 'Iniciado' : 'Profano'}</p>
+          </div>
         </span>
       </div>
 

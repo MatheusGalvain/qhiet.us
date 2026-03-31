@@ -61,8 +61,8 @@ export default function DeleteAccountButton({ email }: Props) {
         onClick={() => setStep('warn')}
         style={{
           background: 'transparent',
-          border: '1px solid var(--faint)',
-          color: 'var(--faint)',
+          border: '1px solid var(--cream)',
+          color: 'var(--cream)',
           fontFamily: 'var(--font-mono)',
           fontSize: 11,
           letterSpacing: 3,
@@ -76,8 +76,8 @@ export default function DeleteAccountButton({ email }: Props) {
           ;(e.currentTarget as HTMLButtonElement).style.borderColor = '#8b1a10'
         }}
         onMouseLeave={e => {
-          ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--faint)'
-          ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--faint)'
+          ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--cream)'
+          ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--cream)'
         }}
       >
         Excluir conta →
