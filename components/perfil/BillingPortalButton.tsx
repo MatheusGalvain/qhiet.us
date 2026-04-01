@@ -10,13 +10,12 @@ export default function BillingPortalButton() {
   function handleClick() {
     setError(null)
     startTransition(async () => {
-      try {
-        await openBillingPortal()
-      } catch (err: any) {
-        // redirect() throws internally — ignore NEXT_REDIRECT
-        if (err?.digest?.startsWith('NEXT_REDIRECT')) return
-        setError('Não foi possível abrir o portal. Tente novamente.')
+      const result = await openBillingPortal()
+      if ('error' in result) {
+        setError(result.error)
+        return
       }
+      window.location.href = result.url
     })
   }
 
@@ -52,7 +51,10 @@ export default function BillingPortalButton() {
         {isPending ? 'Aguarde...' : 'Gerenciar assinatura →'}
       </button>
       {error && (
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red)', letterSpacing: 1 }}>
+        <p style={{
+          fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--red)',
+          letterSpacing: 1, maxWidth: 320, textAlign: 'right', lineHeight: 1.6,
+        }}>
           {error}
         </p>
       )}
