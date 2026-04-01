@@ -123,7 +123,7 @@ export default function NickForm({ currentNick, currentName, nickUpdatedAt }: Pr
         {/* Counter */}
         <p style={{
           fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1,
-          color: 'var(--faint)', marginBottom: 16,
+          color: 'var(--cream-dim)', marginBottom: 16,
         }}>
           {charCount}/24
         </p>

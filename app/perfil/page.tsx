@@ -176,7 +176,7 @@ async function getData(page: number) {
 export default async function PerfilPage({
   searchParams,
 }: {
-  searchParams: { page?: string }
+  searchParams: { page?: string; erro?: string }
 }) {
   const page = Math.max(1, parseInt(searchParams?.page ?? '1', 10) || 1)
   const [{ profile, xpEvents, books, activityMap, totalActiveDays, historyTotal, totalPages, currentPage, trailCompletions, trailsInProgress }, labelMap] = await Promise.all([getData(page), getCategoryLabelMap()])
@@ -537,6 +537,13 @@ export default async function PerfilPage({
           )}
 
           {/* Subscription management — only for subscribers */}
+          {searchParams?.erro === 'sem_customer_id' && (
+            <div style={{ maxWidth: 480, marginTop: 24, padding: '14px 18px', border: '1px solid var(--red-dim)', background: 'rgba(180,30,20,0.06)' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--red)', lineHeight: 1.7 }}>
+                Não foi possível localizar seu cadastro na Stripe. Entre em contato pelo e-mail de suporte informando sua conta e solicitaremos o link de cancelamento manualmente.
+              </p>
+            </div>
+          )}
           {profile.is_subscriber && (
             <div style={{ maxWidth: 480, marginTop: 40, paddingTop: 40, borderTop: '1px solid var(--faint)' }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 16 }}>

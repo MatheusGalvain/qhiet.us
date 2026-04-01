@@ -16,7 +16,7 @@ export async function openBillingPortal() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('stripe_customer_id, is_subscriber')
+    .select('stripe_customer_id, stripe_subscription_id, is_subscriber')
     .eq('id', user.id)
     .single()
 
@@ -24,15 +24,33 @@ export async function openBillingPortal() {
     redirect('/membros')
   }
 
-  if (!profile?.stripe_customer_id) {
-    // stripe_customer_id not stored yet — redirect with a help message
+  let customerId = profile?.stripe_customer_id as string | null
+
+  // Se não tiver o customer_id salvo mas tiver subscription_id,
+  // busca o customer_id direto na Stripe e salva para o futuro.
+  if (!customerId && profile?.stripe_subscription_id) {
+    try {
+      const { stripe } = await import('@/lib/stripe/client')
+      const sub = await stripe.subscriptions.retrieve(profile.stripe_subscription_id)
+      customerId = sub.customer as string
+      if (customerId) {
+        const { createServiceClient } = await import('@/lib/supabase/server')
+        await createServiceClient()
+          .from('profiles')
+          .update({ stripe_customer_id: customerId })
+          .eq('id', user.id)
+      }
+    } catch (_) {}
+  }
+
+  if (!customerId) {
     redirect('/perfil?erro=sem_customer_id')
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://qhiethus.com.br'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.qhiethus.com.br'
 
   const session = await createPortalSession({
-    customerId: profile.stripe_customer_id,
+    customerId,
     returnUrl: `${appUrl}/perfil`,
   })
 
