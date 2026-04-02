@@ -83,7 +83,7 @@ export default function ProfileSidebar({ name, email, isSubscriber, rankName, ra
           title={collapsed ? 'Expandir menu' : 'Recolher menu'}
           style={{
             background: 'none',
-            border: '1px solid var(--faint)',
+            border: '1px solid var(--cream-dim)',
             color: 'var(--muted)',
             fontFamily: 'var(--font-mono)',
             fontSize: 13,

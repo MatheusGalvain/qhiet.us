@@ -116,7 +116,7 @@ export default async function TrailDetailPage({ params }: { params: { id: string
             <span style={{ color: 'var(--gold)', opacity: 0.7 }}>◈</span>
             {trail.is_free
               ? `${transmissoes.length} transmissões`
-              : `Trilha para ${trail.duration_days} dias · ${txPerWeek} transmissão${txPerWeek > 1 ? 'ões' : ''}/semana`
+              : `Tempo estimado para conclusão e liberação de XP ${trail.duration_days} dias ·`
             }
             <span style={{ color: 'var(--faint)' }}>·</span>
             {isTrailCompleted ? (

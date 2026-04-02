@@ -366,7 +366,7 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
           >
             <div style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: 9,
+              fontSize: 12,
               letterSpacing: 1,
               color: unlocked ? (done ? '#c8960a' : '#9a8878') : '#3a3228',
               textTransform: 'uppercase',

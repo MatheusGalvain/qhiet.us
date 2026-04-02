@@ -73,7 +73,7 @@ export default function HermesQuiz({ transmissaoId, questions, xpReward, hasAcce
   const rank = RANKS[rankIdx]
 
   return (
-    <div style={{ marginTop: 72, borderTop: '1px solid var(--faint)', paddingTop: 56 }}>
+    <div className="quiz-dark" style={{ marginTop: 72, borderTop: '1px solid var(--faint)', paddingTop: 56 }}>
 
       {/* Section header */}
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 5, color: 'var(--red)', textTransform: 'uppercase', marginBottom: 14 }}>

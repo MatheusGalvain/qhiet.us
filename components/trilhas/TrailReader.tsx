@@ -113,7 +113,7 @@ export default function TrailReader({
 
       return (
         <p key={i}
-          style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--muted)', lineHeight: 1.9, marginBottom: 0 }}
+          style={{ fontFamily: 'var(--font-body)', fontSize: 18, color: 'var(--muted)', lineHeight: 1.5, marginBottom: 0 }}
           dangerouslySetInnerHTML={{ __html: formatted }}
         />
       )
@@ -126,7 +126,7 @@ export default function TrailReader({
       <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--faint)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
           {onBackToSection && (
-            <button onClick={onBackToSection} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, padding: 0, flexShrink: 0 }}>
+            <button onClick={onBackToSection} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 16, letterSpacing: 1, padding: 0, flexShrink: 0 }}>
               ←
             </button>
           )}
@@ -138,7 +138,7 @@ export default function TrailReader({
           </span>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--faint)', letterSpacing: 2 }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--cream-dim)', letterSpacing: 2 }}>
             ~{tx.read_time_minutes}min
           </span>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}>✕</button>
@@ -180,7 +180,7 @@ export default function TrailReader({
               border: '1px solid var(--faint)',
               color: 'var(--muted)',
               fontFamily: 'var(--font-body)',
-              fontSize: 13,
+              fontSize: 16,
               lineHeight: 1.6,
               padding: '10px 14px',
               outline: 'none',

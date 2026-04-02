@@ -1,6 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 import GrimoireList from '@/components/trilhas/GrimoireList'
+import ProfileSidebar from '@/components/perfil/ProfileSidebar'
+import { getRank } from '@/lib/utils'
 
 export const revalidate = 0
 
@@ -13,7 +16,7 @@ async function getData() {
 
   const { data: profile } = await service
     .from('profiles')
-    .select('is_subscriber, is_admin')
+    .select('is_subscriber, is_admin, name, email, xp_total')
     .eq('id', user.id)
     .single()
 
@@ -55,27 +58,51 @@ async function getData() {
     updated_at: grimoireMap[t.id]?.updated_at ?? null,
   }))
 
-  return { entries }
+  return { entries, profile }
 }
 
 export default async function GrimorioPage() {
-  const { entries } = await getData()
+  const { entries, profile } = await getData()
+  const rank = getRank(profile?.xp_total ?? 0)
+  const isSubscriber = profile?.is_subscriber || profile?.is_admin || false
 
   return (
-    <div style={{ padding: 'clamp(28px,4vw,48px) var(--px)' }}>
-      <div style={{ borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 40 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--red)', textTransform: 'uppercase', marginBottom: 8 }}>
-          Exclusivo Iniciado
-        </p>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)', marginBottom: 8 }}>
-          GRIMÓRIO
-        </h1>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>
-          Suas anotações pessoais por trilha — até 7500 caracteres cada. Auto-salvo enquanto você digita.
-        </p>
-      </div>
+    <div className="profile-layout">
+      <ProfileSidebar
+        name={profile?.name ?? ''}
+        email={profile?.email ?? ''}
+        isSubscriber={isSubscriber}
+        rankName={rank.name}
+        rankSymbol={(rank as any).symbol}
+      />
 
-      <GrimoireList initialEntries={entries} />
+      <div style={{ padding: 'clamp(28px,4vw,48px) var(--px)', minWidth: 0 }}>
+        <div style={{ borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 40 }}>
+          <Link
+            href="/perfil"
+            className="back-link"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 3,
+              color: 'var(--muted)', textTransform: 'uppercase', textDecoration: 'none',
+              marginBottom: 20, transition: 'color .15s',
+            }}
+          >
+            ← Perfil
+          </Link>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--red)', textTransform: 'uppercase', marginBottom: 8 }}>
+            Exclusivo Iniciado
+          </p>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)', marginBottom: 8 }}>
+            GRIMÓRIO
+          </h1>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>
+            Suas anotações pessoais por trilha — até 7500 caracteres cada. Auto-salvo enquanto você digita.
+          </p>
+        </div>
+
+        <GrimoireList initialEntries={entries} />
+      </div>
     </div>
   )
 }

@@ -544,7 +544,7 @@ export default async function PerfilPage({
               </p>
             </div>
           )}
-          {profile.is_subscriber && (
+          {profile.is_subscriber && !profile.is_admin && (
             <div style={{ maxWidth: 480, marginTop: 40, paddingTop: 40, borderTop: '1px solid var(--faint)' }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 16 }}>
                 <span style={{ color: 'var(--red-dim)' }}>// </span>Plano Iniciado

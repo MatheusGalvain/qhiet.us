@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Wordmark from '@/components/ui/Wordmark'
 import Avatar from '@/components/ui/Avatar'
 import type { Profile } from '@/types'
@@ -21,6 +21,18 @@ const NAV_LINKS = [
 export default function Nav({ profile }: NavProps) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [avatarOpen, setAvatarOpen] = useState(false)
+  const avatarRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+        setAvatarOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [])
 
   // Close drawer on route change
   useEffect(() => { setOpen(false) }, [pathname])
@@ -60,9 +72,74 @@ export default function Nav({ profile }: NavProps) {
           <div className="nav-desktop-right" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div className="nav-dot" />
             {profile ? (
-              <Link href="/perfil">
-                <Avatar name={profile.name} size="sm" />
-              </Link>
+              <div ref={avatarRef} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setAvatarOpen(o => !o)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                  aria-label="Menu do perfil"
+                >
+                  <Avatar name={profile.name} size="sm" />
+                </button>
+
+                {avatarOpen && (
+                  <div style={{
+                    position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                    minWidth: 180,
+                    background: 'black',
+                    border: '1px solid var(--faint)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+                    zIndex: 200,
+                    overflow: 'hidden',
+                  }}>
+                    {/* User info */}
+                    <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--faint)' }}>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: 16, letterSpacing: 2, color: 'var(--cream)', marginBottom: 2 }}>
+                        {profile.name}
+                      </p>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--red)', textTransform: 'uppercase' }}>
+                        {profile.is_subscriber ? '◈ Iniciado' : '◉ Profano'}
+                      </p>
+                    </div>
+
+                    {/* Links */}
+                    <Link
+                      href="/perfil"
+                      onClick={() => setAvatarOpen(false)}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '12px 18px',
+                        fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3,
+                        color: 'var(--muted)', textTransform: 'uppercase', textDecoration: 'none',
+                        borderBottom: '1px solid var(--faint)',
+                        transition: 'color .15s, background .15s',
+                      }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--cream)'; (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(255,255,255,0.03)' }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--muted)'; (e.currentTarget as HTMLAnchorElement).style.background = 'transparent' }}
+                    >
+                      Perfil <span style={{ opacity: 0.5 }}>→</span>
+                    </Link>
+
+                    <form action="/api/auth/logout" method="POST">
+                      <button
+                        type="submit"
+                        style={{
+                          width: '100%', textAlign: 'left',
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          padding: '12px 18px',
+                          fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3,
+                          color: 'var(--muted)', textTransform: 'uppercase',
+                          background: 'transparent', border: 'none', cursor: 'pointer',
+                          transition: 'color .15s, background .15s',
+                        }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--red)'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(180,30,20,0.06)' }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--muted)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+                      >
+                        Sair <span style={{ opacity: 0.5 }}>→</span>
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link href="/login" className="nav-btn text-[8px] lg:text-xs">Entrar</Link>
