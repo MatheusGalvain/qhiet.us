@@ -16,7 +16,7 @@ interface CategoryContent {
   desc_col1_html: string
   desc_col2_html: string
   timeline: Array<{ title: string; date: string; desc: string }>
-  figures: Array<{ name: string; period: string; desc: string; symbol: string; }>
+  figures: Array<{ name: string; period: string; desc: string; symbol: string; image_url?: string }>
 }
 
 export async function generateStaticParams() {
@@ -220,30 +220,92 @@ export default async function CategoriaPage({ params }: PageProps) {
           <p className="eyebrow" style={{ marginBottom: 32 }}>Figuras Notáveis</p>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-            gap: 0,
-            border: '1px solid var(--faint)',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: 16,
           }}>
-            {content.figures.map((fig, i) => (
-              <div key={i} style={{
-                padding: '24px 20px',
-                borderRight: '1px solid var(--faint)',
-                borderBottom: '1px solid var(--faint)',
-              }}>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 25, letterSpacing: 2, color: 'var(--gold)', marginBottom: 4 }}>
-                  {fig?.symbol}
-                </p>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 2, color: 'var(--cream)', marginBottom: 4 }}>
-                  {fig?.name}
-                </p>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--red)', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>
-                  {fig?.period}
-                </span>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.65 }}>
-                  {fig?.desc}
-                </p>
-              </div>
-            ))}
+            {content.figures.map((fig, i) => {
+              const hasImage = !!fig?.image_url
+              return hasImage ? (
+                /* ── Card com imagem ── */
+                <div key={i} style={{
+                  position: 'relative',
+                  overflow: 'hidden',
+                  minHeight: 340,
+                  border: '1px solid var(--faint)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end',
+                }}>
+                  {/* Foto de fundo */}
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    backgroundImage: `url(${fig.image_url})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center top',
+                    filter: 'sepia(0.15) contrast(1.05)',
+                  }} />
+                  {/* Gradiente escuro em cima da foto */}
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'linear-gradient(to bottom, rgba(8,8,8,0) 15%, rgba(8,8,8,0.55) 50%, rgba(8,8,8,0.96) 100%)',
+                  }} />
+                  {/* Símbolo no topo */}
+                  {fig?.symbol && (
+                    <div style={{
+                      position: 'absolute', top: 16, left: 18,
+                      fontFamily: 'var(--font-display)', fontSize: 22,
+                      color: 'var(--gold)', opacity: 0.7,
+                      textShadow: '0 1px 6px rgba(0,0,0,0.7)',
+                    }}>
+                      {fig.symbol}
+                    </div>
+                  )}
+                  {/* Texto sobreposto */}
+                  <div style={{ position: 'relative', padding: '20px 20px 24px', background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 100%)' }}>
+                    <p style={{
+                      fontFamily: 'var(--font-display)', fontSize: 21, letterSpacing: 2,
+                      color: '#f5f0e8', marginBottom: 4, lineHeight: 1.2,
+                      textShadow: '0 1px 8px rgba(0,0,0,0.8)',
+                    }}>
+                      {fig?.name}
+                    </p>
+                    <span style={{
+                      fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3,
+                      color: 'var(--red)', textTransform: 'uppercase', display: 'block', marginBottom: 8,
+                    }}>
+                      {fig?.period}
+                    </span>
+                    <p style={{
+                      fontFamily: 'var(--font-body)', fontSize: 13, color: 'rgba(200,196,188,0.85)', lineHeight: 1.6,
+                    }}>
+                      {fig?.desc}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* ── Card sem imagem (original) ── */
+                <div key={i} style={{
+                  padding: '24px 20px',
+                  border: '1px solid var(--faint)',
+                  minHeight: 180,
+                }}>
+                  {fig?.symbol && (
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 25, letterSpacing: 2, color: 'var(--gold)', marginBottom: 4, opacity: 0.6 }}>
+                      {fig.symbol}
+                    </p>
+                  )}
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 20, letterSpacing: 2, color: 'var(--cream)', marginBottom: 4 }}>
+                    {fig?.name}
+                  </p>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--red)', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>
+                    {fig?.period}
+                  </span>
+                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.65 }}>
+                    {fig?.desc}
+                  </p>
+                </div>
+              )
+            })}
           </div>
         </section>
       )}

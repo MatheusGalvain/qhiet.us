@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 interface TimelineItem { date: string; title: string }
-interface FigureItem   { name: string; era: string; contribution: string }
+interface FigureItem   { name: string; period: string; desc: string; symbol: string; image_url?: string }
 
 interface CategoryContent {
   category:      string
@@ -170,7 +170,7 @@ export default function CategoryContentEditor({ slug, categoryId, initialContent
 
   /* ── Figure helpers ── */
   const addFigure = () =>
-    update('figures', [...content.figures, { name: '', era: '', contribution: '' }])
+    update('figures', [...content.figures, { name: '', period: '', desc: '', symbol: '', image_url: '' }])
 
   const updateFigure = (i: number, field: keyof FigureItem, val: string) =>
     update('figures', content.figures.map((fig, idx) => idx === i ? { ...fig, [field]: val } : fig))
@@ -471,20 +471,51 @@ export default function CategoryContentEditor({ slug, categoryId, initialContent
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {content.figures.map((fig, i) => (
-            <div key={i} style={{ border: '1px solid var(--faint)', padding: 16, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 40px', gap: 12, alignItems: 'flex-start' }}>
-              <div>
-                <span style={labelStyle}>Nome</span>
-                <input value={fig.name} onChange={e => updateFigure(i, 'name', e.target.value)} placeholder="Hermes Trismegisto" style={{ ...inputStyle, resize: undefined }} />
+            <div key={i} style={{ border: '1px solid var(--faint)', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* Row 1: nome, era, contribuição, remove */}
+              <div style={{ display: 'grid', gridTemplateColumns: '180px 80px 1fr 40px', gap: 12, alignItems: 'flex-start' }}>
+                <div>
+                  <span style={labelStyle}>Nome</span>
+                  <input value={fig.name} onChange={e => updateFigure(i, 'name', e.target.value)} placeholder="Hermes Trismegisto" style={{ ...inputStyle, resize: undefined }} />
+                </div>
+                <div>
+                  <span style={labelStyle}>Símbolo</span>
+                  <input value={fig.symbol ?? ''} onChange={e => updateFigure(i, 'symbol', e.target.value)} placeholder="☿" style={{ ...inputStyle, resize: undefined, textAlign: 'center', fontSize: 18 }} />
+                </div>
+                <div>
+                  <span style={labelStyle}>Época / Período</span>
+                  <input value={fig.period} onChange={e => updateFigure(i, 'period', e.target.value)} placeholder="Séc. II d.C." style={{ ...inputStyle, resize: undefined }} />
+                </div>
+                <button type="button" onClick={() => removeFigure(i)} style={{ ...btnIcon, marginTop: 26 }} title="Remover">×</button>
               </div>
               <div>
-                <span style={labelStyle}>Época / Era</span>
-                <input value={fig.era} onChange={e => updateFigure(i, 'era', e.target.value)} placeholder="Séc. II d.C." style={{ ...inputStyle, resize: undefined }} />
+                <span style={labelStyle}>Descrição / Contribuição</span>
+                <textarea rows={2} value={fig.desc} onChange={e => updateFigure(i, 'desc', e.target.value)} placeholder="Desenvolveu o hermetismo e é considerado pai da alquimia..." style={inputStyle} />
               </div>
-              <div>
-                <span style={labelStyle}>Contribuição</span>
-                <input value={fig.contribution} onChange={e => updateFigure(i, 'contribution', e.target.value)} placeholder="Desenvolveu o hermetismo..." style={{ ...inputStyle, resize: undefined }} />
+              {/* Row 2: imagem */}
+              <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <span style={labelStyle}>Imagem (URL) — opcional</span>
+                  <input
+                    value={fig.image_url ?? ''}
+                    onChange={e => updateFigure(i, 'image_url', e.target.value)}
+                    placeholder="https://upload.wikimedia.org/wikipedia/commons/..."
+                    style={{ ...inputStyle, resize: undefined }}
+                  />
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, color: 'var(--faint)', marginTop: 4 }}>
+                    Cole a URL direta de uma imagem (Wikimedia, etc.). Será exibida no card público com sobreposição gradiente.
+                  </p>
+                </div>
+                {fig.image_url && (
+                  <div style={{
+                    width: 72, height: 72, flexShrink: 0,
+                    backgroundImage: `url(${fig.image_url})`,
+                    backgroundSize: 'cover', backgroundPosition: 'center top',
+                    border: '1px solid var(--faint)',
+                    marginTop: 22,
+                  }} />
+                )}
               </div>
-              <button type="button" onClick={() => removeFigure(i)} style={{ ...btnIcon, marginTop: 26 }} title="Remover">×</button>
             </div>
           ))}
           {content.figures.length === 0 && (

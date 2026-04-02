@@ -234,7 +234,7 @@ export default async function MembrosPage() {
 function CheckoutButton({ label = 'Assinar →', fullWidth = false }: { label?: string; fullWidth?: boolean }) {
   return (
     <form action="/api/checkout" method="POST" style={{ marginTop: fullWidth ? 32 : 0, width: fullWidth ? '100%' : 'auto', display: 'inline-block' }}>
-      <button type="submit" className="btn-primary" style={{ display: 'block', width: fullWidth ? '100%' : 'auto', textAlign: 'center' }}>
+      <button type="submit" className="btn-primary" style={{ display: 'block', background: "var(--gold)", width: fullWidth ? '100%' : 'auto', textAlign: 'center' }}>
         {label}
       </button>
     </form>

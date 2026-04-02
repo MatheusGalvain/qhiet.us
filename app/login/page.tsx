@@ -137,7 +137,7 @@ function LoginContent() {
 
         <blockquote style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 15, color: 'var(--muted)', lineHeight: 1.7, borderLeft: '1px solid var(--red-dim)', paddingLeft: 16 }}>
           "A ignorância é a mãe de todos os males — e o conhecimento, a única redenção possível."
-          <cite style={{ display: 'block', marginTop: 6, fontStyle: 'normal', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)' }}>
+          <cite style={{ display: 'block', marginTop: 6, fontStyle: 'normal', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--cream-dim)' }}>
             — Evangelhos Gnósticos · Nag Hammadi
           </cite>
         </blockquote>
@@ -296,8 +296,8 @@ function LoginContent() {
             </button>
             <Divider />
             {/* <GoogleButton onClick={handleGoogle} label="Cadastrar com Google" /> */}
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', textAlign: 'center', marginTop: 8 }}>
-              Já tem conta?{' '}
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--cream)', textTransform: 'uppercase', textAlign: 'center', marginTop: 8 }}>
+              Já tem conta criada?{' '}
               <button type="button" onClick={() => setTab('login')} style={{ color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2 }}>
                 Entrar
               </button>
@@ -312,9 +312,9 @@ function LoginContent() {
 function Divider() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase', margin: '4px 0' }}>
-      <span style={{ flex: 1, height: 1, background: 'var(--faint)', display: 'block' }} />
-      ou
-      <span style={{ flex: 1, height: 1, background: 'var(--faint)', display: 'block' }} />
+      <span style={{ flex: 1, height: 1, background: 'var(--cream-dim)', display: 'block' }} />
+      <span style={{ color: 'var(--cream-dim)'}}>ou</span>
+      <span style={{ flex: 1, height: 1, background: 'var(--cream-dim)', display: 'block' }} />
     </div>
   )
 }
