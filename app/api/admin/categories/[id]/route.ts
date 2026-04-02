@@ -54,6 +54,7 @@ export async function DELETE(
 }
 
 // PATCH — update category fields (label, slug, symbol, color, etc.) or toggle active
+// Also accepts { content: CategoryContent } to upsert category_content via service client
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -64,6 +65,21 @@ export async function PATCH(
   const supabase = createServiceClient()
   const { id } = params
   const body = await request.json()
+
+  // ── Save category_content if provided ──
+  if (body.content !== undefined) {
+    const categorySlug: string = body.content.category
+    const { error: contentErr } = await supabase
+      .from('category_content')
+      .upsert(body.content, { onConflict: 'category' })
+    if (contentErr) {
+      return NextResponse.json({ error: contentErr.message }, { status: 500 })
+    }
+    // If only content was sent (no meta fields), return early
+    if (body.label === undefined && body.slug === undefined && body.active === undefined) {
+      return NextResponse.json({ success: true, category: categorySlug })
+    }
+  }
 
   // Build update payload — only include fields that were sent
   const updates: Record<string, unknown> = {}

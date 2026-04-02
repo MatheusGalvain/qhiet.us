@@ -9,8 +9,10 @@ async function checkAdmin() {
   return data?.is_admin ? user : null
 }
 
-// GET — list all categories
+// GET — list all categories (admin only)
 export async function GET() {
+  const admin = await checkAdmin()
+  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   const service = createServiceClient()
   const { data } = await service.from('categories').select('*').order('sort_order')
   return NextResponse.json(data ?? [])

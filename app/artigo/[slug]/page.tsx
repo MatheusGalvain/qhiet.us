@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation'
+
+export const revalidate = 0
 import { createClient } from '@/lib/supabase/server'
 import { getCategoryLabelMap } from '@/lib/getCategoryLabelMap'
 import TransmissaoCard from '@/components/transmissoes/TransmissaoCard'
@@ -8,6 +10,7 @@ import PaywallOverlay from '@/components/artigo/PaywallOverlay'
 import HermesQuiz from '@/components/artigo/HermesQuiz'
 import ArticleSidebarClient from '@/components/artigo/ArticleSidebarClient'
 import ArticleReadingTheme from '@/components/artigo/ArticleReadingTheme'
+import { sanitizeHtml } from '@/lib/sanitize'
 import HermesBot from '@/components/layout/HermesBot'
 import CategoryTag from '@/components/ui/CategoryTag'
 import Link from 'next/link'
@@ -160,7 +163,7 @@ export default async function ArtigoPage({ params }: PageProps) {
           {hasAccess ? (
             <div
               className="article-prose"
-              dangerouslySetInnerHTML={{ __html: t.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(t.content) }}
             />
           ) : (
             <PaywallOverlay />

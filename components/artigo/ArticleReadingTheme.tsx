@@ -36,7 +36,7 @@ export default function ArticleReadingTheme() {
         alignItems: 'center',
         gap: 8,
         background: 'transparent',
-        border: `1px solid ${light ? 'var(--gold)' : 'var(--faint)'}`,
+        border: `1px solid ${light ? 'var(--gold)' : 'var(--cream-dim)'}`,
         color: light ? 'var(--gold)' : 'var(--muted)',
         fontFamily: 'var(--font-mono)',
         fontSize: 11,
@@ -49,7 +49,7 @@ export default function ArticleReadingTheme() {
       }}
     >
       <span style={{ fontSize: 13 }}>{light ? '◉' : '○'}</span>
-      {light ? 'Escuro' : 'Claro'}
+      {light ? 'Modo Escuro' : 'Modo Claro'}
     </button>
   )
 }

@@ -44,10 +44,10 @@ export default async function AdminDashboard() {
   const stats = await getStats()
 
   const statCards = [
-    { label: 'Transmissões', value: stats.totalTransmissoes, sub: `${stats.totalPublished} publicadas`, icon: '◎', href: '/admin/transmissoes' },
-    { label: 'Membros',      value: stats.totalUsers,         sub: 'cadastrados',                        icon: '○', href: '/admin/membros' },
-    { label: 'Assinantes',   value: stats.totalSubscribers,   sub: 'plano Iniciado ativo',               icon: '◆', href: '/admin/membros' },
-    { label: 'XP Médio',     value: stats.avgXp,              sub: 'por usuário',                        icon: '✦', href: '/admin/membros' },
+    { label: 'Transmissões', value: stats.totalTransmissoes, sub: `${stats.totalPublished} publicadas`, icon: '◎', href: '/control/transmissoes' },
+    { label: 'Membros',      value: stats.totalUsers,         sub: 'cadastrados',                        icon: '○', href: '/control/membros' },
+    { label: 'Assinantes',   value: stats.totalSubscribers,   sub: 'plano Iniciado ativo',               icon: '◆', href: '/control/membros' },
+    { label: 'XP Médio',     value: stats.avgXp,              sub: 'por usuário',                        icon: '✦', href: '/control/membros' },
   ]
 
   return (
@@ -100,7 +100,7 @@ export default async function AdminDashboard() {
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)' }}>
               Últimas Transmissões
             </span>
-            <Link href="/admin/transmissoes/nova" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--red)', textDecoration: 'none' }}>
+            <Link href="/control/transmissoes/nova" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--red)', textDecoration: 'none' }}>
               + Nova
             </Link>
           </div>
@@ -109,7 +109,7 @@ export default async function AdminDashboard() {
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)' }}>Nenhuma transmissão ainda.</p>
             )}
             {stats.recentTransmissoes.map((t: any) => (
-              <Link key={t.id} href={`/admin/transmissoes/${t.id}/editar`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--faint)' }}>
+              <Link key={t.id} href={`/control/transmissoes/${t.id}/editar`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--faint)' }}>
                 <span style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--cream)' }}>
                   {t.title}
                 </span>
@@ -132,7 +132,7 @@ export default async function AdminDashboard() {
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)' }}>
               Últimos Membros
             </span>
-            <Link href="/admin/membros" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--red)', textDecoration: 'none' }}>
+            <Link href="/control/membros" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--red)', textDecoration: 'none' }}>
               Ver todos
             </Link>
           </div>

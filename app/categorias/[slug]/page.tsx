@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CATEGORY_META } from '@/types'
 import type { Transmissao } from '@/types'
 import type { Metadata } from 'next'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 export const revalidate = 0
 
@@ -130,14 +131,14 @@ export default async function CategoriaPage({ params }: PageProps) {
           {content.desc_col1_html && (
             <div
               className="article-prose border-b md:border-b-0 md:border-r border-[var(--faint)] pb-8 md:pb-0 md:pr-[clamp(20px,3vw,48px)]"
-              dangerouslySetInnerHTML={{ __html: content.desc_col1_html }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.desc_col1_html) }}
             />
           )}
           
           {content.desc_col2_html && (
             <div
               className="article-prose pt-8 md:pt-0 md:pl-[clamp(20px,3vw,48px)]"
-              dangerouslySetInnerHTML={{ __html: content.desc_col2_html }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.desc_col2_html) }}
             />
           )}
         </section>

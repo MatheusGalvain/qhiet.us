@@ -4,13 +4,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const NAV_ITEMS = [
-  { href: '/admin',               label: 'Dashboard',      icon: '◈' },
-  { href: '/admin/transmissoes',  label: 'Transmissões',   icon: '◎' },
-  { href: '/admin/livros',        label: 'Livros',         icon: '☿' },
-  { href: '/admin/trilhas',       label: 'Trilhas',        icon: '◉' },
-  { href: '/admin/membros',       label: 'Membros',        icon: '○' },
-  { href: '/admin/categorias',    label: 'Categorias',     icon: '△' },
-  { href: '/admin/configuracoes', label: 'Configurações',  icon: '✦' },
+  { href: '/control',               label: 'Dashboard',      icon: '◈' },
+  { href: '/control/transmissoes',  label: 'Transmissões',   icon: '◎' },
+  { href: '/control/livros',        label: 'Livros',         icon: '☿' },
+  { href: '/control/trilhas',       label: 'Trilhas',        icon: '◉' },
+  { href: '/control/membros',       label: 'Membros',        icon: '○' },
+  { href: '/control/categorias',    label: 'Categorias',     icon: '△' },
+  { href: '/control/configuracoes', label: 'Configurações',  icon: '✦' },
 ]
 
 interface Props {
@@ -47,8 +47,8 @@ export default function AdminNav({ adminName, adminEmail }: Props) {
       {/* Nav links */}
       <nav style={{ flex: 1, padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
         {NAV_ITEMS.map(({ href, label, icon }) => {
-          const isActive = href === '/admin'
-            ? pathname === '/admin'
+          const isActive = href === '/control'
+            ? pathname === '/control'
             : pathname.startsWith(href)
 
           return (

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { saveNextPostAt } from '@/app/admin/configuracoes/actions'
+import { saveNextPostAt } from '@/app/control/configuracoes/actions'
 
 interface Props {
   nextPostAt: string

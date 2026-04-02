@@ -55,10 +55,10 @@ export default async function AdminCategoriasPage() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-          <Link href="/admin/categorias/nova" className="btn-secondary" style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          <Link href="/control/categorias/nova" className="btn-secondary" style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}>
             + Nova Categoria
           </Link>
-          <Link href="/admin/transmissoes/nova" className="btn-secondary" style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          <Link href="/control/transmissoes/nova" className="btn-secondary" style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}>
             + Nova Transmissão
           </Link>
         </div>
@@ -69,7 +69,7 @@ export default async function AdminCategoriasPage() {
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 24 }}>
             Nenhuma categoria no banco. Rode o SQL de migração ou crie uma nova.
           </p>
-          <Link href="/admin/categorias/nova" className="btn-secondary" style={{ textDecoration: 'none' }}>
+          <Link href="/control/categorias/nova" className="btn-secondary" style={{ textDecoration: 'none' }}>
             + Criar primeira categoria
           </Link>
         </div>
@@ -97,7 +97,7 @@ export default async function AdminCategoriasPage() {
                   <Link href={`/categorias/${slug}`} target="_blank" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
                     /categorias/{slug} ↗
                   </Link>
-                  <Link href={`/admin/categorias/${slug}`} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--red)', textDecoration: 'none', textTransform: 'uppercase', border: '1px solid var(--red-dim)', padding: '2px 8px' }}>
+                  <Link href={`/control/categorias/${slug}`} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--red)', textDecoration: 'none', textTransform: 'uppercase', border: '1px solid var(--red-dim)', padding: '2px 8px' }}>
                     Editar conteúdo →
                   </Link>
                   <DeleteButton id={id} title={slug} endpoint="categories"/>

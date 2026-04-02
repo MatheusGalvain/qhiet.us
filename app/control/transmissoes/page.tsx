@@ -41,7 +41,7 @@ export default async function AdminTransmissoesPage() {
             {list.length} transmissões · {list.filter(t => t.status === 'published').length} publicadas
           </p>
         </div>
-        <Link href="/admin/transmissoes/nova" className="btn-primary" style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}>
+        <Link href="/control/transmissoes/nova" className="btn-primary" style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}>
           + Nova Transmissão
         </Link>
       </div>
@@ -59,7 +59,7 @@ export default async function AdminTransmissoesPage() {
           <div style={{ padding: '40px 20px', textAlign: 'center' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)' }}>
               Nenhuma transmissão ainda.{' '}
-              <Link href="/admin/transmissoes/nova" style={{ color: 'var(--red)' }}>Criar a primeira →</Link>
+              <Link href="/control/transmissoes/nova" style={{ color: 'var(--red)' }}>Criar a primeira →</Link>
             </p>
           </div>
         )}
@@ -84,7 +84,7 @@ export default async function AdminTransmissoesPage() {
 
             {/* Title */}
             <div>
-              <Link href={`/admin/transmissoes/${t.id}/editar`} style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--cream)', textDecoration: 'none', display: 'block', marginBottom: 3 }}>
+              <Link href={`/control/transmissoes/${t.id}/editar`} style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--cream)', textDecoration: 'none', display: 'block', marginBottom: 3 }}>
                 {t.title}
               </Link>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 1, color: 'var(--muted)' }}>/{t.slug}</span>
@@ -116,7 +116,7 @@ export default async function AdminTransmissoesPage() {
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-start', flexDirection: 'column' }}>
-              <Link href={`/admin/transmissoes/${t.id}/editar`} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
+              <Link href={`/control/transmissoes/${t.id}/editar`} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>
                 Edit.
               </Link>
               <DeleteButton id={t.id} title={t.title} endpoint="transmissoes"/>

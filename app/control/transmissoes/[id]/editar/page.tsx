@@ -19,7 +19,7 @@ export default async function EditarTransmissaoPage({ params }: { params: { id: 
   return (
     <div>
       <div style={{ marginBottom: 40 }}>
-        <Link href="/admin/transmissoes" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)', textDecoration: 'none' }}>
+        <Link href="/control/transmissoes" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)', textDecoration: 'none' }}>
           ← Transmissões
         </Link>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginTop: 12 }}>

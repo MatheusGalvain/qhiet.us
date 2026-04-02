@@ -113,7 +113,7 @@ export default function CategoryForm({ mode, initial = {}, categoryId }: Props) 
       return
     }
 
-    router.push('/admin/categorias')
+    router.push('/control/categorias')
     router.refresh()
   }
 
@@ -262,7 +262,7 @@ export default function CategoryForm({ mode, initial = {}, categoryId }: Props) 
         >
           {saving ? 'Salvando…' : mode === 'create' ? 'Criar Categoria →' : 'Salvar →'}
         </button>
-        <a href="/admin/categorias" style={{ padding: '12px 20px', background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+        <a href="/control/categorias" style={{ padding: '12px 20px', background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
           Cancelar
         </a>
       </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 
 interface TimelineItem { date: string; title: string }
 interface FigureItem   { name: string; period: string; desc: string; symbol: string; image_url?: string }
@@ -80,6 +80,8 @@ function slugify(str: string) {
 }
 
 export default function CategoryContentEditor({ slug, categoryId, initialContent, initialMeta }: Props) {
+  const router = useRouter()
+
   /* ── Meta (categories table) ── */
   const [meta, setMeta] = useState<CategoryMeta>(initialMeta)
   const [editedSlug, setEditedSlug] = useState(slug)
@@ -137,18 +139,24 @@ export default function CategoryContentEditor({ slug, categoryId, initialContent
         throw new Error(d.error ?? 'Erro ao salvar categoria')
       }
 
-      // 2. Save content → category_content table (use current slug for FK)
-      const supabase = createClient()
-      const { error: err } = await supabase
-        .from('category_content')
-        .upsert({ ...content, category: slugChanged ? editedSlug : slug }, { onConflict: 'category' })
-      if (err) throw err
+      // 2. Save content → category_content via server API (bypasses RLS)
+      const contentPayload = { ...content, category: slugChanged ? editedSlug : slug }
+      const contentRes = await fetch(`/api/admin/categories/${categoryId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: contentPayload }),
+      })
+      if (!contentRes.ok) {
+        const d = await contentRes.json()
+        throw new Error(d.error ?? 'Erro ao salvar conteúdo')
+      }
 
       setSaved(true)
+      router.refresh() // invalida o router cache para que a próxima visita busque dados frescos
 
       // If slug changed, redirect to new URL
       if (slugChanged) {
-        window.location.href = `/admin/categorias/${editedSlug}`
+        window.location.href = `/control/categorias/${editedSlug}`
         return
       }
     } catch (e: unknown) {
@@ -544,7 +552,7 @@ export default function CategoryContentEditor({ slug, categoryId, initialContent
         </button>
 
         <a
-          href="/admin/categorias"
+          href="/control/categorias"
           style={{ padding: '14px 20px', background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', textDecoration: 'none' }}
         >
           ← Voltar

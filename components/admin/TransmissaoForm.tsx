@@ -96,7 +96,7 @@ export default function TransmissaoForm({ initial = {}, mode }: Props) {
       return
     }
 
-    router.push('/admin/transmissoes')
+    router.push('/control/transmissoes')
     router.refresh()
   }
 

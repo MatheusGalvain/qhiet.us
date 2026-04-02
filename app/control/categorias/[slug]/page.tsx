@@ -3,6 +3,8 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { CATEGORY_META } from '@/types'
 import CategoryContentEditor from '@/components/admin/CategoryContentEditor'
 
+export const dynamic = 'force-dynamic'
+
 interface PageProps { params: { slug: string } }
 
 async function getData(slug: string) {

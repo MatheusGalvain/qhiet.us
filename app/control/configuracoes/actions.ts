@@ -26,6 +26,6 @@ export async function saveNextPostAt(date: string): Promise<{ ok: boolean; error
   if (error) return { ok: false, error: error.message }
 
   revalidatePath('/')
-  revalidatePath('/admin/configuracoes')
+  revalidatePath('/control/configuracoes')
   return { ok: true }
 }
