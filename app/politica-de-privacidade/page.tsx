@@ -35,7 +35,7 @@ export default function PoliticaPrivacidadePage() {
       <LegalUL>
         <LegalLI>Para autenticar seu acesso ao portal.</LegalLI>
         <LegalLI>Para calcular e exibir seu XP, rank e histórico de leitura.</LegalLI>
-        <LegalLI>Para enviar o livro mensal e a newsletter por e-mail.</LegalLI>
+        <LegalLI>Para enviar o livro mensal.</LegalLI>
         <LegalLI>Para processar e gerenciar sua assinatura.</LegalLI>
         <LegalLI>Para melhorar o conteúdo e a experiência do portal.</LegalLI>
       </LegalUL>

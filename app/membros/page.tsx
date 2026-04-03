@@ -38,7 +38,7 @@ async function getStats() {
 const PLAN_FEATURES = {
   profano: [
     { check: true,  text: 'Acesso a todas as transmissões de <strong>Leitura Livre</strong>' },
-    { check: true,  text: '<strong>1 livro mensal</strong> por e-mail' },
+    { check: true,  text: '<strong>1 livro mensal</strong>' },
     { check: true,  text: 'Perfil com XP e ranking global' },
     { check: false, text: 'Transmissões exclusivas Iniciado' },
     { check: false, text: 'Quiz de IA Hermes com XP bônus' },
@@ -48,7 +48,7 @@ const PLAN_FEATURES = {
     { check: true, text: 'Tudo do plano Profano' },
     { check: true, text: '<strong>Todas as transmissões</strong> — inclusive exclusivas' },
     { check: true, text: 'Quiz de <strong>IA Hermes</strong> ao final de cada artigo' },
-    { check: true, text: '<strong>4 livros mensais</strong> curados por e-mail/ebook' },
+    { check: true, text: '<strong>4 livros mensais</strong>' },
     { check: true, text: 'XP bônus por quiz e leitura exclusiva' },
     // { check: true, text: 'Recomendação' },
   ],
@@ -61,7 +61,7 @@ const COMPARE_ROWS = [
   { label: 'Transmissões de Leitura Livre',        profano: true,     iniciado: true },
   { label: 'Quiz de IA Hermes',                     profano: true,    iniciado: true },
   { label: 'XP por leitura',                        profano: true,     iniciado: true },
-  { label: 'Livros mensais por e-mail',             profano: '1 livro', iniciado: '4 livros' },
+  { label: 'Livros mensais',             profano: '1 livro', iniciado: '4 livros' },
   { label: 'Ranking global',                        profano: true,     iniciado: true },
 ]
 

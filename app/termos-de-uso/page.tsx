@@ -33,7 +33,7 @@ export default function TermosUsoPage() {
       <LegalH2>Planos e acesso</LegalH2>
       <LegalP>O portal oferece dois planos:</LegalP>
       <LegalUL>
-        <LegalLI><S>Plano Profano (gratuito):</S> acesso às transmissões de leitura livre, 1 livro por mês por e-mail e quiz básico.</LegalLI>
+        <LegalLI><S>Plano Profano (gratuito):</S> acesso às transmissões de leitura livre, 1 livro por mês.</LegalLI>
         <LegalLI><S>Plano Iniciado (R$19,99/mês):</S> acesso completo a todas as transmissões, 4 livros por mês, XP completo, rank global e trilhas de estudo.</LegalLI>
       </LegalUL>
       <LegalP>Os benefícios de cada plano podem ser alterados mediante aviso prévio por e-mail.</LegalP>

@@ -11,7 +11,7 @@ Portal de conhecimento gnóstico, cabalístico e hermético construído com **Ne
 | **Next.js 14** | Framework (App Router, Server Components, ISR) |
 | **Supabase** | Auth (email + Google OAuth), banco de dados, RLS |
 | **Stripe** | Plano Iniciado (R$29/mês) + webhook |
-| **Resend** | Envio de livros mensais por e-mail |
+| **Resend** | Envio de livros mensais |
 | **OpenAI GPT-4o-mini** | Geração do quiz Hermes |
 | **Vercel** | Deploy + Edge Runtime |
 
