@@ -57,11 +57,11 @@ export default function TransmissaoCard({ transmissao: t, isSubscriber, labelMap
           })}
         </div>
 
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(16px, 2vw, 20px)', letterSpacing: 1, lineHeight: 1.2, color: 'var(--cream)' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', letterSpacing: 1, lineHeight: 1.2, color: 'var(--cream)' }}>
           {t.title}
         </h3>
 
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: '#b8b8b8', lineHeight: 1.75, flex: 1, ...(isLocked ? { filter: 'blur(3.5px)', userSelect: 'none', opacity: 0.5 } : {}) }}>
+        <p style={{ fontFamily: 'var(--font-body-article)', fontSize: 15, color: '#b8b8b8', lineHeight: 1.75, flex: 1, ...(isLocked ? { filter: 'blur(3.5px)', userSelect: 'none', opacity: 0.5 } : {}) }}>
           {t.excerpt}
         </p>
 

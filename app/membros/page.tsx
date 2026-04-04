@@ -38,31 +38,29 @@ async function getStats() {
 const PLAN_FEATURES = {
   profano: [
     { check: true,  text: 'Acesso a todas as transmissões de <strong>Leitura Livre</strong>' },
-    { check: true,  text: '<strong>1 livro mensal</strong>' },
+    { check: true,  text: 'Bot Hermes para instruir' },
     { check: true,  text: 'Perfil com XP e ranking global' },
-    { check: false, text: 'Transmissões exclusivas Iniciado' },
-    { check: false, text: 'Quiz de IA Hermes com XP bônus' },
-    { check: false, text: '1 livros mensal' },
+    { check: true,  text: '<strong>1 livro mensal</strong>' },
   ],
   iniciado: [
     { check: true, text: 'Tudo do plano Profano' },
-    { check: true, text: '<strong>Todas as transmissões</strong> — inclusive exclusivas' },
-    { check: true, text: 'Quiz de <strong>IA Hermes</strong> ao final de cada artigo' },
+    { check: true, text: '<strong>Transmissões exclusivas</strong> para iniciados' },
+    { check: true, text: 'Quiz de <strong>Hermes</strong> ao final de cada artigo' },
     { check: true, text: '<strong>4 livros mensais</strong>' },
-    { check: true, text: 'XP bônus por quiz e leitura exclusiva' },
-    // { check: true, text: 'Recomendação' },
+    { check: true, text: 'Acesso às <strong>Trilhas Exclusivas</strong>' },
+    { check: true, text: 'Grimório Digital para Registros das Trilhas' },
   ],
 }
 
 const COMPARE_ROWS = [
-  { label: 'Transmissões Exclusivas Iniciado',      profano: false,    iniciado: true },
-  { label: 'Badge de assinante no perfil',          profano: false,    iniciado: true },
-  { label: 'Quiz liberado em artigos com bônus de xp',                     profano: false,    iniciado: true },
   { label: 'Transmissões de Leitura Livre',        profano: true,     iniciado: true },
-  { label: 'Quiz de IA Hermes',                     profano: true,    iniciado: true },
-  { label: 'XP por leitura',                        profano: true,     iniciado: true },
-  { label: 'Livros mensais',             profano: '1 livro', iniciado: '4 livros' },
-  { label: 'Ranking global',                        profano: true,     iniciado: true },
+  { label: 'Transmissões Exclusivas Iniciado',      profano: false,    iniciado: true },
+  { label: 'Quiz Liberado em Artigos',                     profano: false,    iniciado: true },
+  { label: 'Trilhas Exclusivas',        profano: false,     iniciado: true },
+  { label: 'Grimório Exclusivo Digital',        profano: false,     iniciado: true },
+  { label: 'XP por Leitura',                        profano: true,     iniciado: true },
+  { label: 'Livros Mensais Disponibilizados',             profano: '1 livro', iniciado: '4 livros' },
+  { label: 'Ranking Global',                        profano: true,     iniciado: true },
 ]
 
 export default async function MembrosPage() {
@@ -157,7 +155,7 @@ export default async function MembrosPage() {
                 </div>
               ))}
             </div>
-            <Link href="/login?tab=register" style={{ display: 'block', width: '100%', marginTop: 32, padding: 16, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)', textDecoration: 'none', transition: 'all .2s' }}>
+            <Link href="/login?tab=register" style={{ display: 'block', width: '100%', marginTop: 32, padding: 16, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--cream-dim)', color: 'var(--muted)', textDecoration: 'none', transition: 'all .2s' }}>
               Criar conta grátis
             </Link>
           </div>

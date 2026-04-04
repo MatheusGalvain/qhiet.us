@@ -469,18 +469,27 @@ export default async function PerfilPage({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="book-card-link"
-                style={isPremium ? { outline: '1px solid var(--gold)', outlineOffset: 2 } : undefined}
+                style={isPremium ? { outline: '1px solid var(--gold)', outlineOffset: 2 } : {outline: '1px solid var(--red-dim)', outlineOffset: 2}}
               >
                 {/* Badge premium */}
-                {isPremium && (
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 8 }}>
-                    ◈ Iniciado
-                  </p>
-                )}
+                <p
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 9,
+                    letterSpacing: 3,
+                    color: isPremium ? 'var(--gold)' : 'var(--cream)',
+                    textTransform: 'uppercase',
+                    marginBottom: 8
+                  }}
+                >
+                  {isPremium ? "Plano Iniciado" : "Plano Gratuito"}
+                </p>
+
                 {/* Cover */}
-                <div style={{ width: '100%', aspectRatio: '2/3', marginBottom: 14, overflow: 'hidden', flexShrink: 0 }}>
+                <div className="divBook" style={{ width: '100%', aspectRatio: '2/3', marginBottom: 14, overflow: 'hidden', flexShrink: 0 }}>
                   {book.cover_url ? (
                     <img
+                      className='imgBook'
                       src={book.cover_url}
                       alt={book.title}
                       style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}

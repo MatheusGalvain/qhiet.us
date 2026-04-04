@@ -341,7 +341,7 @@ function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
               <span className="plan-period"> / gratuito</span>
             </div>
             <div className="plan-features">
-              {['Textos introdutórios', '1 livro/mês'].map(f => (
+              {['Textos introdutórios', '1 livro/mês', 'Perfil com XP e ranking global'].map(f => (
                 <p key={f} className="plan-feature">{f}</p>
               ))}
             </div>
@@ -356,7 +356,7 @@ function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
               <span className="plan-period"> / por mês</span>
             </div>
             <div className="plan-features">
-              {['Acesso completo', '4 livros/mês', 'Trilhas de estudo'].map(f => (
+              {['Tudo do Profano Incluso', 'Transmissões Exclusivas', '4 livros/mês', 'Trilhas de Estudos', 'Grimorio Digital para anotações', 'Quiz no Final dos Artigos'].map(f => (
                 <p key={f} className="plan-feature">{f}</p>
               ))}
             </div>
