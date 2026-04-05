@@ -53,17 +53,77 @@ export default function ProfileSidebar({ name, email, isSubscriber, rankName, ra
 
   return (
     <>
-    {/* Mobile identity strip — visible on mobile only (sidebar is horizontal tabs on mobile) */}
-    <div className="profile-mobile-identity" style={{ padding: '16px var(--px-sm) 16px', borderBottom: '1px solid var(--faint)' }}>
-      <ProfileNameEditor initialName={name} size="sm" />
-      <div>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--red)', textTransform: 'uppercase', marginTop: 2 }}>
-          {rankSymbol} {rankName} · {isSubscriber ? 'Iniciado' : 'Profano'}
-        </p>
+    {/* ══ MOBILE HEADER — hidden on desktop ══ */}
+    <div className="profile-mobile-identity">
+      {/* Identity row */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 14,
+        padding: '18px var(--px-sm) 16px',
+        borderBottom: '1px solid var(--faint)',
+        background: '#1b1b1a',
+      }}>
+        {/* Avatar + name handled entirely by ProfileNameEditor (size="sm" = 32px avatar) */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <ProfileNameEditor initialName={name} size="sm" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>
+              {rankSymbol} {rankName}
+            </span>
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, textTransform: 'uppercase',
+              color: isSubscriber ? 'var(--gold)' : 'var(--faint)',
+              border: `1px solid ${isSubscriber ? 'var(--gold)' : 'var(--faint)'}`,
+              padding: '1px 6px',
+            }}>
+              {isSubscriber ? 'Iniciado' : 'Profano'}
+            </span>
+          </div>
+        </div>
+        {/* Logout */}
+        <form action="/api/auth/logout" method="POST">
+          <button type="submit" title="Sair" style={{
+            background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)',
+            cursor: 'pointer', width: 36, height: 36,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'var(--font-mono)', fontSize: 13, flexShrink: 0,
+          }}>⏻</button>
+        </form>
       </div>
+
+      {/* Nav grid */}
+      <nav className="profile-mobile-nav">
+        <a href="#xp">
+          <span className="pmn-icon">✦</span>XP
+        </a>
+        <a href="#atividade">
+          <span className="pmn-icon">◈</span>Atividade
+        </a>
+        <a href="#historico">
+          <span className="pmn-icon">◎</span>Histórico
+        </a>
+        <a href="#livros">
+          <span className="pmn-icon">☿</span>Livros
+        </a>
+        <a href="/perfil/trilhas">
+          <span className="pmn-icon">◉</span>Trilhas
+        </a>
+        {isSubscriber && (
+          <a href="/perfil/grimorio" className="pmn-subscriber">
+            <span className="pmn-icon">✧</span>Grimório
+          </a>
+        )}
+        <a href="#config">
+          <span className="pmn-icon">○</span>Config
+        </a>
+        {!isSubscriber && (
+          <a href="/membros" style={{ color: 'var(--gold)', opacity: 1 }}>
+            <span className="pmn-icon" style={{ color: 'var(--gold)', opacity: 1 }}>◆</span>Upgrade
+          </a>
+        )}
+      </nav>
     </div>
 
-    <aside
+        <aside
       className="profile-sidebar"
       style={{
         width: collapsed ? 56 : 280,
@@ -72,8 +132,8 @@ export default function ProfileSidebar({ name, email, isSubscriber, rankName, ra
         overflow: 'hidden',
       }}
     >
-      {/* ── Toggle button ── */}
-      <div style={{
+      {/* ── Toggle button — desktop only ── */}
+      <div className="profile-identity-mobile-hide" style={{
         display: 'flex',
         justifyContent: collapsed ? 'center' : 'flex-end',
         padding: collapsed ? '0 0 20px' : '0 20px 20px',

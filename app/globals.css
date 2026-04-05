@@ -801,7 +801,6 @@ body {
   display: flex;
   min-height: calc(100vh - var(--nav-h));
 }
-/* Main content always fills remaining space regardless of sidebar width */
 .profile-layout > div {
   flex: 1;
   min-width: 0;
@@ -810,6 +809,7 @@ body {
   .profile-layout { flex-direction: column; }
 }
 
+/* ── Desktop sidebar ── */
 .profile-sidebar {
   border-right: 1px solid var(--faint);
   background-color: #1b1b1a;
@@ -821,46 +821,87 @@ body {
   height: calc(100vh - var(--nav-h));
   overflow-y: auto;
 }
+
+/* ── Mobile: sidebar becomes a compact header card ── */
 @media (max-width: 767px) {
   .profile-sidebar {
     position: static;
     height: auto;
     border-right: none;
-    border-bottom: 1px solid var(--faint);
-    padding: 24px 0 0;
+    border-bottom: none;
+    padding: 0;
     overflow: visible;
+    background: transparent;
+    width: 100% !important;
+    min-width: 0 !important;
   }
-  /* On mobile, sidebar nav becomes horizontal tab bar */
-  .profile-sidebar-nav {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    white-space: nowrap;
-    padding-bottom: 0;
-  }
-  .profile-sidebar-nav::-webkit-scrollbar { display: none; }
-  .profile-sidebar-nav li { display: inline-block; }
-  .profile-sidebar-nav li a {
-    border-left: none !important;
-    border-bottom: 2px solid transparent;
-    padding: 14px 20px !important;
-    display: inline-flex;
-  }
-  .profile-sidebar-nav li a.active {
-    border-bottom-color: var(--red) !important;
-    background: transparent !important;
-  }
-  /* Hide identity block on mobile (show inline) */
-  .profile-identity-mobile-hide { display: none; }
+  .profile-identity-mobile-hide { display: none !important; }
+  .profile-sidebar-nav { display: none !important; }
 }
 
-/* Mobile identity strip — hidden on desktop (sidebar has big identity block) */
+/* ── Mobile identity strip ── */
 .profile-mobile-identity { display: none !important; }
 @media (max-width: 767px) {
-  .profile-mobile-identity { display: flex !important; align-items: center; gap: 12px; }
+  .profile-mobile-identity { display: block !important; }
 }
 
-/* Mobile-only logout row — hidden on desktop (sidebar handles it) */
+/* ── Mobile nav grid ── */
+.profile-mobile-nav { display: none; }
+@media (max-width: 767px) {
+  .profile-mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--faint);
+    border-bottom: 1px solid var(--faint);
+    background: #131312;
+  }
+  .profile-mobile-nav a,
+  .profile-mobile-nav button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 14px 4px;
+    border-right: 1px solid var(--faint);
+    border-left: none;
+    border-top: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color .18s, border-color .18s, background .18s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .profile-mobile-nav a:last-child,
+  .profile-mobile-nav button:last-child { border-right: none; }
+  .profile-mobile-nav a:hover,
+  .profile-mobile-nav button:hover {
+    color: var(--cream);
+    background: rgba(255,255,255,0.03);
+  }
+  .profile-mobile-nav a.pmn-active {
+    color: var(--cream);
+    border-bottom-color: var(--red);
+    background: rgba(176,42,30,0.06);
+  }
+  .profile-mobile-nav .pmn-icon {
+    font-size: 18px;
+    line-height: 1;
+    color: var(--gold);
+    opacity: 0.7;
+  }
+  .profile-mobile-nav a.pmn-active .pmn-icon { opacity: 1; }
+  /* Subscriber-only items get a gold tint */
+  .profile-mobile-nav .pmn-subscriber .pmn-icon { color: var(--red); opacity: 0.7; }
+}
+
+/* Mobile-only logout row */
 .profile-mobile-actions {
   display: none;
   margin-top: 32px;
@@ -868,7 +909,7 @@ body {
   border-top: 1px solid var(--faint);
 }
 @media (max-width: 767px) {
-  .profile-mobile-actions { display: flex; gap: 12; flex-wrap: wrap; }
+  .profile-mobile-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 }
 
 /* ═══════════════════════════════════════

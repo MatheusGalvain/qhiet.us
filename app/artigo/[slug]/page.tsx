@@ -64,13 +64,19 @@ async function getData(slug: string) {
   const safeQuizQuestions: QuizQuestion[] = hasAccess && quiz
     ? (quiz.questions as QuizQuestion[])
     : []
-  // ─────────────────────────────────────────────────────────────────────────────────
-  const { data: transmissoes } = await supabase
+  // Recomendações: artigo free → só recomenda free; artigo pago → recomenda ambos
+  let recQuery = supabase
     .from('transmissoes')
     .select('*')
     .eq('status', 'published')
     .neq('id', transmissao.id)
-    .limit(6)
+
+  if (transmissao.access === 'free') {
+    recQuery = recQuery.eq('access', 'free')
+  }
+  // se locked, sem filtro de access → retorna free + locked
+
+  const { data: transmissoes } = await recQuery.limit(6)
   return { transmissao: safeTransmissao, transmissoes: transmissoes ?? [], isSubscriber, hasAccess, quiz, safeQuizQuestions }
 }
 

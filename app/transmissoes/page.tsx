@@ -1,11 +1,13 @@
 import { Suspense } from 'react'
 
 export const revalidate = 0
+
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import FilterBar from '@/components/transmissoes/FilterBar'
 import TransmissaoCard from '@/components/transmissoes/TransmissaoCard'
 import HermesBot from '@/components/layout/HermesBot'
+import Link from 'next/link'
 import type { Transmissao } from '@/types'
 import type { Metadata } from 'next'
 
@@ -14,8 +16,10 @@ export const metadata: Metadata = {
   description: 'Todas as transmissões do portal QHIETHUS — artigos sobre hermetismo, cabala, gnosticismo, alquimia e tarot.',
 }
 
+const PER_PAGE = 12
+
 interface PageProps {
-  searchParams: { cat?: string; q?: string; tab?: string; sort?: string }
+  searchParams: { cat?: string; q?: string; tab?: string; sort?: string; page?: string }
 }
 
 async function getActiveCategories() {
@@ -34,9 +38,13 @@ async function getData(searchParams: PageProps['searchParams']) {
   let isSubscriber = false
   if (user) {
     const { data: profile } = await supabase
-      .from('profiles').select('is_subscriber').eq('id', user.id).single()
-    isSubscriber = profile?.is_subscriber ?? false
+      .from('profiles').select('is_subscriber, is_admin').eq('id', user.id).single()
+    isSubscriber = profile?.is_subscriber ?? profile?.is_admin ?? false
   }
+
+  const page = Math.max(1, parseInt(searchParams.page ?? '1', 10))
+  const from  = (page - 1) * PER_PAGE
+  const to    = from + PER_PAGE - 1
 
   let query = supabase
     .from('transmissoes')
@@ -48,43 +56,62 @@ async function getData(searchParams: PageProps['searchParams']) {
   if (searchParams.cat && searchParams.cat !== 'todos') {
     const cats = searchParams.cat.split(',').filter(Boolean)
     if (cats.length === 1) {
-      // single category — contains check
       query = query.contains('categories', cats)
-    } else if (cats.length > 1) {
-      // multiple categories — overlaps (any match)
+    } else {
       query = query.overlaps('categories', cats)
     }
   }
   if (searchParams.q) {
     query = query.ilike('title', `%${searchParams.q}%`)
   }
-  // Only show published articles — never leak drafts to the public
+
   query = query.eq('status', 'published')
 
-  // Filter by tab — default is 'free', 'locked' shows subscriber transmissoes (visible to all, content-locked)
   if (searchParams.tab === 'locked') {
     query = query.eq('access', 'locked')
   } else {
     query = query.eq('access', 'free')
   }
 
-  const { data, count } = await query.limit(12)
-  return { transmissoes: (data ?? []) as Transmissao[], total: count ?? 0, isSubscriber }
+  const { data, count } = await query.range(from, to)
+  const total      = count ?? 0
+  const totalPages = Math.ceil(total / PER_PAGE)
+
+  return {
+    transmissoes: (data ?? []) as Transmissao[],
+    total,
+    totalPages,
+    page,
+    isSubscriber,
+  }
 }
 
 export default async function TransmisoesPage({ searchParams }: PageProps) {
-  const [{ transmissoes, total, isSubscriber }, activeCategories] = await Promise.all([
+  const [{ transmissoes, total, totalPages, page, isSubscriber }, activeCategories] = await Promise.all([
     getData(searchParams),
     getActiveCategories(),
   ])
-  const labelMap = Object.fromEntries(activeCategories.map(c => [c.slug, { label: c.label, symbol: c.symbol, parent_id: null, parent_slug: null }]))
+
+  const labelMap = Object.fromEntries(
+    activeCategories.map(c => [c.slug, { label: c.label, symbol: c.symbol, parent_id: null, parent_slug: null }])
+  )
   const activeTab = searchParams.tab ?? 'free'
+
+  function pageUrl(p: number) {
+    const params = new URLSearchParams()
+    if (searchParams.tab)  params.set('tab',  searchParams.tab)
+    if (searchParams.cat)  params.set('cat',  searchParams.cat)
+    if (searchParams.q)    params.set('q',    searchParams.q)
+    if (searchParams.sort) params.set('sort', searchParams.sort)
+    params.set('page', String(p))
+    return `?${params.toString()}`
+  }
 
   return (
     <>
       {/* PAGE HEADER */}
       <div className="page-header">
-        <p className="eyebrow" style={{ marginBottom: 12 }}>Portal Oculto · 212 registros</p>
+        <p className="eyebrow" style={{ marginBottom: 12 }}>Portal Oculto · {total} registros</p>
         <h1 style={{
           fontFamily: 'var(--font-display)',
           fontSize: 'clamp(48px, 8vw, 80px)',
@@ -92,7 +119,6 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
         }}>
           TRANS<span style={{ color: 'var(--red)' }}>MIS</span>SÕES
         </h1>
-
         <div style={{ marginTop: 24 }}>
           <Suspense>
             <FilterBar categories={activeCategories} />
@@ -100,13 +126,11 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* TABS — full-width on mobile */}
+      {/* TABS */}
       <div className="lg:justify-end justify-center" style={{
-        display: 'flex',
-        alignItems: 'stretch',
+        display: 'flex', alignItems: 'stretch',
         borderBottom: '1px solid var(--faint)',
-        padding: '0 var(--px)',
-        overflowX: 'auto', scrollbarWidth: 'none',
+        padding: '0 var(--px)', overflowX: 'auto', scrollbarWidth: 'none',
       }}>
         <TabBtn href="?tab=free"   active={activeTab === 'free'}   label="◉ Leitura Livre" />
         <TabBtn href="?tab=locked" active={activeTab === 'locked'} label="◈ Assinantes" />
@@ -118,7 +142,12 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8,
       }}>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-          Exibindo <span style={{ color: 'var(--cream)' }}>{transmissoes.length}</span> transmissões
+          <span style={{ color: 'var(--cream)' }}>{total}</span> transmissões
+          {totalPages > 1 && (
+            <span style={{ color: 'var(--cream-dim)', marginLeft: 12 }}>
+              · página {page} de {totalPages}
+            </span>
+          )}
         </p>
       </div>
 
@@ -136,10 +165,68 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
         )}
       </div>
 
+      {/* PAGINATION */}
+      {totalPages > 1 && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          gap: 6, padding: '40px var(--px)', borderTop: '1px solid var(--faint)',
+          flexWrap: 'wrap',
+        }}>
+          {page > 1 ? (
+            <Link href={pageUrl(page - 1)} style={pgStyle(false)}>← Anterior</Link>
+          ) : (
+            <span style={pgStyle(true)}>← Anterior</span>
+          )}
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => {
+            const isNear  = Math.abs(p - page) <= 1
+            const isEdge  = p === 1 || p === totalPages
+            const showDot = p === page - 2 || p === page + 2
+
+            if (!isNear && !isEdge) {
+              if (showDot) return (
+                <span key={p} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--faint)', padding: '0 4px' }}>…</span>
+              )
+              return null
+            }
+
+            return (
+              <Link key={p} href={pageUrl(p)} style={{
+                fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2,
+                textDecoration: 'none', padding: '8px 12px',
+                background: p === page ? 'var(--red)' : 'transparent',
+                border: `1px solid ${p === page ? 'var(--red)' : 'var(--faint)'}`,
+                color: p === page ? '#fff' : 'var(--muted)',
+                textTransform: 'uppercase',
+              }}>
+                {p}
+              </Link>
+            )
+          })}
+
+          {page < totalPages ? (
+            <Link href={pageUrl(page + 1)} style={pgStyle(false)}>Próxima →</Link>
+          ) : (
+            <span style={pgStyle(true)}>Próxima →</span>
+          )}
+        </div>
+      )}
+
       <HermesBot message="Use o filtro acima para navegar por categoria ou busque por título." />
     </>
   )
 }
+
+const pgStyle = (disabled: boolean): React.CSSProperties => ({
+  fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2,
+  textTransform: 'uppercase', textDecoration: 'none',
+  padding: '8px 16px',
+  background: 'transparent',
+  border: '1px solid var(--faint)',
+  color: disabled ? 'var(--faint)' : 'var(--muted)',
+  pointerEvents: disabled ? 'none' : 'auto',
+  display: 'inline-block',
+})
 
 function TabBtn({ href, active, label }: { href: string; active: boolean; label: string }) {
   return (
@@ -147,8 +234,7 @@ function TabBtn({ href, active, label }: { href: string; active: boolean; label:
       href={href}
       className='mr-0 lg:text-xs text-[9px] lg:mr-6 py-4 px-2 lg:px-6'
       style={{
-        fontFamily: 'var(--font-mono)', letterSpacing: 4,
-        textTransform: 'uppercase',
+        fontFamily: 'var(--font-mono)', letterSpacing: 4, textTransform: 'uppercase',
         color: active ? 'var(--cream)' : 'var(--muted)',
         background: 'transparent', border: 'none',
         cursor: 'pointer', textDecoration: 'none',
