@@ -102,4 +102,11 @@ export default async function GrimorioPage() {
           </h1>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>
             Suas anotações pessoais por trilha — até 7500 caracteres cada. Auto-salvo enquanto você digita.
-       
+          </p>
+        </div>
+
+        <GrimoireList initialEntries={entries} />
+      </div>
+    </div>
+  )
+}

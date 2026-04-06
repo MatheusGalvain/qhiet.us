@@ -271,4 +271,5 @@ export default function ProfileNameEditor({ initialName, size = 'lg' }: Props) {
         <EditModal name={name} onClose={() => setOpen(false)} onSaved={handleSaved} />
       )}
     </>
-  
+  )
+}

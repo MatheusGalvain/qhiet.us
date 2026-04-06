@@ -314,4 +314,6 @@ export default function ProfileSidebar({ name: initialName, email, plan, plans, 
       {editOpen && (
         <EditNameModal name={name} onClose={() => setEditOpen(false)} onSaved={handleSaved} />
       )}
-    </
+    </>
+  )
+}

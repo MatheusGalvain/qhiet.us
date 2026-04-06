@@ -135,4 +135,11 @@ export default async function BibliotecaPage({
           books={books}
           hasAccess={hasAccess}
           userId={userId}
-          prog
+          progress={progress}
+        />
+      </div>
+
+      <HermesBot message="Parabéns por ter chegado até aqui, absorva todo conhecimento necessário com o nosso acervo! :)" />
+    </>
+  )
+}

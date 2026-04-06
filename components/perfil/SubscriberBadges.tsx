@@ -117,4 +117,5 @@ export default function SubscriberBadges({ plan, plans, bookCount = 0 }: Props) 
         {hasAcervo   && <Acervo bookCount={bookCount} />}
       </div>
     </div>
-  
+  )
+}

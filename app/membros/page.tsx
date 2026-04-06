@@ -370,4 +370,7 @@ function ActivePlanBadge({ plan, fullWidth = false }: { plan: Plan; fullWidth?: 
       fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 3,
       textTransform: 'uppercase' as const, color: meta.color,
     }}>
-      <span>{meta.symbol}</span> Plano {meta.label} ati
+      <span>{meta.symbol}</span> Plano {meta.label} ativo
+    </div>
+  )
+}
