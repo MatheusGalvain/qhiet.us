@@ -350,7 +350,7 @@ export default async function PerfilPage({
         )}
 
         {/* ═══ TRILHAS CONCLUÍDAS + INSÍGNIAS DE ASSINANTE ═══ */}
-        {(trailCompletions.length > 0 || (profile.plan ?? 'profano') !== 'profano') && (
+        {(trailCompletions.length > 0 || activePlans.length > 0) && (
           <section id="trilhas-badges" style={{ marginBottom: 56, scrollMarginTop: 'calc(var(--nav-h) + 8px)' }}>
             {trailCompletions.length > 0 && (
               <TrailBadges completions={trailCompletions as any} labelMap={labelMap} />

@@ -74,10 +74,12 @@ function Acervo({ bookCount = 0 }: { bookCount?: number }) {
 
 /* ── Main export ── */
 export default function SubscriberBadges({ plan, plans, bookCount = 0 }: Props) {
-  // Use plans array if available, otherwise derive from single plan
-  const activePlans: string[] = plans && plans.length > 0
-    ? plans
-    : plan !== 'profano' ? [plan] : []
+  // adepto é superset — se plan='adepto', força ['adepto'] independente do array
+  const activePlans: string[] = plan === 'adepto'
+    ? ['adepto']
+    : plans && plans.length > 0
+      ? plans
+      : plan !== 'profano' ? [plan] : []
 
   if (activePlans.length === 0) return null
 

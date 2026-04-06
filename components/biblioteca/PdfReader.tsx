@@ -62,23 +62,19 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
     async function load() {
       try {
         await injectPdfJs()
-        const res = await fetch(`/api/biblioteca/${bookId}/url`)
-        if (!res.ok) {
-          const j = await res.json().catch(() => ({}))
-          throw new Error(j.error ?? 'Não foi possível carregar o PDF.')
-        }
-        const { url } = await res.json()
+        // Use the stream proxy route — avoids CORS issues with direct R2 signed URLs
         const pdf = await window.pdfjsLib.getDocument({
-          url,
-          cMapUrl: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${CDN_VERSION}/cmaps/`,
-          cMapPacked: true,
+          url:             `/api/biblioteca/${bookId}/stream`,
+          withCredentials: true,
+          cMapUrl:         `https://cdn.jsdelivr.net/npm/pdfjs-dist@${CDN_VERSION}/cmaps/`,
+          cMapPacked:      true,
         }).promise
         if (destroyed) return
         setPdfDoc(pdf)
         setTotalPages(pdf.numPages)
         setLoading(false)
       } catch (e: any) {
-        if (!destroyed) { setError(e.message ?? 'Erro desconhecido.'); setLoading(false) }
+        if (!destroyed) { setError(e.message ?? 'Não foi possível carregar o PDF.'); setLoading(false) }
       }
     }
     load()
