@@ -9,6 +9,8 @@ const FROM = process.env.RESEND_FROM_EMAIL ?? 'livros@qhiethus.com'
 export const BOOKS_PER_PLAN: Record<Plan, number> = {
   profano:  1,
   iniciado: 4,
+  adepto:   4,
+  acervo:   2,
 }
 
 export async function sendMonthlyBook({

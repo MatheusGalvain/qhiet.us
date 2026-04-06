@@ -60,11 +60,11 @@ async function getData() {
     updated_at: grimoireMap[t.id]?.updated_at ?? null,
   }))
 
-  return { entries, profile }
+  return { entries, profile, activePlans }
 }
 
 export default async function GrimorioPage() {
-  const { entries, profile } = await getData()
+  const { entries, profile, activePlans } = await getData()
   const rank = getRank(profile?.xp_total ?? 0)
   const plan = (profile as any)?.plan ?? 'profano'
 
