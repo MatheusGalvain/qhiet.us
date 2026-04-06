@@ -8,9 +8,10 @@ const NAV_ITEMS = [
   { href: '/control/transmissoes',  label: 'Transmissões',   icon: '◎' },
   { href: '/control/livros',        label: 'Livros',         icon: '☿' },
   { href: '/control/trilhas',       label: 'Trilhas',        icon: '◉' },
+  { href: '/control/biblioteca',    label: 'Biblioteca',     icon: '✦' },
   { href: '/control/membros',       label: 'Membros',        icon: '○' },
   { href: '/control/categorias',    label: 'Categorias',     icon: '△' },
-  { href: '/control/configuracoes', label: 'Configurações',  icon: '✦' },
+  { href: '/control/configuracoes', label: 'Configurações',  icon: '⚙' },
 ]
 
 interface Props {

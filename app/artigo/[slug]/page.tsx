@@ -40,13 +40,13 @@ async function getData(slug: string) {
   // Block direct URL access to drafts — only admins can preview unpublished articles
   if (transmissao.status !== 'published' && !isAdmin) return null
 
-  // isSubscriber: re-use the profile query above (isAdmin already fetched)
-  // We need is_subscriber — fetch it now (profile was select('is_admin') above)
+  // isSubscriber: check plan-based access for exclusive transmissões
   let isSubscriber = isAdmin // admins always have access
   if (user && !isAdmin) {
     const { data: subProfile } = await supabase
-      .from('profiles').select('is_subscriber').eq('id', user.id).single()
-    isSubscriber = subProfile?.is_subscriber ?? false
+      .from('profiles').select('plan').eq('id', user.id).single()
+    const { canAccess: ca } = await import('@/lib/plans')
+    isSubscriber = ca((subProfile as any)?.plan, 'transmissoes_exclusivas')
   }
 
   const hasAccess = transmissao.access === 'free' || isSubscriber

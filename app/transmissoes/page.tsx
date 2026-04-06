@@ -4,6 +4,7 @@ export const revalidate = 0
 
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/server'
+import { canAccessAny, resolvePlans } from '@/lib/plans'
 import FilterBar from '@/components/transmissoes/FilterBar'
 import TransmissaoCard from '@/components/transmissoes/TransmissaoCard'
 import HermesBot from '@/components/layout/HermesBot'
@@ -38,8 +39,9 @@ async function getData(searchParams: PageProps['searchParams']) {
   let isSubscriber = false
   if (user) {
     const { data: profile } = await supabase
-      .from('profiles').select('is_subscriber, is_admin').eq('id', user.id).single()
-    isSubscriber = profile?.is_subscriber ?? profile?.is_admin ?? false
+      .from('profiles').select('plan, plans, is_admin').eq('id', user.id).single()
+    const activePlans = resolvePlans((profile as any)?.plans, (profile as any)?.plan)
+    isSubscriber = canAccessAny(activePlans, 'transmissoes_exclusivas') || (profile as any)?.is_admin || false
   }
 
   const page = Math.max(1, parseInt(searchParams.page ?? '1', 10))

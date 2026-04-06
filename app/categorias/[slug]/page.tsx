@@ -7,6 +7,7 @@ import { CATEGORY_META } from '@/types'
 import type { Transmissao } from '@/types'
 import type { Metadata } from 'next'
 import { sanitizeHtml } from '@/lib/sanitize'
+import { canAccessAny, resolvePlans } from '@/lib/plans'
 
 export const revalidate = 0
 
@@ -60,8 +61,9 @@ async function getData(slug: string) {
   let isSubscriber = false
   if (user) {
     const { data: profile } = await supabase
-      .from('profiles').select('is_subscriber, is_admin').eq('id', user.id).single()
-    isSubscriber = profile?.is_subscriber ?? profile?.is_admin ?? false
+      .from('profiles').select('plan, plans, is_admin').eq('id', user.id).single()
+    const activePlans = resolvePlans((profile as any)?.plans, (profile as any)?.plan)
+    isSubscriber = canAccessAny(activePlans, 'transmissoes_exclusivas') || (profile as any)?.is_admin || false
   }
 
   const [{ data: transmissoesData, count }, { data: catContent }] = await Promise.all([

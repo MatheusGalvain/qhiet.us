@@ -312,6 +312,14 @@ body {
   0%, 100% { box-shadow: 0 0 0 0 rgba(176,42,30,0.4); }
   50%       { box-shadow: 0 0 0 8px rgba(176,42,30,0); }
 }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 16px)); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
 
 .bot-wrap {
   position: fixed;
@@ -813,13 +821,15 @@ body {
 .profile-sidebar {
   border-right: 1px solid var(--faint);
   background-color: #1b1b1a;
-  padding: 40px 0;
+  padding: 32px 0 24px;
   display: flex;
   flex-direction: column;
   position: sticky;
   top: var(--nav-h);
   height: calc(100vh - var(--nav-h));
   overflow-y: auto;
+  overflow-x: hidden;
+  flex-shrink: 0;
 }
 
 /* ── Mobile: sidebar becomes a compact header card ── */
@@ -1589,6 +1599,269 @@ body {
 }
 .trail-badge-medal:hover .trail-badge-symbol {
   filter: drop-shadow(0 0 8px rgba(200,150,10,0.8));
+}
+
+/* ════════════════════════════════════════════════
+   SUBSCRIBER BADGES — Iniciado / Adepto / Acervo
+════════════════════════════════════════════════ */
+
+/* ── Shared base ── */
+.sub-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 14px 16px;
+  width: 136px;
+  cursor: pointer;
+  transition: border-color .25s, background .25s, transform .25s, box-shadow .25s;
+  position: relative;
+  text-decoration: none;
+}
+.sub-badge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.sub-badge:hover { transform: translateY(-3px); }
+
+/* ── Iniciado — vermelho ── */
+.sub-badge-iniciado {
+  background: rgba(176,42,30,0.04);
+  border: 1px solid rgba(176,42,30,0.28);
+}
+.sub-badge-iniciado::before {
+  background: linear-gradient(150deg, rgba(176,42,30,0.09) 0%, transparent 55%);
+}
+.sub-badge-iniciado:hover {
+  border-color: rgba(176,42,30,0.70);
+  background: rgba(176,42,30,0.09);
+  box-shadow: 0 6px 24px rgba(176,42,30,0.18);
+}
+.sub-ring-iniciado {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  border: 1.5px solid #b02a1e;
+  box-shadow: 0 0 12px rgba(176,42,30,0.28), inset 0 0 8px rgba(176,42,30,0.09);
+  background: rgba(176,42,30,0.08);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; transition: box-shadow .25s;
+}
+.sub-ring-iniciado::after {
+  content: ''; position: absolute; inset: 4px;
+  border-radius: 50%; border: 1px solid rgba(176,42,30,0.28);
+}
+.sub-symbol-iniciado {
+  font-family: var(--font-display);
+  font-size: 20px; color: #c0352a; line-height: 1;
+  filter: drop-shadow(0 0 4px rgba(176,42,30,0.55));
+  transition: filter .25s;
+}
+.sub-badge-iniciado:hover .sub-ring-iniciado {
+  box-shadow: 0 0 22px rgba(176,42,30,0.45), inset 0 0 12px rgba(176,42,30,0.14);
+}
+.sub-badge-iniciado:hover .sub-symbol-iniciado {
+  filter: drop-shadow(0 0 9px rgba(176,42,30,0.9));
+}
+
+/* ── Adepto — ouro, maior, hero ── */
+.sub-badge-adepto {
+  background: rgba(200,150,10,0.05);
+  border: 1px solid rgba(200,150,10,0.35);
+  width: 148px;
+  padding: 20px 16px 18px;
+}
+.sub-badge-adepto::before {
+  background: linear-gradient(145deg, rgba(200,150,10,0.12) 0%, transparent 55%);
+}
+/* Top shimmer */
+.sub-badge-adepto::after {
+  content: '';
+  position: absolute; top: 0; left: 18%; right: 18%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,150,10,0.60), transparent);
+}
+.sub-badge-adepto:hover {
+  border-color: rgba(200,150,10,0.80);
+  background: rgba(200,150,10,0.11);
+  box-shadow: 0 8px 28px rgba(200,150,10,0.22), 0 0 0 1px rgba(200,150,10,0.12);
+}
+.sub-ring-adepto {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  border: 2px solid #c8960a;
+  box-shadow: 0 0 16px rgba(200,150,10,0.35), inset 0 0 10px rgba(200,150,10,0.10);
+  background: rgba(200,150,10,0.09);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; transition: box-shadow .25s;
+}
+.sub-ring-adepto::before {
+  content: ''; position: absolute; inset: -5px;
+  border-radius: 50%; border: 1px solid rgba(200,150,10,0.18);
+}
+.sub-ring-adepto::after {
+  content: ''; position: absolute; inset: 5px;
+  border-radius: 50%; border: 1px solid rgba(200,150,10,0.32);
+}
+.sub-symbol-adepto {
+  font-family: var(--font-display);
+  font-size: 24px; color: #c8960a; line-height: 1;
+  filter: drop-shadow(0 0 5px rgba(200,150,10,0.60));
+  transition: filter .25s;
+}
+.sub-badge-adepto:hover .sub-ring-adepto {
+  box-shadow: 0 0 26px rgba(200,150,10,0.55), inset 0 0 14px rgba(200,150,10,0.14);
+}
+.sub-badge-adepto:hover .sub-symbol-adepto {
+  filter: drop-shadow(0 0 10px rgba(200,150,10,0.95));
+}
+
+/* ── Acervo — âmbar, losango ── */
+.sub-badge-acervo {
+  background: rgba(184,160,122,0.04);
+  border: 1px solid rgba(184,160,122,0.28);
+}
+.sub-badge-acervo::before {
+  background: linear-gradient(145deg, rgba(184,160,122,0.10) 0%, transparent 55%);
+}
+.sub-badge-acervo:hover {
+  border-color: rgba(184,160,122,0.75);
+  background: rgba(184,160,122,0.09);
+  box-shadow: 0 8px 28px rgba(184,160,122,0.16);
+}
+.sub-ring-acervo {
+  width: 52px; height: 52px;
+  border-radius: 4px; rotate: 45deg;
+  border: 1.5px solid #b8a07a;
+  box-shadow: 0 0 13px rgba(184,160,122,0.28), inset 0 0 8px rgba(184,160,122,0.08);
+  background: rgba(184,160,122,0.07);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; transition: box-shadow .25s;
+}
+.sub-ring-acervo::after {
+  content: ''; position: absolute; inset: 4px;
+  border-radius: 3px; border: 1px solid rgba(184,160,122,0.28);
+}
+.sub-symbol-acervo {
+  rotate: -45deg;
+  font-family: var(--font-display);
+  font-size: 20px; color: #b8a07a; line-height: 1;
+  filter: drop-shadow(0 0 4px rgba(184,160,122,0.55));
+  transition: filter .25s;
+}
+.sub-badge-acervo:hover .sub-ring-acervo {
+  box-shadow: 0 0 22px rgba(184,160,122,0.45), inset 0 0 12px rgba(184,160,122,0.12);
+}
+.sub-badge-acervo:hover .sub-symbol-acervo {
+  filter: drop-shadow(0 0 10px rgba(184,160,122,0.9));
+}
+
+/* ════════════════════════════════════════════════
+   SIDEBAR — scrollbar e nav hover
+════════════════════════════════════════════════ */
+.profile-sidebar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
+.profile-sidebar::-webkit-scrollbar { width: 4px; }
+.profile-sidebar::-webkit-scrollbar-track { background: transparent; }
+.profile-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+.sidebar-nav-link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 28px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--muted); text-decoration: none;
+  transition: color .18s, background .18s, border-color .18s;
+  border-left: 2px solid transparent;
+  white-space: nowrap; position: relative;
+}
+.sidebar-nav-link:hover {
+  color: var(--cream);
+  background: rgba(255,255,255,0.03);
+  border-left-color: var(--faint);
+}
+.sidebar-nav-link.collapsed {
+  padding: 12px 0; justify-content: center;
+}
+.sidebar-nav-link .snl-icon {
+  font-size: 15px; width: 18px; text-align: center; flex-shrink: 0;
+  transition: filter .18s;
+}
+.sidebar-nav-link.subscriber { color: var(--muted); }
+.sidebar-nav-link.subscriber .snl-icon { color: var(--red); opacity: 0.75; }
+.sidebar-nav-link.subscriber:hover { color: var(--cream); }
+.sidebar-nav-link.subscriber:hover .snl-icon { opacity: 1; }
+
+/* ── Acervo subscriber badge (amber/bronze, more exclusive than trail badges) ── */
+.acervo-badge-medal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 16px 16px;
+  width: 148px;
+  background: rgba(184,160,122,0.04);
+  border: 1px solid rgba(184,160,122,0.28);
+  cursor: pointer;
+  transition: border-color .25s, background .25s, transform .25s, box-shadow .25s;
+  position: relative;
+  text-decoration: none;
+}
+.acervo-badge-medal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, rgba(184,160,122,0.10) 0%, transparent 55%);
+  pointer-events: none;
+}
+/* Top edge shimmer line */
+.acervo-badge-medal::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 20%; right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(184,160,122,0.55), transparent);
+}
+.acervo-badge-medal:hover {
+  border-color: rgba(184,160,122,0.75);
+  background: rgba(184,160,122,0.09);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(184,160,122,0.16), 0 0 0 1px rgba(184,160,122,0.10);
+}
+
+/* Outer ring — octagonal feel via clip-path */
+.acervo-badge-ring {
+  width: 58px;
+  height: 58px;
+  border-radius: 4px;
+  rotate: 45deg;
+  border: 1.5px solid #b8a07a;
+  box-shadow: 0 0 14px rgba(184,160,122,0.28), inset 0 0 10px rgba(184,160,122,0.08);
+  background: rgba(184,160,122,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: box-shadow .25s;
+}
+.acervo-badge-ring::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 3px;
+  border: 1px solid rgba(184,160,122,0.28);
+}
+.acervo-badge-symbol {
+  rotate: -45deg;
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: #b8a07a;
+  line-height: 1;
+  filter: drop-shadow(0 0 4px rgba(184,160,122,0.55));
+  transition: filter .25s;
+}
+.acervo-badge-medal:hover .acervo-badge-ring {
+  box-shadow: 0 0 24px rgba(184,160,122,0.45), inset 0 0 14px rgba(184,160,122,0.14);
+}
+.acervo-badge-medal:hover .acervo-badge-symbol {
+  filter: drop-shadow(0 0 10px rgba(184,160,122,0.9));
 }
 
 @media (max-width: 767px) {

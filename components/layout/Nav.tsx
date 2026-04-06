@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import Wordmark from '@/components/ui/Wordmark'
 import Avatar from '@/components/ui/Avatar'
 import type { Profile } from '@/types'
+import { PLAN_META } from '@/lib/plans'
 
 interface NavProps {
   profile?: Profile | null
@@ -97,7 +98,7 @@ export default function Nav({ profile }: NavProps) {
                         {profile.name}
                       </p>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--red)', textTransform: 'uppercase' }}>
-                        {profile.is_subscriber ? '◈ Iniciado' : '◉ Profano'}
+                        {(() => { const m = PLAN_META[profile.plan ?? 'profano']; return `${m.symbol} ${m.label}` })()}
                       </p>
                     </div>
 
@@ -196,7 +197,7 @@ export default function Nav({ profile }: NavProps) {
             <div>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: 2, color: 'var(--cream)' }}>{profile.name}</p>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--red)', textTransform: 'uppercase', marginTop: 2 }}>
-                {profile.is_subscriber ? '◈ Iniciado' : '◉ Profano'}
+                {(() => { const m = PLAN_META[profile.plan ?? 'profano']; return `${m.symbol} ${m.label}` })()}
               </p>
             </div>
           </div>

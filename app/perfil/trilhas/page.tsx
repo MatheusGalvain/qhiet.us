@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { getCategoryLabelMap, resolveCategoryLabel } from '@/lib/getCategoryLabelMap'
 import ProfileSidebar from '@/components/perfil/ProfileSidebar'
 import { getRank } from '@/lib/utils'
+import { canAccessAny, resolvePlans } from '@/lib/plans'
 
 export const revalidate = 0
 
@@ -16,11 +17,12 @@ async function getData() {
 
   const { data: profile } = await service
     .from('profiles')
-    .select('is_subscriber, is_admin, name, email, xp_total')
+    .select('plan, plans, is_admin, name, email, xp_total')
     .eq('id', user.id)
     .single()
 
-  const isSubscriber = profile?.is_subscriber || profile?.is_admin || false
+  const activePlans = resolvePlans((profile as any)?.plans, (profile as any)?.plan)
+  const isSubscriber = canAccessAny(activePlans, 'trilhas') || profile?.is_admin || false
 
   // Trails visíveis: is_free=true para todos; premium só para assinantes
   const { data: allTrails } = await service
@@ -80,6 +82,8 @@ export default async function TrilhasPage() {
       <ProfileSidebar
         name={profile?.name ?? ''}
         email={profile?.email ?? ''}
+        plan={(profile as any)?.plan ?? 'profano'}
+        plans={(profile as any)?.plans ?? undefined}
         isSubscriber={isSubscriber}
         rankName={rank.name}
         rankSymbol={(rank as any).symbol}

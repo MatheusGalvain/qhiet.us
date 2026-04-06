@@ -180,7 +180,7 @@ export default function ArticleSidebarClient({ transmissao: t, hasAccess, isFree
       {/* CTA if locked */}
       {!hasAccess && (
         <Link href="/membros" className="btn-primary" style={{ display: 'block', textAlign: 'center' }}>
-          Desbloquear → Iniciado
+          Consulte nossos planos →
         </Link>
       )}
     </div>

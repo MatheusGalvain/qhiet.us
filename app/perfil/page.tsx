@@ -4,6 +4,7 @@ import { getCategoryLabelMap, resolveCategoryLabel, resolveCategorySymbol } from
 import type { CategoryLabelMap } from '@/lib/getCategoryLabelMap'
 import Link from 'next/link'
 import type { Profile } from '@/types'
+import { canAccess, canAccessAny, resolvePlans, PLAN_META } from '@/lib/plans'
 import { getRank, getNextRank, RANK_THRESHOLDS, formatDatePT, formatNumber, getCategorySymbol, padNumber } from '@/lib/utils'
 import type { Metadata } from 'next'
 import ActivityHeatmap from '@/components/perfil/ActivityHeatmap'
@@ -13,6 +14,7 @@ import BillingPortalButton from '@/components/perfil/BillingPortalButton'
 import DeleteAccountButton from '@/components/perfil/DeleteAccountButton'
 import DomainCarousel from '@/components/perfil/DomainCarousel'
 import TrailBadges from '@/components/perfil/TrailBadges'
+import SubscriberBadges from '@/components/perfil/SubscriberBadges'
 
 export const metadata: Metadata = { title: 'Perfil' }
 export const revalidate = 0
@@ -74,9 +76,9 @@ async function getData(page: number) {
     .order('month', { ascending: false })
     .limit(12)
 
-  // Subscribers see all books; profano users see only books accessible to them
-  // .or() captures both: new books (plan_access array) and old books (plan text column)
-  const { data: books } = profile?.is_subscriber
+  // Iniciado/Adepto see all books; others see only free books
+  const activePlans = resolvePlans((profile as any)?.plans, profile?.plan)
+  const { data: books } = canAccessAny(activePlans, 'transmissoes_exclusivas')
     ? await booksQuery
     : await booksQuery.or('plan_access.cs.{profano},plan.eq.profano')
 
@@ -170,7 +172,14 @@ async function getData(page: number) {
 
   const totalPages = Math.max(1, Math.ceil((historyTotal ?? 0) / HISTORY_PER_PAGE))
 
-  return { profile: profile as Profile, xpEvents: xpEvents ?? [], books: books ?? [], activityMap, totalActiveDays, historyTotal: historyTotal ?? 0, totalPages, currentPage: page, trailCompletions, trailsInProgress }
+  // Count published biblioteca books (for the AcervoGateway card)
+  let bookCount = 0
+  try {
+    const { count } = await service.from('biblioteca').select('id', { count: 'exact', head: true }).eq('is_published', true)
+    bookCount = count ?? 0
+  } catch (_) {}
+
+  return { profile: profile as Profile, xpEvents: xpEvents ?? [], books: books ?? [], activityMap, totalActiveDays, historyTotal: historyTotal ?? 0, totalPages, currentPage: page, trailCompletions, trailsInProgress, bookCount, activePlans }
 }
 
 export default async function PerfilPage({
@@ -179,7 +188,7 @@ export default async function PerfilPage({
   searchParams: { page?: string; erro?: string }
 }) {
   const page = Math.max(1, parseInt(searchParams?.page ?? '1', 10) || 1)
-  const [{ profile, xpEvents, books, activityMap, totalActiveDays, historyTotal, totalPages, currentPage, trailCompletions, trailsInProgress }, labelMap] = await Promise.all([getData(page), getCategoryLabelMap()])
+  const [{ profile, xpEvents, books, activityMap, totalActiveDays, historyTotal, totalPages, currentPage, trailCompletions, trailsInProgress, bookCount, activePlans }, labelMap] = await Promise.all([getData(page), getCategoryLabelMap()])
   const rank = getRank(profile.xp_total)
   const nextRank = getNextRank(profile.xp_total)
   const xpToNext = nextRank ? nextRank.min - profile.xp_total : 0
@@ -194,9 +203,12 @@ export default async function PerfilPage({
       <ProfileSidebar
         name={profile.name}
         email={profile.email}
+        plan={profile.plan ?? 'profano'}
+        plans={(profile as any).plans ?? undefined}
         isSubscriber={profile.is_subscriber}
         rankName={rank.name}
         rankSymbol={(rank as any).symbol}
+        bookCount={bookCount}
       />
 
       {/* MAIN */}
@@ -337,10 +349,17 @@ export default async function PerfilPage({
           </section>
         )}
 
-        {/* ═══ TRILHAS CONCLUÍDAS ═══ */}
-        {trailCompletions.length > 0 && (
+        {/* ═══ TRILHAS CONCLUÍDAS + INSÍGNIAS DE ASSINANTE ═══ */}
+        {(trailCompletions.length > 0 || (profile.plan ?? 'profano') !== 'profano') && (
           <section id="trilhas-badges" style={{ marginBottom: 56, scrollMarginTop: 'calc(var(--nav-h) + 8px)' }}>
-            <TrailBadges completions={trailCompletions as any} labelMap={labelMap} />
+            {trailCompletions.length > 0 && (
+              <TrailBadges completions={trailCompletions as any} labelMap={labelMap} />
+            )}
+            <SubscriberBadges
+              plan={profile.plan ?? 'profano'}
+              plans={(profile as any).plans ?? undefined}
+              bookCount={bookCount}
+            />
           </section>
         )}
 
@@ -453,7 +472,7 @@ export default async function PerfilPage({
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 28 }}>
             <h2 className="flex items-center justify-center gap-3" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px,5vw,52px)', letterSpacing: 3, color: 'var(--cream)' }}><span className="text-2xl">☿</span>LIVROS</h2>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-              {profile.is_subscriber ? '4 livros/mês · Iniciado' : '1 livro/mês · Profano'}
+              {canAccessAny(activePlans, 'transmissoes_exclusivas') ? '4 livros/mês · Assinante' : '1 livro/mês · Profano'}
             </p>
           </div>
 
@@ -553,38 +572,45 @@ export default async function PerfilPage({
               </p>
             </div>
           )}
-          {profile.is_subscriber && !profile.is_admin && (
-            <div style={{ maxWidth: 480, marginTop: 40, paddingTop: 40, borderTop: '1px solid var(--faint)' }}>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 16 }}>
-                <span style={{ color: 'var(--red-dim)' }}>// </span>Plano Iniciado
-              </p>
-              <div style={{
-                border: '1px solid var(--faint)',
-                padding: '20px 24px',
-                marginBottom: 16,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: 12,
-              }}>
-                <div>
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: 2, color: 'var(--gold)', marginBottom: 4 }}>
-                    ◈ Plano Iniciado ativo
-                  </p>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--cream)', textTransform: 'uppercase' }}>
-                    Acesso completo · transmissões + livros
-                  </p>
+          {profile.is_subscriber && !profile.is_admin && (() => {
+            const pm = PLAN_META[profile.plan ?? 'profano']
+            return (
+              <div style={{ maxWidth: 480, marginTop: 40, paddingTop: 40, borderTop: '1px solid var(--faint)' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 16 }}>
+                  <span style={{ color: 'var(--red-dim)' }}>// </span>Plano {pm.label}
+                </p>
+                <div style={{
+                  border: `1px solid ${pm.border}`,
+                  padding: '20px 24px', marginBottom: 16,
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  flexWrap: 'wrap', gap: 12,
+                }}>
+                  <div>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: 2, color: pm.color, marginBottom: 4 }}>
+                      {pm.symbol} Plano {pm.label} ativo
+                    </p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--cream)', textTransform: 'uppercase' }}>
+                      {profile.plan === 'adepto' ? 'Acesso total · transmissões + biblioteca' : 'Acesso completo · transmissões + livros'}
+                    </p>
+                  </div>
+                  <BillingPortalButton />
                 </div>
-                <BillingPortalButton />
+                {profile.plan === 'iniciado' && (
+                  <form action="/api/checkout" method="POST" style={{ marginBottom: 16 }}>
+                    <input type="hidden" name="plan" value="adepto" />
+                    <button type="submit" style={{ display: 'block', width: '100%', padding: '12px', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--gold-dim)', color: 'var(--gold)', cursor: 'pointer' }}>
+                      ✦ Fazer upgrade para Adepto →
+                    </button>
+                  </form>
+                )}
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--muted)', lineHeight: 1.9 }}>
+                  Para cancelar, clique em &ldquo;Gerenciar assinatura&rdquo;. Você será redirecionado
+                  para o portal seguro da Stripe onde pode cancelar, alterar o método de pagamento
+                  ou ver o histórico de cobranças. O acesso permanece ativo até o fim do período pago.
+                </p>
               </div>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--muted)', lineHeight: 1.9 }}>
-                Para cancelar, clique em &ldquo;Gerenciar assinatura&rdquo;. Você será redirecionado
-                para o portal seguro da Stripe onde pode cancelar, alterar o método de pagamento
-                ou ver o histórico de cobranças. O acesso permanece ativo até o fim do período pago.
-              </p>
-            </div>
-          )}
+            )
+          })()}
         </section>
 
         {/* Mobile-only logout (sidebar is hidden on mobile) */}

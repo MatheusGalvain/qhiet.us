@@ -1,13 +1,14 @@
 import Hero from '@/components/home/Hero'
 import HermesBot from '@/components/layout/HermesBot'
 import Link from 'next/link'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import type { Transmissao } from '@/types'
 import { padNumber, formatDatePT } from '@/lib/utils'
 import { getCategoryLabelMap, resolveCategoryLabel, resolveCategorySymbol } from '@/lib/getCategoryLabelMap'
 import type { CategoryLabelMap } from '@/lib/getCategoryLabelMap'
+import { canAccessAny, resolvePlans } from '@/lib/plans'
 
-export const revalidate = 3600
+export const revalidate = 0
 
 function daysUntil(dateStr: string | null | undefined): number | null {
   if (!dateStr) return null
@@ -28,6 +29,16 @@ const currentMonthName = currentDate.toLocaleString('pt-BR', { month: 'long' });
 async function getData() {
   try {
     const supabase = await createClient()
+
+    // Check if current user is a subscriber (iniciado/adepto)
+    let isSubscriber = false
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles').select('plan, plans').eq('id', user.id).single()
+      const activePlans = resolvePlans((profile as any)?.plans, (profile as any)?.plan)
+      isSubscriber = canAccessAny(activePlans, 'transmissoes_exclusivas')
+    }
 
     // Featured: most recent locked transmissão (never fetch content on list/home pages)
     const { data: featured } = await supabase
@@ -68,32 +79,21 @@ async function getData() {
 
     const nextPostDays = daysUntil(nextDraft?.published_at)
 
-    // Livro do mês — apenas o livro para profano (plan_access contém 'profano')
-    // Usa service client para contornar RLS (profano não está logado mas precisa ver)
-    const service = createServiceClient()
-    const { data: monthBook } = await service
-      .from('monthly_books')
-      .select('id, title, author, month, cover_url, plan_access')
-      .contains('plan_access', ['profano'])
-      .order('month', { ascending: false })
-      .limit(1)
-      .single()
-
     return {
       featured: featured as Transmissao | null,
       grid: (grid ?? []) as Transmissao[],
       total: totalCount ?? 0,
       totalcat: totalCategories ?? 0,
       nextPostDays,
-      monthBook: monthBook ?? null,
+      isSubscriber,
     }
   } catch {
-    return { featured: null, grid: [], total: 1, totalcat: 1, nextPostDays: 7, monthBook: null }
+    return { featured: null, grid: [], total: 1, totalcat: 1, nextPostDays: 7, isSubscriber: false }
   }
 }
 
 export default async function HomePage() {
-  const [{ featured, grid, total, totalcat, nextPostDays, monthBook }, labelMap] = await Promise.all([getData(), getCategoryLabelMap()])
+  const [{ featured, grid, total, totalcat, nextPostDays, isSubscriber }, labelMap] = await Promise.all([getData(), getCategoryLabelMap()])
 
   return (
     <>
@@ -135,7 +135,7 @@ export default async function HomePage() {
 
         {/* Featured article */}
         {featured ? (
-          <FeaturedArticle transmissao={featured} nextPostDays={nextPostDays} labelMap={labelMap} />
+          <FeaturedArticle transmissao={featured} nextPostDays={nextPostDays} labelMap={labelMap} isSubscriber={isSubscriber} />
         ) : (
           <FeaturedArticleFallback nextPostDays={nextPostDays} />
         )}
@@ -166,7 +166,7 @@ export default async function HomePage() {
       </section>
 
       {/* MEMBERSHIP SECTION */}
-      <MembershipSection monthBook={monthBook} />
+      <MembershipSection />
 
       <HermesBot message="Bem-vindo ao QHIETHUS. Explore as transmissões ou navegue pelas categorias para iniciar sua jornada." />
     </>
@@ -182,11 +182,12 @@ function countdownLabel(days: number | null): { line: string; num: string } {
 }
 
 /* ─── Featured Article ─── */
-function FeaturedArticle({ transmissao: t, nextPostDays, labelMap = {} }: { transmissao: Transmissao; nextPostDays: number | null; labelMap?: CategoryLabelMap }) {
+function FeaturedArticle({ transmissao: t, nextPostDays, labelMap = {}, isSubscriber = false }: { transmissao: Transmissao; nextPostDays: number | null; labelMap?: CategoryLabelMap; isSubscriber?: boolean }) {
   const catLabel = t.categories.map(c => resolveCategoryLabel(c, labelMap)).join(' · ')
   const preview = t.excerpt || (t.content ? t.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().split(' ').slice(0, 30).join(' ') + '…' : '…')
   const dateStr = formatDatePT(t.published_at).toUpperCase()
   const { line: cLine, num: cNum } = countdownLabel(nextPostDays)
+  const isLocked = t.access === 'locked' && !isSubscriber
 
   return (
     <Link href={`/artigo/${t.slug}`} className="article-featured">
@@ -194,19 +195,21 @@ function FeaturedArticle({ transmissao: t, nextPostDays, labelMap = {} }: { tran
       <div className="af-main">
         <p className="af-cat">{catLabel}</p>
         <h2 className="af-title">{t.title}</h2>
-        <p className={`af-excerpt af-blurred`}>{preview}</p>
+        <p className={`af-excerpt${isLocked ? ' af-blurred' : ''}`}>{preview}</p>
 
-        {/* VIP center badge */}
-        <div className="af-center-badge">
-          <div className="af-veil-tag">
-            <div className="af-veil-line-top" />
-            <div className="af-veil-diamond" />
-            <span className="af-veil-text">Assinantes</span>
-            <div className="af-veil-diamond" />
-            <div className="af-veil-line-bot" />
+        {/* VIP center badge — only show for non-subscribers */}
+        {isLocked && (
+          <div className="af-center-badge">
+            <div className="af-veil-tag">
+              <div className="af-veil-line-top" />
+              <div className="af-veil-diamond" />
+              <span className="af-veil-text">Assinantes</span>
+              <div className="af-veil-diamond" />
+              <div className="af-veil-line-bot" />
+            </div>
+            <span className="af-veil-sub">acesso exclusivo</span>
           </div>
-          <span className="af-veil-sub">acesso exclusivo</span>
-        </div>
+        )}
       </div>
 
       {/* Right meta */}
@@ -321,86 +324,136 @@ function FallbackGridCards() {
 }
 
 /* ─── Membership Section ─── */
-interface MonthBook { id?: string; title?: string; author?: string; month?: string; cover_url?: string | null; plan_access?: string[] }
-function MembershipSection({ monthBook }: { monthBook: MonthBook | null }) {
+function MembershipSection() {
+  const plans = [
+    {
+      name: 'Profano', price: 'R$ 0', period: 'gratuito',
+      href: '/login', cta: 'Entrar', featured: false,
+      features: [
+        { on: true,  text: 'Transmissões de Leitura Livre' },
+        { on: true,  text: 'Bot Hermes para instruir' },
+        { on: true,  text: 'Perfil com XP' },
+        { on: false, text: 'Transmissões exclusivas' },
+        { on: false, text: 'Quiz & XP bônus' },
+        { on: false, text: 'Trilhas de estudo' },
+        { on: false, text: 'Grimório Digital' },
+        { on: false, text: 'Acervo de livros PDF' },
+      ],
+    },
+    {
+      name: 'Iniciado', price: 'R$19,99', period: '/mês',
+      href: '/membros', cta: 'Assinar →', featured: false,
+      features: [
+        { on: true, text: 'Tudo do plano Profano' },
+        { on: true, text: 'Transmissões exclusivas' },
+        { on: true, text: 'Quiz de Hermes + XP bônus' },
+        { on: true, text: '4 livros mensais' },
+        { on: true, text: 'Trilhas Exclusivas de estudo' },
+        { on: true, text: 'Grimório Digital' },
+        { on: true, text: 'Ranking global & Badges' },
+        { on: false, text: 'Acervo de livros PDF' },
+      ],
+    },
+    {
+      name: 'Adepto', price: 'R$27,90', period: '/mês',
+      href: '/membros?upgrade=adepto', cta: 'Assinar →', featured: true,
+      badge: '✦ Recomendado',
+      features: [
+        { on: true, text: 'Tudo do plano Iniciado' },
+        { on: true, text: 'Acervo completo de livros PDF' },
+        { on: true, text: 'Leitor PDF inline com anotações' },
+        { on: true, text: 'Progresso de leitura salvo' },
+        { on: true, text: 'Hermetismo, Cabala, Alquimia…' },
+        { on: true, text: 'Suporte prioritário' },
+      ],
+    },
+    {
+      name: 'Acervo', price: 'R$19,99', period: '/mês',
+      href: '/membros?upgrade=acervo', cta: 'Assinar →', featured: false,
+      features: [
+        { on: true,  text: 'Transmissões de Leitura Livre' },
+        { on: true,  text: 'Acervo completo de livros PDF' },
+        { on: true,  text: 'Leitor PDF inline com anotações' },
+        { on: true,  text: 'Progresso de leitura salvo' },
+        { on: true,  text: 'Grimório Digital' },
+        { on: false, text: 'Transmissões exclusivas' },
+        { on: false, text: 'Trilhas & XP bônus' },
+      ],
+    },
+  ]
+
   return (
-    <section className="membership">
-      {/* Left — plans */}
-      <div className="mem-left">
-        <h2 className="mem-display">ASCEN<span>DA</span></h2>
-        <p className="mem-desc">
-          Dois caminhos se abrem diante do buscador. O primeiro, livre — para os que chegam. O segundo, para os que escolhem permanecer.
+    <section style={{ borderTop: '1px solid var(--faint)', borderBottom: '1px solid var(--faint)' }}>
+      {/* Header */}
+      <div style={{ padding: 'clamp(32px,4vw,56px) var(--px) clamp(20px,3vw,32px)', borderBottom: '1px solid var(--faint)' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px,7vw,80px)', letterSpacing: 4, color: 'var(--cream)', lineHeight: 1 }}>
+          ASCEN<span style={{ color: 'var(--red)' }}>DA</span>
+        </h2>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(14px,1.4vw,17px)', color: 'var(--muted)', marginTop: 12, maxWidth: 560, lineHeight: 1.7 }}>
+          Quatro caminhos se abrem diante do buscador. Do livre ao total — cada um com sua profundidade.
         </p>
-
-        <div className="plans">
-          {/* Profano */}
-          <div className="plan">
-            <p className="plan-name">Profano</p>
-            <div>
-              <span className="plan-price">R$ 0</span>
-              <span className="plan-period"> / gratuito</span>
-            </div>
-            <div className="plan-features">
-              {['Textos introdutórios', '1 livro/mês', 'Perfil com XP e ranking global'].map(f => (
-                <p key={f} className="plan-feature">{f}</p>
-              ))}
-            </div>
-            <Link href="/login" className="plan-cta">Entrar</Link>
-          </div>
-
-          {/* Iniciado (featured) */}
-          <div className="plan featured">
-            <p className="plan-name">Iniciado</p>
-            <div>
-              <span className="plan-price">R$19,99</span>
-              <span className="plan-period"> / por mês</span>
-            </div>
-            <div className="plan-features">
-              {['Tudo do Profano Incluso', 'Transmissões Exclusivas', '4 livros/mês', 'Trilhas de Estudos', 'Grimorio Digital para anotações', 'Quiz no Final dos Artigos'].map(f => (
-                <p key={f} className="plan-feature">{f}</p>
-              ))}
-            </div>
-            <Link href="/membros" className="plan-cta">Assinar →</Link>
-          </div>
-        </div>
       </div>
 
+      {/* 4-column grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        {plans.map((p, i) => (
+          <div key={p.name} style={{
+            padding: 'clamp(24px,3vw,40px) clamp(20px,2.5vw,36px)',
+            borderRight: i < 3 ? '1px solid var(--faint)' : 'none',
+            display: 'flex', flexDirection: 'column',
+            position: 'relative',
+            background: p.featured ? 'linear-gradient(160deg, var(--surface), rgba(130,111,18,.07))' : 'transparent',
+            outline: p.featured ? '1px solid rgba(212,175,55,0.35)' : 'none',
+          }}>
+            {p.badge && (
+              <div style={{
+                position: 'absolute', top: 0, right: 0,
+                background: 'var(--gold)', color: '#000',
+                fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2,
+                padding: '3px 10px', textTransform: 'uppercase',
+              }}>
+                {p.badge}
+              </div>
+            )}
 
-      {/* Right — book of the month (profano) */}
-      <div className="mem-right">
-        <div>
-          <p className="book-label">
-            // Livro do Mês · {currentMonthName ?? ""} 2026
-          </p>
-          <div className="book-card">
-            <div className="book-cover">
-              {monthBook?.cover_url
-                ? <img src={monthBook.cover_url} alt={monthBook.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                : <>{(monthBook?.title ?? 'LIVRO DO MÊS').split(' ').slice(0, 3).join(' ')}<br /><br />✦</>
-              }
-            </div>
-            <div>
-              <p className="book-title">{monthBook?.title ?? '—'}</p>
-              <span className="book-author">{monthBook?.author ?? ''}</span>
-              <p className="book-desc" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginTop: 8 }}>
-                Disponível durante um mês na plataforma.
-              </p>
-            </div>
-          </div>
-        </div>
+            <p className="plan-name" style={{ color: p.featured ? 'var(--gold)' : undefined }}>{p.name}</p>
 
-        <div className="readbook">
-          <div className="rb-item">
-            <span className="rb-tag free">◉ LEITURA LIVRE</span>
-            <p className="rb-text">Acesso ao conteúdo introdutório. Um livro mensal disponível na plataforma.</p>
+            <div style={{ margin: '12px 0 8px' }}>
+              <span className="plan-price">{p.price}</span>
+              <span className="plan-period"> {p.period}</span>
+            </div>
+
+            <div style={{ flex: 1, marginBottom: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {p.features.map((f, fi) => (
+                <div key={fi} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                  <span style={{
+                    fontFamily: 'var(--font-mono)', fontSize: 9, flexShrink: 0, marginTop: 3,
+                    color: f.on
+                      ? (p.featured ? 'var(--gold)' : 'var(--red)')
+                      : 'var(--cream-dim)',
+                  }}>
+                    {f.on ? '◉' : '○'}
+                  </span>
+                  <span style={{
+                    fontFamily: 'var(--font-body)', fontSize: 13, lineHeight: 1.5,
+                    color: f.on ? 'var(--cream)' : 'var(--cream-dim)',
+                  }}>
+                    {f.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <Link
+              href={p.href}
+              className="plan-cta"
+              style={{ background: p.featured ? 'var(--gold)' : undefined, color: p.featured ? '#000' : undefined, textDecoration: 'none', display: 'block', textAlign: 'center' }}
+            >
+              {p.cta}
+            </Link>
           </div>
-          <div className="rb-item">
-            <span className="rb-tag paid">◈ PLANO INICIADO</span>
-            <p className="rb-text">Acesso completo ao portal, 4 livros por mês + guias exclusivos de estudo.</p>
-          </div>
-        </div>
+        ))}
       </div>
-
     </section>
   )
 }
