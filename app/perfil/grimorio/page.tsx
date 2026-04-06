@@ -4,6 +4,7 @@ import Link from 'next/link'
 import GrimoireList from '@/components/trilhas/GrimoireList'
 import ProfileSidebar from '@/components/perfil/ProfileSidebar'
 import { getRank } from '@/lib/utils'
+import { canAccess, canAccessAny, resolvePlans } from '@/lib/plans'
 
 export const revalidate = 0
 
@@ -16,11 +17,12 @@ async function getData() {
 
   const { data: profile } = await service
     .from('profiles')
-    .select('is_subscriber, is_admin, name, email, xp_total')
+    .select('plan, plans, is_admin, name, email, xp_total')
     .eq('id', user.id)
     .single()
 
-  if (!profile?.is_subscriber && !profile?.is_admin) redirect('/perfil')
+  const activePlans = resolvePlans((profile as any)?.plans, (profile as any)?.plan)
+  if (!canAccessAny(activePlans, 'grimorio') && !profile?.is_admin) redirect('/membros?upgrade=true')
 
   // Trilhas que o usuário tem progresso
   const { data: progressTrails } = await service
@@ -64,14 +66,16 @@ async function getData() {
 export default async function GrimorioPage() {
   const { entries, profile } = await getData()
   const rank = getRank(profile?.xp_total ?? 0)
-  const isSubscriber = profile?.is_subscriber || profile?.is_admin || false
+  const plan = (profile as any)?.plan ?? 'profano'
 
   return (
     <div className="profile-layout">
       <ProfileSidebar
         name={profile?.name ?? ''}
         email={profile?.email ?? ''}
-        isSubscriber={isSubscriber}
+        plan={plan}
+        plans={(profile as any)?.plans ?? undefined}
+        isSubscriber={canAccessAny(activePlans, 'transmissoes_exclusivas')}
         rankName={rank.name}
         rankSymbol={(rank as any).symbol}
       />
@@ -98,11 +102,4 @@ export default async function GrimorioPage() {
           </h1>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>
             Suas anotações pessoais por trilha — até 7500 caracteres cada. Auto-salvo enquanto você digita.
-          </p>
-        </div>
-
-        <GrimoireList initialEntries={entries} />
-      </div>
-    </div>
-  )
-}
+       

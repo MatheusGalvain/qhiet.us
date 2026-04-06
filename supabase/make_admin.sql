@@ -56,12 +56,11 @@ create policy "Admins can read all profiles"
   );
 
 -- ─────────────────────────────────────────────────────────────
--- TORNAR-SE ADMIN
--- Substitua 'seu@email.com' pelo seu e-mail cadastrado
+-- ADMIN — matheusgalvain@gmail.com
 -- ─────────────────────────────────────────────────────────────
 update public.profiles
 set is_admin = true
-where email = 'seu@email.com';
+where email = 'matheusgalvain@gmail.com';
 
 -- Confirma
 select id, email, is_admin from public.profiles where is_admin = true;

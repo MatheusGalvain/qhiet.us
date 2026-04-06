@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getCategoryLabelMap, resolveCategoryLabel } from '@/lib/getCategoryLabelMap'
 import TrailMap from '@/components/trilhas/TrailMap'
 import Link from 'next/link'
+import { canAccessAny, resolvePlans } from '@/lib/plans'
 
 export const revalidate = 0
 
@@ -26,13 +27,14 @@ async function getData(trailId: string) {
   // Security: non-free trails require subscription
   const { data: profile } = await service
     .from('profiles')
-    .select('is_subscriber, is_admin')
+    .select('plan, plans, is_admin')
     .eq('id', user.id)
     .single()
 
-  const isSubscriber = profile?.is_subscriber || profile?.is_admin || false
+  const activePlans = resolvePlans((profile as any)?.plans, (profile as any)?.plan)
+  const isSubscriber = canAccessAny(activePlans, 'trilhas') || profile?.is_admin || false
 
-  if (!trail.is_free && !isSubscriber) {
+  if (!trail.is_free && !canAccessAny(activePlans, 'trilhas') && !profile?.is_admin) {
     // User tried to access a premium trail directly — redirect to listing
     redirect('/perfil/trilhas')
   }
@@ -134,7 +136,7 @@ export default async function TrailDetailPage({ params }: { params: { id: string
               ◈ Grimório disponível para Iniciados
             </span>
             <Link href="/membros" style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--gold)', textTransform: 'uppercase', textDecoration: 'none' }}>
-              Tornar-se Iniciado →
+              Consulte nossos planos →
             </Link>
           </div>
         )}

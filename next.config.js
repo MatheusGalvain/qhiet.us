@@ -12,8 +12,8 @@ const ContentSecurityPolicy = [
   // Only load resources from same origin by default
   `default-src 'self'`,
 
-  // Scripts: self + inline/eval needed by Next.js hydration + Stripe.js
-  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com`,
+  // Scripts: self + inline/eval needed by Next.js hydration + Stripe.js + PDF.js CDN
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net https://unpkg.com`,
 
   // Styles: self + inline + Google Fonts CSS
   `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
@@ -21,11 +21,14 @@ const ContentSecurityPolicy = [
   // Images: self + data URIs + external HTTPS (Wikipedia, etc. for figure images)
   `img-src 'self' data: blob: https:`,
 
-  // Fonts: self + data URIs + Google Fonts files (gstatic)
-  `font-src 'self' data: https://fonts.gstatic.com`,
+  // Fonts: self + data URIs + Google Fonts files (gstatic) + CDN (PDF.js cmaps)
+  `font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net`,
 
-  // API / WS connections: self + Supabase + Stripe
-  `connect-src 'self' ${supabaseHosts} https://api.stripe.com`,
+  // API / WS connections: self + Supabase + Stripe + R2 (signed PDF URLs)
+  `connect-src 'self' ${supabaseHosts} https://api.stripe.com https://*.r2.cloudflarestorage.com`,
+
+  // Workers: blob URLs (PDF.js web worker) + CDN fallback
+  `worker-src 'self' blob: https://cdn.jsdelivr.net https://unpkg.com`,
 
   // Iframes: Stripe payment UI only
   `frame-src https://js.stripe.com https://hooks.stripe.com`,

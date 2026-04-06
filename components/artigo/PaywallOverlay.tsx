@@ -47,12 +47,12 @@ export default function PaywallOverlay() {
             fontFamily: 'var(--font-body)', fontSize: 16,
             color: 'var(--muted)', lineHeight: 1.7,
           }}>
-            Esta transmissão é exclusiva para assinantes Iniciados. Assine por R$19,99/mês e acesse todo o acervo, quiz de IA e 4 livros mensais.
+            Esta transmissão é exclusiva para assinantes. Escolha o plano que se encaixa no seu caminho e acesse todo o conteúdo exclusivo.
           </p>
 
           <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
             <Link href="/membros" className="btn-primary">
-              Tornar-se Iniciado →
+              Consulte nossos planos →
             </Link>
             <Link href="/login" className="btn-secondary">
               Já sou assinante

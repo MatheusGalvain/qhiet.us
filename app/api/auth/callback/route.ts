@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
   if (tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
     if (!error) {
-      return NextResponse.redirect(`${origin}/login`)
+      // Recovery flow → sempre vai para redefinir-senha; outros usam o param redirect
+      const dest = type === 'recovery' ? '/redefinir-senha' : redirect
+      return NextResponse.redirect(`${origin}${dest}`)
     }
   }
 

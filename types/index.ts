@@ -2,7 +2,7 @@
    QHIETHUS — Global Types
 ═══════════════════════════════════════ */
 
-export type Plan = 'profano' | 'iniciado'
+export type Plan = 'profano' | 'iniciado' | 'adepto' | 'acervo'
 
 export type AccessLevel = 'free' | 'locked'
 

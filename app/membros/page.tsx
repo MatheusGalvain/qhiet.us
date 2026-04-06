@@ -1,72 +1,139 @@
 import HermesBot from '@/components/layout/HermesBot'
 import Link from 'next/link'
-import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
+import { PLAN_META, resolvePlans } from '@/lib/plans'
+import type { Plan } from '@/types'
 
 export const revalidate = 0
 
 export const metadata: Metadata = {
   title: 'Membros',
-  description: 'Conheça os planos do QHIETHUS — Profano (gratuito) e Iniciado (R$19,99/mês).',
+  description: 'Conheça os planos do QHIETHUS — Profano, Iniciado, Adepto e Acervo.',
 }
 
 async function getStats() {
   const supabase = await createClient()
-  const service = createServiceClient()
   const { data: { user } } = await supabase.auth.getUser()
-
-  const [{ count: transmissoesCount }, { count: livrosCount }, { data: ranking }, { data: profile }] = await Promise.all([
+  const [{ count: transmissoesCount }, profileRes] = await Promise.all([
     supabase.from('transmissoes').select('*', { count: 'exact', head: true }),
-    supabase.from('monthly_books').select('*', { count: 'exact', head: true }),
-    service
-      .from('profiles')
-      .select('id, name, nick, xp_total, is_subscriber')
-      .order('xp_total', { ascending: false })
-      .limit(10),
-    user
-      ? supabase.from('profiles').select('is_subscriber').eq('id', user.id).single()
-      : Promise.resolve({ data: null }),
+    user ? supabase.from('profiles').select('plan, plans').eq('id', user.id).single() : Promise.resolve({ data: null }),
   ])
+  const rawPlan  = (profileRes.data as any)?.plan  as Plan | null
+  const rawPlans = (profileRes.data as any)?.plans as string[] | null
+  const activePlans = resolvePlans(rawPlans, rawPlan)
   return {
     transmissoesCount: transmissoesCount ?? 0,
-    livrosCount: livrosCount ?? 0,
-    ranking: (ranking ?? []) as Array<{ id: string; name: string; nick: string | null; xp_total: number; is_subscriber: boolean }>,
-    isSubscriber: (profile as any)?.is_subscriber ?? false,
+    currentPlan:  (rawPlan ?? 'profano') as Plan,
+    activePlans,   // e.g. ['acervo', 'iniciado'] or ['adepto']
+    isLoggedIn: !!user,
   }
 }
 
-const PLAN_FEATURES = {
-  profano: [
-    { check: true,  text: 'Acesso a todas as transmissões de <strong>Leitura Livre</strong>' },
-    { check: true,  text: 'Bot Hermes para instruir' },
-    { check: true,  text: 'Perfil com XP e ranking global' },
-    { check: true,  text: '<strong>1 livro mensal</strong>' },
-  ],
-  iniciado: [
-    { check: true, text: 'Tudo do plano Profano' },
-    { check: true, text: '<strong>Transmissões exclusivas</strong> para iniciados' },
-    { check: true, text: 'Quiz de <strong>Hermes</strong> ao final de cada artigo' },
-    { check: true, text: '<strong>4 livros mensais</strong>' },
-    { check: true, text: 'Acesso às <strong>Trilhas Exclusivas</strong>' },
-    { check: true, text: 'Grimório Digital para Registros das Trilhas' },
-  ],
-}
-
-const COMPARE_ROWS = [
-  { label: 'Transmissões de Leitura Livre',        profano: true,     iniciado: true },
-  { label: 'Transmissões Exclusivas Iniciado',      profano: false,    iniciado: true },
-  { label: 'Quiz Liberado em Artigos',                     profano: false,    iniciado: true },
-  { label: 'Trilhas Exclusivas',        profano: false,     iniciado: true },
-  { label: 'Grimório Exclusivo Digital',        profano: false,     iniciado: true },
-  { label: 'XP por Leitura',                        profano: true,     iniciado: true },
-  { label: 'Livros Mensais Disponibilizados',             profano: '1 livro', iniciado: '4 livros' },
-  { label: 'Ranking Global',                        profano: true,     iniciado: true },
+const PLANS: Array<{
+  key: Plan
+  price: string
+  period: string
+  tagline: string
+  badge?: string
+  featured?: boolean
+  features: Array<{ on: boolean; text: string }>
+}> = [
+  {
+    key: 'profano',
+    price: 'R$ 0',
+    period: 'gratuito',
+    tagline: 'Para os que chegam',
+    features: [
+      { on: true,  text: 'Transmissões de Leitura Livre' },
+      { on: true,  text: 'Bot Hermes para instruir' },
+      { on: true,  text: 'Perfil com XP' },
+      { on: true,  text: '1 livro mensal' },
+      { on: false, text: 'Transmissões exclusivas' },
+      { on: false, text: 'Quiz & XP bônus' },
+      { on: false, text: 'Trilhas de estudo' },
+      { on: false, text: 'Grimório Digital' },
+      { on: false, text: 'Acervo de livros PDF' },
+    ],
+  },
+  {
+    key: 'iniciado',
+    price: 'R$19,99',
+    period: '/mês',
+    tagline: 'Para os que escolhem permanecer',
+    features: [
+      { on: true, text: 'Tudo do plano Profano' },
+      { on: true, text: '<strong>Transmissões exclusivas</strong>' },
+      { on: true, text: 'Quiz de Hermes + <strong>XP bônus</strong>' },
+      { on: true, text: '<strong>4 livros mensais</strong>' },
+      { on: true, text: '<strong>Trilhas Exclusivas</strong> de estudo' },
+      { on: true, text: 'Grimório Digital' },
+      { on: true, text: 'Ranking global & Badges' },
+      { on: false, text: 'Acervo de livros PDF' },
+    ],
+  },
+  {
+    key: 'adepto',
+    price: 'R$27,90',
+    period: '/mês',
+    tagline: 'Acesso total — a via completa',
+    badge: '✦ Recomendado',
+    featured: true,
+    features: [
+      { on: true, text: 'Tudo do plano Iniciado' },
+      { on: true, text: '<strong>Acervo completo</strong> de livros PDF' },
+      { on: true, text: 'Leitor PDF inline com anotações' },
+      { on: true, text: 'Progresso de leitura salvo' },
+      { on: true, text: 'Hermetismo, Cabala, Alquimia, Tarot…' },
+      { on: true, text: 'Suporte prioritário' },
+    ],
+  },
+  {
+    key: 'acervo',
+    price: 'R$19,99',
+    period: '/mês',
+    tagline: 'Só a Biblioteca, foco em leitura',
+    features: [
+      { on: true, text: 'Transmissões de Leitura Livre' },
+      { on: true, text: '<strong>Acervo completo</strong> de livros PDF' },
+      { on: true, text: 'Leitor PDF inline com anotações' },
+      { on: true, text: 'Progresso de leitura salvo' },
+      { on: true, text: 'Grimório Digital' },
+      { on: false, text: 'Transmissões exclusivas' },
+      { on: false, text: 'Trilhas & XP bônus' },
+    ],
+  },
 ]
 
-export default async function MembrosPage() {
-  const { transmissoesCount, livrosCount, ranking, isSubscriber } = await getStats()
+const COMPARE_ROWS = [
+  { label: 'Transmissões Leitura Livre', profano: true,  iniciado: true,  adepto: true,  acervo: true  },
+  { label: 'Transmissões Exclusivas',    profano: false, iniciado: true,  adepto: true,  acervo: false },
+  { label: 'Quiz Hermes + XP bônus',    profano: false, iniciado: true,  adepto: true,  acervo: false },
+  { label: 'Trilhas Exclusivas',         profano: false, iniciado: true,  adepto: true,  acervo: false },
+  { label: 'Grimório Digital',           profano: false, iniciado: true,  adepto: true,  acervo: true  },
+  { label: 'Livros Mensais',             profano: '1',   iniciado: '4',   adepto: '4',   acervo: '—'  },
+  { label: 'Ranking Global',             profano: false, iniciado: true,  adepto: true,  acervo: false },
+  { label: 'Badges de Conquista',        profano: false, iniciado: true,  adepto: true,  acervo: false },
+  { label: 'Acervo de Livros PDF',       profano: false, iniciado: false, adepto: true,  acervo: true  },
+  { label: 'Leitor PDF inline',          profano: false, iniciado: false, adepto: true,  acervo: true  },
+]
+
+export default async function MembrosPage({ searchParams }: { searchParams: { error?: string; detail?: string } }) {
+  const { transmissoesCount, currentPlan, activePlans, isLoggedIn } = await getStats()
+  const stripeError = searchParams?.error === 'stripe' ? (searchParams?.detail ?? 'Erro ao processar pagamento.') : null
+  const configError = searchParams?.error === 'config'
+
   return (
     <>
+      {/* Stripe error banner */}
+      {(stripeError || configError) && (
+        <div style={{ background: 'rgba(180,30,20,0.12)', border: '1px solid var(--red-dim)', borderLeft: '3px solid var(--red)', padding: '14px 20px', margin: '0 var(--px)', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1.5, color: 'var(--red)', lineHeight: 1.8 }}>
+          {configError
+            ? 'Configuração incompleta — verifique as variáveis STRIPE_PRICE_ID_* no ambiente.'
+            : stripeError}
+        </div>
+      )}
+
       {/* HERO */}
       <div className="membros-hero">
         <div style={{ padding: 'clamp(40px,6vw,72px) var(--px)', borderRight: '1px solid var(--faint)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 24 }}>
@@ -80,25 +147,26 @@ export default async function MembrosPage() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            {isSubscriber
-              ? <ActivePlanBadge />
-              : <CheckoutButton label="Assinar R$19,99/mês →" />
+            {activePlans.includes('adepto')
+              ? <ActivePlanBadge plan="adepto" />
+              : activePlans.length > 0
+                ? <CheckoutButton plan="adepto" label="Upgrade → Adepto ✦" featured />
+                : <CheckoutButton plan="iniciado" label="Assinar R$19,99/mês →" />
             }
-            <Link href="/login?tab=register" className="btn-ghost">Criar conta grátis</Link>
+            {!isLoggedIn && <Link href="/login?tab=register" className="btn-ghost">Criar conta grátis</Link>}
           </div>
         </div>
 
-        {/* Hero right (hidden on mobile via .page-hero / .hero-right) */}
-        <div className="hero-right" style={{ padding: 'clamp(20px,6vw,7290px) var(--px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 32 }}>
+        <div className="hero-right" style={{ padding: 'clamp(20px,6vw,72px) var(--px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 32 }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,2.5vw,28px)', letterSpacing: 2, color: 'var(--cream)', marginBottom: 14 }}>
-            Dados reais do nosso portal:
+            Dados do portal:
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
             {[
               { n: String(transmissoesCount), l: 'Transmissões' },
-              { n: String(livrosCount || '∞'), l: 'Livros Ativos' },
-              { n: '6',   l: 'Categorias' },
-              { n: '∞',   l: 'Conhecimento' },
+              { n: '4',  l: 'Planos' },
+              { n: '6',  l: 'Categorias' },
+              { n: '∞',  l: 'Conhecimento' },
             ].map(({ n, l }, i) => (
               <div key={l} style={{ padding: 20, borderRight: i % 2 === 0 ? '1px solid var(--faint)' : 'none', borderBottom: i < 2 ? '1px solid var(--faint)' : 'none' }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,4vw,52px)', color: 'var(--cream)', letterSpacing: 2, display: 'block', lineHeight: 1 }}>{n}</span>
@@ -113,110 +181,131 @@ export default async function MembrosPage() {
         </div>
       </div>
 
-      {/* O QUE É */}
-      <div className="section-div"><div className="sdiv-line" /><span className="sdiv-sym">◉</span><span className="sdiv-text">O que disponibilizamos</span><div className="sdiv-line" /></div>
-
-      <div className="what-grid">
-        {[
-          { n: '01', title: 'Transmissões', desc: 'Artigos aprofundados sobre hermetismo, cabala, gnosticismo, alquimia, tarot e rosacruz — organizados em categorias temáticas.' },
-          { n: '02', title: 'Quiz Hermes',  desc: 'Ao final de cada transmissão, a IA Hermes gera questões de compreensão. Acerte para ganhar XP bônus e subir no ranking.' },
-          { n: '03', title: 'Livros Mensais', desc: 'Todo mês, livros de referência chegam direto no seu e-mail. Profanos recebem 1 — Iniciados recebem 4 títulos curados.' },
-        ].map(({ n, title, desc }) => (
-          <div key={n} className="what-col" style={{ padding: 'clamp(28px,4vw,48px) clamp(20px,3vw,40px)', borderRight: '1px solid var(--faint)' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 64, color: 'var(--cream-dim)', lineHeight: 1, marginBottom: 12 }}>{n}</div>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,2.5vw,28px)', letterSpacing: 2, color: 'var(--cream)', marginBottom: 14 }}>{title}</h3>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--muted)', lineHeight: 1.8 }}>{desc}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* PLANOS */}
+      {/* PLANOS GRID */}
       <div style={{ borderBottom: '1px solid var(--faint)' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, padding: '20px var(--px)', borderBottom: '1px solid var(--faint)' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px,6vw,64px)', letterSpacing: 3, color: 'var(--red)' }}>PLANOS</h2>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--muted)' }}>Sem fidelidade. Cancele quando quiser.</p>
         </div>
 
-        <div className="plans-grid">
-          {/* PROFANO */}
-          <div className="plan-col">
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 20, display: 'block' }}>Acesso Livre</span>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(48px,6vw,72px)', color: 'var(--cream)', letterSpacing: 2, lineHeight: 1 }}>R$0</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: 2 }}>/mês</span>
-            </div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,32px)', letterSpacing: 4, color: 'var(--muted)', marginBottom: 24 }}>PROFANO</p>
-            <div style={{ height: 1, background: 'var(--faint)', margin: '24px 0' }} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1 }}>
-              {PLAN_FEATURES.profano.map(({ check, text }, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontFamily: 'var(--font-body)', fontSize: 'clamp(14px,1.5vw,16px)', color: 'var(--muted)', lineHeight: 1.5 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', flexShrink: 0, marginTop: 3 }}>{check ? '◉' : '○'}</span>
-                  <span dangerouslySetInnerHTML={{ __html: text }} />
-                </div>
-              ))}
-            </div>
-            <Link href="/login?tab=register" style={{ display: 'block', width: '100%', marginTop: 32, padding: 16, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 4, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--cream-dim)', color: 'var(--muted)', textDecoration: 'none', transition: 'all .2s' }}>
-              Criar conta grátis
-            </Link>
-          </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))' }}>
+          {PLANS.map((p) => {
+            const meta = PLAN_META[p.key]
 
-          {/* INICIADO */}
-        <div className="plan-col" style={{ background: 'linear-gradient(135deg,var(--surface),rgba(130,111,18,.05))' }}>
-            <div style={{ position: 'relative', marginBottom: 20 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--gold)', border: '1px solid var(--gold-dim)', padding: '4px 12px', display: 'inline-block', position: 'relative' }}>
-                <span style={{ position: 'absolute', top: -20, right: 0, fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, background: 'var(--gold)', color: '#fff', padding: '2px 8px' }}>POPULAR</span>
-                ◈ Assinante
-              </span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(48px,6vw,72px)', color: 'var(--cream)', letterSpacing: 2, lineHeight: 1 }}>R$19,99</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: 2 }}>/mês</span>
-            </div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,32px)', letterSpacing: 4, color: 'var(--gold)', marginBottom: 24 }}>INICIADO</p>
-            <div style={{ height: 1, background: 'var(--gold)', margin: '24px 0' }} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1 }}>
-              {PLAN_FEATURES.iniciado.map(({ check, text }, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontFamily: 'var(--font-body)', fontSize: 'clamp(14px,1.5vw,16px)', color: 'var(--muted)', lineHeight: 1.5 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--gold)', flexShrink: 0, marginTop: 3 }}>◉</span>
-                  <span dangerouslySetInnerHTML={{ __html: text }} />
+            // ── Multi-plan button logic ─────────────────────────────────
+            // isActive: this specific plan is in the user's active plans array
+            const isActive = activePlans.includes(p.key)
+            // includedInAdepto: user has adepto (superset), this card is not adepto
+            const includedInAdepto = activePlans.includes('adepto') && p.key !== 'adepto'
+            // canUpgradeToAdepto: user holds both iniciado+acervo → upgrade to adepto shown
+            const canUpgradeToAdepto = p.key === 'adepto'
+              && activePlans.includes('iniciado')
+              && activePlans.includes('acervo')
+              && !activePlans.includes('adepto')
+
+            return (
+              <div key={p.key} style={{
+                padding: 'clamp(20px,3vw,36px)',
+                borderRight: '1px solid var(--faint)',
+                display: 'flex', flexDirection: 'column',
+                position: 'relative',
+                background: p.featured ? 'linear-gradient(135deg,var(--surface),rgba(130,111,18,.07))' : 'transparent',
+                boxShadow: p.featured ? `inset 0 0 0 1px var(--gold)` : 'none',
+              }}>
+                {p.badge && (
+                  <div style={{
+                    position: 'absolute', top: 0, right: 0,
+                    background: 'var(--gold)', color: '#000',
+                    fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2,
+                    padding: '3px 10px', textTransform: 'uppercase',
+                  }}>
+                    {p.badge}
+                  </div>
+                )}
+
+                <span style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 4,
+                  textTransform: 'uppercase', color: meta.color,
+                  border: `1px solid ${meta.border}`, padding: '2px 8px',
+                  display: 'inline-block', marginBottom: 18, alignSelf: 'flex-start',
+                }}>
+                  {meta.symbol} {meta.label}
+                </span>
+
+                <div style={{ marginBottom: 6 }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,4vw,52px)', color: 'var(--cream)', letterSpacing: 2, lineHeight: 1 }}>{p.price}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', letterSpacing: 2, marginLeft: 4 }}>{p.period}</span>
                 </div>
-              ))}
-            </div>
-            {isSubscriber
-              ? <ActivePlanBadge fullWidth />
-              : <CheckoutButton label="Assinar Iniciado →" fullWidth />
-            }
-          </div>
+
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--muted)', marginBottom: 20, lineHeight: 1.5 }}>
+                  {p.tagline}
+                </p>
+
+                <div style={{ height: 1, background: p.featured ? 'var(--gold)' : 'var(--faint)', marginBottom: 20 }} />
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, marginBottom: 24 }}>
+                  {p.features.map(({ on, text }, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: on ? meta.color : 'var(--faint)', flexShrink: 0, marginTop: 2 }}>
+                        {on ? '◉' : '○'}
+                      </span>
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: on ? 'var(--cream-dim)' : 'var(--faint)', lineHeight: 1.5 }} dangerouslySetInnerHTML={{ __html: text }} />
+                    </div>
+                  ))}
+                </div>
+
+                {isActive
+                  ? <ActivePlanBadge plan={p.key} fullWidth />
+                  : p.key === 'profano'
+                    ? <Link href={isLoggedIn ? '/perfil' : '/login?tab=register'} style={{ display: 'block', textAlign: 'center', padding: '13px', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 3, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--faint)', color: 'var(--muted)', textDecoration: 'none' }}>
+                        {isLoggedIn ? 'Meu perfil →' : 'Criar conta grátis'}
+                      </Link>
+                  : includedInAdepto
+                    ? <CheckoutButton plan={p.key} label="Incluído no Adepto" fullWidth disabled />
+                  : canUpgradeToAdepto
+                    ? <CheckoutButton plan="adepto" label="Upgrade → Adepto ✦" fullWidth featured />
+                    : <CheckoutButton
+                        plan={p.key}
+                        label={activePlans.length > 0 && p.key === 'adepto' ? 'Upgrade → Adepto ✦' : 'Assinar →'}
+                        fullWidth
+                        featured={p.featured}
+                      />
+                }
+              </div>
+            )
+          })}
         </div>
       </div>
 
-      {/* COMPARE TABLE — horizontal scroll on mobile */}
+      {/* COMPARE TABLE */}
       <div style={{ borderBottom: '1px solid var(--faint)' }}>
-        <div className="section-div"><div className="sdiv-line" /><span className="sdiv-sym">◈</span><span className="sdiv-text">Comparação mais Detalhada</span><div className="sdiv-line" /></div>
-
+        <div className="section-div"><div className="sdiv-line" /><span className="sdiv-sym">◈</span><span className="sdiv-text">Comparação Detalhada</span><div className="sdiv-line" /></div>
         <div className="compare-scroll">
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 540 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
             <thead>
               <tr>
-                <th style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)', padding: '16px var(--px)', borderBottom: '1px solid var(--faint)', textAlign: 'left' }}>Recurso</th>
-                <th style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--muted)', padding: '16px 40px', borderBottom: '1px solid var(--faint)', textAlign: 'center', width: 160 }}>Profano</th>
-                <th style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--red)', padding: '16px 40px', borderBottom: '1px solid var(--faint)', textAlign: 'center', width: 160 }}>Iniciado</th>
+                <th style={thSt}>Recurso</th>
+                {(['profano', 'iniciado', 'adepto', 'acervo'] as Plan[]).map(pk => (
+                  <th key={pk} style={{ ...thSt, color: PLAN_META[pk].color, width: 120, textWrap: "nowrap" }}>
+                    {PLAN_META[pk].symbol} {PLAN_META[pk].label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {COMPARE_ROWS.map(({ label, profano, iniciado }, i) => (
+              {COMPARE_ROWS.map(({ label, ...vals }, i) => (
                 <tr key={i}>
-                  <td style={{ padding: '14px var(--px)', borderBottom: '1px solid var(--faint)', fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--muted)' }}>{label}</td>
-                  <td style={{ padding: '14px 40px', borderBottom: '1px solid var(--faint)', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
-                    {typeof profano === 'boolean'
-                      ? <span style={{ color: profano ? 'var(--red)' : 'var(--faint)' }}>{profano ? '◉' : '○'}</span>
-                      : <span style={{ color: 'var(--cream)' }}>{profano}</span>}
-                  </td>
-                  <td style={{ padding: '14px 40px', borderBottom: '1px solid var(--faint)', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
-                    {typeof iniciado === 'boolean'
-                      ? <span style={{ color: iniciado ? 'var(--red)' : 'var(--faint)' }}>{iniciado ? '◉' : '○'}</span>
-                      : <span style={{ color: 'var(--cream)' }}>{iniciado}</span>}
-                  </td>
+                  <td style={tdSt}>{label}</td>
+                  {(['profano', 'iniciado', 'adepto', 'acervo'] as Plan[]).map(pk => {
+                    const v = (vals as any)[pk]
+                    return (
+                      <td key={pk} style={{ ...tdSt, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                        {typeof v === 'boolean'
+                          ? <span style={{ color: v ? PLAN_META[pk].color : 'var(--faint)' }}>{v ? '◉' : '○'}</span>
+                          : <span style={{ color: 'var(--cream)' }}>{v}</span>}
+                      </td>
+                    )
+                  })}
                 </tr>
               ))}
             </tbody>
@@ -224,41 +313,61 @@ export default async function MembrosPage() {
         </div>
       </div>
 
-      <HermesBot message="Dúvidas sobre os planos? O Iniciado oferece acesso completo — transmissões, quiz e 4 livros/mês." />
+      <HermesBot message="Dúvidas sobre os planos? O Adepto oferece acesso total — transmissões exclusivas, trilhas e a biblioteca completa de PDFs." />
     </>
   )
 }
 
-function CheckoutButton({ label = 'Assinar →', fullWidth = false }: { label?: string; fullWidth?: boolean }) {
+const thSt: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase',
+  color: 'var(--muted)', padding: '14px var(--px)', borderBottom: '1px solid var(--faint)', textAlign: 'left',
+}
+const tdSt: React.CSSProperties = {
+  padding: '12px var(--px)', borderBottom: '1px solid var(--faint)',
+  fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--muted)',
+}
+
+function CheckoutButton({ plan, label, fullWidth = false, featured = false, disabled = false }: {
+  plan: string; label: string; fullWidth?: boolean; featured?: boolean; disabled?: boolean
+}) {
+  if (disabled) {
+    return (
+      <div style={{
+        width: fullWidth ? '100%' : 'auto',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: fullWidth ? '13px' : '10px 16px',
+        border: '1px solid var(--faint)',
+        fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 3,
+        textTransform: 'uppercase', color: 'var(--faint)',
+        cursor: 'default', userSelect: 'none',
+      }}>
+        ◉ {label}
+      </div>
+    )
+  }
   return (
-    <form action="/api/checkout" method="POST" style={{ marginTop: fullWidth ? 32 : 0, width: fullWidth ? '100%' : 'auto', display: 'inline-block' }}>
-      <button type="submit" className="btn-primary" style={{ display: 'block', background: "var(--gold)", width: fullWidth ? '100%' : 'auto', textAlign: 'center' }}>
+    <form action="/api/checkout" method="POST" style={{ width: fullWidth ? '100%' : 'auto', display: 'inline-block' }}>
+      <input type="hidden" name="plan" value={plan} />
+      <button type="submit" className="btn-primary" style={{
+        display: 'block', width: fullWidth ? '100%' : 'auto', textAlign: 'center',
+        background: featured ? 'var(--gold)' : undefined,
+        color: featured ? '#000' : undefined,
+      }}>
         {label}
       </button>
     </form>
   )
 }
 
-function ActivePlanBadge({ fullWidth = false }: { fullWidth?: boolean }) {
+function ActivePlanBadge({ plan, fullWidth = false }: { plan: Plan; fullWidth?: boolean }) {
+  const meta = PLAN_META[plan]
   return (
     <div style={{
-      marginTop: fullWidth ? 32 : 0,
       width: fullWidth ? '100%' : 'auto',
-      display: 'inline-flex',
-      alignItems: 'center',
-      background: 'var(--gold)',
-      gap: 10,
-      padding: fullWidth ? '16px' : '12px 20px',
-      border: '1px solid var(--gold-dim)',
-      fontFamily: 'var(--font-mono)',
-      fontSize: 12,
-      letterSpacing: 3,
-      textTransform: 'uppercase' as const,
-      color: 'black',
-      justifyContent: fullWidth ? 'center' : 'flex-start',
+      display: 'inline-flex', alignItems: 'center', justifyContent: fullWidth ? 'center' : 'flex-start',
+      gap: 8, padding: fullWidth ? '13px' : '10px 14px',
+      border: `1px solid ${meta.border}`,
+      fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 3,
+      textTransform: 'uppercase' as const, color: meta.color,
     }}>
-      <span style={{ fontSize: 14 }}>◈</span>
-      Plano Iniciado ativo
-    </div>
-  )
-}
+      <span>{meta.symbol}</span> Plano {meta.label} ati
