@@ -62,7 +62,7 @@ export default function BibliotecaShell({
           </div>
 
           <Link
-            href="/perfil/livros"
+            href="/perfil/biblioteca"
             style={{
               fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2,
               textTransform: 'uppercase', padding: '0 18px',

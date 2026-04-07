@@ -1,6 +1,10 @@
 -- Migração: categorias da biblioteca
 -- Tabela separada das categorias de conteúdo do site
 
+-- Remove o check constraint antigo que limitava as categorias a valores hardcodados
+-- (agora as categorias são gerenciadas dinamicamente via biblioteca_categorias)
+ALTER TABLE biblioteca DROP CONSTRAINT IF EXISTS biblioteca_category_check;
+
 CREATE TABLE IF NOT EXISTS biblioteca_categorias (
   id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   name        text        NOT NULL UNIQUE,

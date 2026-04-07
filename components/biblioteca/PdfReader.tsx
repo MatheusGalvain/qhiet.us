@@ -97,9 +97,11 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
     const containerW = containerRef.current.clientWidth - 120
     const fit        = containerW / vp.width
     setFitScale(fit)
-    // Open at 30% of fit-to-width by default
-    setScale(fit * 0.30)
-    setZoomPct(30)
+    // Mobile (≤768px) abre em 120%, desktop em 30%
+    const isMobile = window.innerWidth <= 768
+    const defaultPct = isMobile ? 120 : 30
+    setScale(fit * (defaultPct / 100))
+    setZoomPct(defaultPct)
   }, [])
 
   useEffect(() => {
@@ -162,8 +164,10 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
   }
 
   const resetZoom = () => {
-    setScale(fitScale * 0.30)
-    setZoomPct(30)
+    const isMobile = window.innerWidth <= 768
+    const defaultPct = isMobile ? 120 : 30
+    setScale(fitScale * (defaultPct / 100))
+    setZoomPct(defaultPct)
   }
 
   const progressPct = totalPages > 0 ? (currentPage / totalPages) * 100 : 0
