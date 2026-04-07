@@ -395,16 +395,9 @@ function MembershipSection() {
       </div>
 
       {/* 4-column grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
+      <div className="home-plans-grid">
         {plans.map((p, i) => (
-          <div key={p.name} style={{
-            padding: 'clamp(24px,3vw,40px) clamp(20px,2.5vw,36px)',
-            borderRight: i < 3 ? '1px solid var(--faint)' : 'none',
-            display: 'flex', flexDirection: 'column',
-            position: 'relative',
-            background: p.featured ? 'linear-gradient(160deg, var(--surface), rgba(130,111,18,.07))' : 'transparent',
-            outline: p.featured ? '1px solid rgba(212,175,55,0.35)' : 'none',
-          }}>
+          <div key={p.name} className={`home-plan-card${p.featured ? ' featured' : ''}${i < 3 ? ' border-r' : ''}`}>
             {p.badge && (
               <div style={{
                 position: 'absolute', top: 0, right: 0,

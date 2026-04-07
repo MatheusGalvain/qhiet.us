@@ -13,6 +13,14 @@ interface Props {
   author: string
   initialPage: number
   initialTotal: number
+  /** URL da rota de stream (default: /api/biblioteca/{bookId}/stream) */
+  streamUrl?: string
+  /** URL da rota de progresso (default: /api/biblioteca/{bookId}/progress) */
+  progressUrl?: string
+  /** URL do link de voltar (default: /perfil/biblioteca) */
+  backHref?: string
+  /** Label do link de voltar (default: ← Biblioteca) */
+  backLabel?: string
 }
 
 const CDN_VERSION = '3.11.174'
@@ -39,7 +47,7 @@ async function injectPdfJs(): Promise<void> {
     `https://cdn.jsdelivr.net/npm/pdfjs-dist@${CDN_VERSION}/build/pdf.worker.min.js`
 }
 
-export default function PdfReader({ bookId, title, author, initialPage, initialTotal }: Props) {
+export default function PdfReader({ bookId, title, author, initialPage, initialTotal, streamUrl, progressUrl, backHref = '/perfil/biblioteca', backLabel = '← Biblioteca' }: Props) {
   const canvasRef      = useRef<HTMLCanvasElement>(null)
   const containerRef   = useRef<HTMLDivElement>(null)
   const renderTaskRef  = useRef<any>(null)
@@ -64,7 +72,7 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
         await injectPdfJs()
         // Use the stream proxy route — avoids CORS issues with direct R2 signed URLs
         const pdf = await window.pdfjsLib.getDocument({
-          url:             `/api/biblioteca/${bookId}/stream`,
+          url:             streamUrl ?? `/api/biblioteca/${bookId}/stream`,
           withCredentials: true,
           cMapUrl:         `https://cdn.jsdelivr.net/npm/pdfjs-dist@${CDN_VERSION}/cmaps/`,
           cMapPacked:      true,
@@ -135,7 +143,7 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
     if (!pdfDoc || totalPages === 0) return
     if (progressTimeout.current) clearTimeout(progressTimeout.current)
     progressTimeout.current = setTimeout(() => {
-      fetch(`/api/biblioteca/${bookId}/progress`, {
+      fetch(progressUrl ?? `/api/biblioteca/${bookId}/progress`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ current_page: currentPage, total_pages: totalPages }),
@@ -174,8 +182,8 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
     <div style={{ minHeight: '100vh', background: '#080503', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ textAlign: 'center', maxWidth: 400 }}>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--red)', marginBottom: 20 }}>{error}</p>
-        <Link href="/perfil/biblioteca" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-          ← Voltar à Biblioteca
+        <Link href={backHref} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
+          {backLabel}
         </Link>
       </div>
     </div>
@@ -202,7 +210,7 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
 
         {/* Back */}
         <Link
-          href="/perfil/biblioteca"
+          href={backHref}
           style={{
             display: 'flex', alignItems: 'center', gap: 8,
             fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2,
@@ -216,7 +224,7 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
           onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(255,255,255,0.13)'; (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,0.28)' }}
           onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(255,255,255,0.07)'; (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,0.14)' }}
         >
-          ← Biblioteca
+          {backLabel}
         </Link>
 
         <div style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.08)', margin: '0 16px', flexShrink: 0 }} />
@@ -309,7 +317,7 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
       }}>
         {/* Back to library */}
         <Link
-          href="/perfil/biblioteca"
+          href={backHref}
           style={{
             fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2,
             color: 'var(--cream)', textDecoration: 'none', textTransform: 'uppercase',
@@ -318,7 +326,7 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
             transition: 'background .15s',
           }}
         >
-          ← Biblioteca
+          {backLabel}
         </Link>
 
         <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.10)', margin: '0 4px' }} />

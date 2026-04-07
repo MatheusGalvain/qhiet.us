@@ -37,6 +37,12 @@ export async function uploadToR2(key: string, body: Buffer, contentType: string)
   return key
 }
 
+/** Generate a presigned PUT URL so the browser can upload directly to R2 */
+export async function getSignedUploadUrl(key: string, contentType: string, expiresIn = 3600): Promise<string> {
+  const command = new PutObjectCommand({ Bucket: R2_BUCKET, Key: key, ContentType: contentType })
+  return getSignedUrl(r2, command, { expiresIn })
+}
+
 /** Delete a file from R2 */
 export async function deleteFromR2(key: string): Promise<void> {
   await r2.send(new DeleteObjectCommand({ Bucket: R2_BUCKET, Key: key }))

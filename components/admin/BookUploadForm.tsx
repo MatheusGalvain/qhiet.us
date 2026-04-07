@@ -2,126 +2,78 @@
 
 import { useState, useRef } from 'react'
 
-interface Props {
-  onSaved: () => void
-}
+interface Props { onSaved: () => void }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%',
-  background: 'var(--surface)',
-  border: '1px solid var(--faint)',
-  color: 'var(--cream)',
-  fontFamily: 'var(--font-body)',
-  fontSize: 14,
-  padding: '10px 14px',
-  outline: 'none',
-  boxSizing: 'border-box',
+  width: '100%', background: 'var(--surface)', border: '1px solid var(--faint)',
+  color: 'var(--cream)', fontFamily: 'var(--font-body)', fontSize: 14,
+  padding: '10px 14px', outline: 'none', boxSizing: 'border-box',
 }
-
 const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontFamily: 'var(--font-mono)',
-  fontSize: 11,
-  letterSpacing: 3,
-  textTransform: 'uppercase' as const,
-  color: 'var(--muted)',
-  marginBottom: 6,
+  display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11,
+  letterSpacing: 3, textTransform: 'uppercase' as const,
+  color: 'var(--muted)', marginBottom: 6,
 }
 
 export default function BookUploadForm({ onSaved }: Props) {
-  const [title, setTitle]       = useState('')
-  const [author, setAuthor]     = useState('')
-  const [month, setMonth]       = useState('')
-  const [plan, setPlan]         = useState<'profano' | 'iniciado'>('profano')
+  const [title,    setTitle]    = useState('')
+  const [author,   setAuthor]   = useState('')
+  const [month,    setMonth]    = useState('')
+  const [plan,     setPlan]     = useState<'profano' | 'iniciado'>('profano')
   const [coverUrl, setCoverUrl] = useState('')
-  // File mode: 'upload' = PDF file, 'link' = external URL
-  const [fileMode, setFileMode] = useState<'upload' | 'link'>('upload')
-  const [linkUrl, setLinkUrl]   = useState('')
-  const [file, setFile]         = useState<File | null>(null)
+  const [file,     setFile]     = useState<File | null>(null)
   const [progress, setProgress] = useState(0)
-  const [status, setStatus]     = useState<'idle' | 'uploading' | 'saving' | 'done' | 'error'>('idle')
-  const [error, setError]       = useState('')
+  const [status,   setStatus]   = useState<'idle' | 'uploading' | 'saving' | 'done' | 'error'>('idle')
+  const [error,    setError]    = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!file) { setError('Selecione um arquivo PDF.'); return }
 
-    let finalUrl = ''
+    setStatus('uploading'); setError(''); setProgress(0)
 
-    if (fileMode === 'link') {
-      if (!linkUrl.trim()) { setError('Informe a URL do livro.'); return }
-      finalUrl = linkUrl.trim()
-    } else {
-      if (!file) { setError('Selecione um arquivo PDF.'); return }
+    // 1. Upload via servidor Next.js → R2 (evita CORS do R2 direto)
+    let r2Key = ''
+    try {
+      const form = new FormData()
+      form.append('file', file)
 
-      setStatus('uploading')
-      setError('')
-      setProgress(0)
-
-      const mimeType = file.type || 'application/pdf'
-      const urlRes = await fetch(`/api/admin/livros?filename=${encodeURIComponent(file.name)}&type=${encodeURIComponent(mimeType)}`)
-      if (!urlRes.ok) {
-        const d = await urlRes.json().catch(() => ({}))
-        setError(`Erro ao gerar URL de upload: ${d.error ?? urlRes.status}`)
-        setStatus('error'); return
-      }
-      const { signedUrl, path } = await urlRes.json()
-
-      try {
-        await new Promise<void>((resolve, reject) => {
-          const xhr = new XMLHttpRequest()
-          xhr.open('PUT', signedUrl)
-          xhr.setRequestHeader('Content-Type', mimeType)
-          xhr.upload.onprogress = e => {
-            if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100))
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', '/api/admin/livros/upload')
+        xhr.upload.onprogress = ev => {
+          if (ev.lengthComputable) setProgress(Math.round((ev.loaded / ev.total) * 100))
+        }
+        xhr.onload = () => {
+          if (xhr.status < 300) {
+            r2Key = JSON.parse(xhr.responseText).key
+            resolve()
+          } else {
+            reject(new Error(`Upload falhou: ${xhr.status}`))
           }
-          xhr.onload = () => {
-            if (xhr.status < 300) {
-              resolve()
-            } else {
-              const body = xhr.responseText || ''
-              let detail = ''
-              try { detail = JSON.parse(body)?.message ?? body } catch { detail = body }
-              reject(new Error(`Upload falhou: ${xhr.status}${detail ? ' — ' + detail : ''}`))
-            }
-          }
-          xhr.onerror = () => reject(new Error('Erro de rede ao enviar o arquivo'))
-          xhr.send(file)
-        })
-      } catch (err: any) {
-        setError(err.message)
-        setStatus('error')
-        return
-      }
-
-      finalUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/livros/${path}`
+        }
+        xhr.onerror = () => reject(new Error('Erro de rede ao enviar o arquivo'))
+        xhr.send(form)
+      })
+    } catch (err: any) {
+      setError(err.message); setStatus('error'); return
     }
 
+    // 2. Save metadata to DB with file_key (R2 key)
     setStatus('saving')
-
     const saveRes = await fetch('/api/admin/livros', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title,
-        author,
-        month,
-        file_url: finalUrl,
-        cover_url: coverUrl.trim() || null,
-        plan,
-      }),
+      body: JSON.stringify({ title, author, month, file_key: r2Key, cover_url: coverUrl.trim() || null, plan }),
     })
-
     if (!saveRes.ok) {
       const d = await saveRes.json()
-      setError(d.error ?? 'Erro ao salvar.')
-      setStatus('error')
-      return
+      setError(d.error ?? 'Erro ao salvar.'); setStatus('error'); return
     }
 
     setStatus('done')
-    setTitle(''); setAuthor(''); setMonth(''); setFile(null)
-    setLinkUrl(''); setCoverUrl(''); setProgress(0)
+    setTitle(''); setAuthor(''); setMonth(''); setFile(null); setCoverUrl(''); setProgress(0)
     if (fileRef.current) fileRef.current.value = ''
     onSaved()
     setTimeout(() => setStatus('idle'), 2500)
@@ -129,7 +81,6 @@ export default function BookUploadForm({ onSaved }: Props) {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 580 }}>
-
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <div>
           <label style={labelStyle}>Título</label>
@@ -155,16 +106,9 @@ export default function BookUploadForm({ onSaved }: Props) {
         </div>
       </div>
 
-      {/* Cover image URL */}
       <div>
         <label style={labelStyle}>URL da capa (opcional)</label>
-        <input
-          type="url"
-          value={coverUrl}
-          onChange={e => setCoverUrl(e.target.value)}
-          placeholder="https://... (imagem JPG/PNG)"
-          style={inputStyle}
-        />
+        <input type="url" value={coverUrl} onChange={e => setCoverUrl(e.target.value)} placeholder="https://... (imagem JPG/PNG)" style={inputStyle} />
         {coverUrl && (
           <div style={{ marginTop: 8, width: 80, height: 110, border: '1px solid var(--faint)', overflow: 'hidden' }}>
             <img src={coverUrl} alt="Capa" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -172,81 +116,32 @@ export default function BookUploadForm({ onSaved }: Props) {
         )}
       </div>
 
-      {/* File mode toggle */}
       <div>
-        <label style={labelStyle}>Acesso ao livro</label>
-        <div style={{ display: 'flex', gap: 0, marginBottom: 16 }}>
-          {(['upload', 'link'] as const).map(mode => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => setFileMode(mode)}
-              style={{
-                flex: 1,
-                padding: '10px',
-                background: fileMode === mode ? 'var(--red)' : 'var(--surface)',
-                border: '1px solid var(--faint)',
-                color: fileMode === mode ? '#fff' : 'var(--muted)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: 11,
-                letterSpacing: 2,
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-              }}
-            >
-              {mode === 'upload' ? '↑ Upload PDF' : '⇗ Link Externo'}
-            </button>
-          ))}
+        <label style={labelStyle}>Arquivo PDF</label>
+        <div
+          onClick={() => fileRef.current?.click()}
+          style={{
+            border: `1px dashed ${file ? 'var(--gold)' : 'var(--faint)'}`,
+            padding: '28px 24px', textAlign: 'center', cursor: 'pointer',
+            background: file ? 'rgba(184,134,11,0.04)' : 'transparent',
+          }}
+        >
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: file ? 'var(--gold)' : 'var(--muted)', textTransform: 'uppercase', marginBottom: file ? 4 : 0 }}>
+            {file ? file.name : '+ Clique para selecionar PDF'}
+          </p>
+          {file && <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)' }}>{(file.size / 1024 / 1024).toFixed(1)} MB · será salvo no R2</p>}
         </div>
-
-        {fileMode === 'upload' ? (
-          <div
-            onClick={() => fileRef.current?.click()}
-            style={{
-              border: `1px dashed ${file ? 'var(--gold)' : 'var(--faint)'}`,
-              padding: '24px',
-              textAlign: 'center',
-              cursor: 'pointer',
-              background: file ? 'rgba(184,134,11,0.04)' : 'transparent',
-            }}
-          >
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: file ? 'var(--gold)' : 'var(--muted)', textTransform: 'uppercase', marginBottom: file ? 4 : 0 }}>
-              {file ? file.name : '+ Clique para selecionar PDF'}
-            </p>
-            {file && <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)' }}>{(file.size / 1024 / 1024).toFixed(1)} MB</p>}
-          </div>
-        ) : (
-          <div>
-            <input
-              type="url"
-              value={linkUrl}
-              onChange={e => setLinkUrl(e.target.value)}
-              placeholder="https://drive.google.com/... ou qualquer URL"
-              style={inputStyle}
-            />
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', marginTop: 6, letterSpacing: 1 }}>
-              Google Drive, Dropbox, site externo — qualquer URL de acesso ao livro.
-            </p>
-          </div>
-        )}
-
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".pdf,application/pdf"
-          style={{ display: 'none' }}
-          onChange={e => setFile(e.target.files?.[0] ?? null)}
-        />
+        <input ref={fileRef} type="file" accept=".pdf,application/pdf" style={{ display: 'none' }}
+          onChange={e => setFile(e.target.files?.[0] ?? null)} />
       </div>
 
-      {/* Upload progress */}
       {status === 'uploading' && (
         <div>
           <div style={{ height: 3, background: 'var(--faint)' }}>
-            <div style={{ height: '100%', width: `${progress}%`, background: 'var(--red)', transition: 'width .2s' }} />
+            <div style={{ height: '100%', width: `${progress}%`, background: 'var(--gold)', transition: 'width .2s' }} />
           </div>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--muted)', marginTop: 4 }}>
-            Enviando… {progress}%
+            Enviando para R2… {progress}%
           </p>
         </div>
       )}
@@ -265,14 +160,13 @@ export default function BookUploadForm({ onSaved }: Props) {
           background: status === 'done' ? 'transparent' : 'var(--red)',
           border: status === 'done' ? '1px solid var(--gold)' : '1px solid var(--red)',
           color: status === 'done' ? 'var(--gold)' : '#fff',
-          fontFamily: 'var(--font-mono)',
-          fontSize: 12, letterSpacing: 3, textTransform: 'uppercase',
+          fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, textTransform: 'uppercase',
           cursor: (status === 'uploading' || status === 'saving') ? 'wait' : 'pointer',
           opacity: (status === 'uploading' || status === 'saving') ? 0.6 : 1,
           alignSelf: 'flex-start',
         }}
       >
-        {status === 'uploading' ? 'Enviando PDF…'
+        {status === 'uploading' ? `Enviando… ${progress}%`
           : status === 'saving' ? 'Salvando…'
           : status === 'done' ? '✓ Livro Adicionado'
           : 'Adicionar Livro →'}

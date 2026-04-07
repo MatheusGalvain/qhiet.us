@@ -482,11 +482,9 @@ export default async function PerfilPage({
                 ? !book.plan_access.includes('profano')
                 : false
               return (
-              <a
+              <Link
                 key={book.id}
-                href={book.file_url}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={book.file_key ? `/perfil/livros/${book.id}` : (book.file_url ?? '#')}
                 className="book-card-link"
                 style={isPremium ? { outline: '1px solid var(--gold)', outlineOffset: 2 } : {outline: '1px solid var(--red-dim)', outlineOffset: 2}}
               >
@@ -525,7 +523,7 @@ export default async function PerfilPage({
                 <span style={{ display: 'block', width: '100%', padding: 8, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', background: 'transparent', border: `1px solid ${isPremium ? 'var(--gold)' : 'var(--cream-dim)'}`, color: isPremium ? 'var(--gold)' : 'var(--muted)' }}>
                   Acessar →
                 </span>
-              </a>
+              </Link>
               )
             })}
             {books.length === 0 && (

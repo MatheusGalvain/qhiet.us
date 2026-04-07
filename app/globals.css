@@ -771,6 +771,36 @@ body {
 /* ═══════════════════════════════════════
    PLANS GRID — stacks on mobile
 ═══════════════════════════════════════ */
+/* ── Home page plans grid ── */
+.home-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.home-plan-card {
+  padding: clamp(24px,3vw,40px) clamp(20px,2.5vw,36px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.home-plan-card.border-r { border-right: 1px solid var(--faint); }
+.home-plan-card.featured {
+  background: linear-gradient(160deg, var(--surface), rgba(130,111,18,.07));
+  outline: 1px solid rgba(212,175,55,0.35);
+}
+@media (max-width: 900px) {
+  .home-plans-grid { grid-template-columns: 1fr 1fr; }
+  .home-plan-card.border-r { border-right: none; }
+  .home-plan-card { border-bottom: 1px solid var(--faint); }
+  .home-plan-card:nth-child(3),
+  .home-plan-card:nth-child(4) { border-bottom: none; }
+  .home-plan-card:nth-child(odd) { border-right: 1px solid var(--faint); }
+}
+@media (max-width: 560px) {
+  .home-plans-grid { grid-template-columns: 1fr; }
+  .home-plan-card { border-right: none !important; border-bottom: 1px solid var(--faint); }
+  .home-plan-card:last-child { border-bottom: none; }
+}
+
 .plans-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

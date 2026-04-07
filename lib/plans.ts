@@ -77,6 +77,9 @@ export function resolvePlans(
   plansArr: string[] | null | undefined,
   legacyPlan: Plan | null | undefined,
 ): Plan[] {
+  // adepto é superset — se a coluna plan for 'adepto', sempre retorna ['adepto']
+  // independente do que estiver no array plans (pode estar desatualizado)
+  if (legacyPlan === 'adepto') return ['adepto']
   if (plansArr && plansArr.length > 0) {
     return plansArr.filter(p => p in PLAN_FEATURES) as Plan[]
   }

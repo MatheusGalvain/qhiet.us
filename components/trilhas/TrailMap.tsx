@@ -469,7 +469,7 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
 
       <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
         {/* Map */}
-        <div style={{ flex: '0 0 auto', position: 'relative' }}>
+        <div style={{ flex: '1 1 300px', minWidth: 0, position: 'relative' }}>
           <div style={{ border: '1px solid var(--faint)', background: 'var(--surface)', overflow: 'hidden' }}>
             <div style={{ height: 2, background: 'var(--faint)' }}>
               <div style={{
@@ -477,7 +477,7 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
                 background: trailDone ? '#c8960a' : '#b02a1e', transition: 'width .5s ease',
               }} />
             </div>
-            <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', maxWidth: '100%' }}>
+            <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: 'auto' }}>
               {renderCenter()}
               {renderLines()}
               {renderNodes()}

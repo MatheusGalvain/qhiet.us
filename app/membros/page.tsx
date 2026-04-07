@@ -246,10 +246,10 @@ export default async function MembrosPage({ searchParams }: { searchParams: { er
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, marginBottom: 24 }}>
                   {p.features.map(({ on, text }, i) => (
                     <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: on ? meta.color : 'var(--faint)', flexShrink: 0, marginTop: 2 }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: on ? meta.color : 'var(--cream-dim)', flexShrink: 0, marginTop: 2 }}>
                         {on ? '◉' : '○'}
                       </span>
-                      <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: on ? 'var(--cream-dim)' : 'var(--faint)', lineHeight: 1.5 }} dangerouslySetInnerHTML={{ __html: text }} />
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: on ? 'var(--cream)' : 'var(--cream-dim)', lineHeight: 1.5 }} dangerouslySetInnerHTML={{ __html: text }} />
                     </div>
                   ))}
                 </div>
@@ -301,7 +301,7 @@ export default async function MembrosPage({ searchParams }: { searchParams: { er
                     return (
                       <td key={pk} style={{ ...tdSt, textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
                         {typeof v === 'boolean'
-                          ? <span style={{ color: v ? PLAN_META[pk].color : 'var(--faint)' }}>{v ? '◉' : '○'}</span>
+                          ? <span style={{ color: v ? PLAN_META[pk].color : 'var(--cream-dim)' }}>{v ? '◉' : '○'}</span>
                           : <span style={{ color: 'var(--cream)' }}>{v}</span>}
                       </td>
                     )
