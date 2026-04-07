@@ -131,11 +131,11 @@ export async function PATCH(request: NextRequest) {
   const year = formData.get('year')
   if (year !== null && year !== '') updates.year = Number(year)
 
-  const category = formData.get('category') as string
-  if (category) updates.category = category
+  const category = formData.get('category') as string | null
+  if (category !== null) updates.category = category || null
 
-  const era = formData.get('era') as string
-  if (era) updates.era = era
+  const era = formData.get('era') as string | null
+  if (era !== null) updates.era = era || null
 
   const description = formData.get('description') as string
   if (description !== null) updates.description = description
