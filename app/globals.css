@@ -1948,3 +1948,82 @@ body {
   background: #111;
   border-top-color: #2a2a2a !important;
 }
+
+/* ═══════════════════════════════════════
+   BIBLIOTECA NAV — responsivo
+═══════════════════════════════════════ */
+.bib-nav {
+  border-top: 1px solid var(--faint);
+  border-bottom: 1px solid var(--faint);
+}
+/* Row 1: abas com scroll horizontal */
+.bib-nav-tabs {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.bib-nav-tabs::-webkit-scrollbar { display: none; }
+
+/* Row 2: busca + botão Em Leitura */
+.bib-nav-actions {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--faint);
+}
+.bib-nav-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  position: relative;
+  border-right: 1px solid var(--faint);
+  padding: 0 12px;
+}
+.bib-nav-search input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--cream);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 10px 28px 10px 28px;
+  caret-color: var(--cream);
+}
+.bib-nav-search .bib-search-icon {
+  position: absolute;
+  left: 24px;
+  font-size: 14px;
+  color: var(--muted);
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+}
+.bib-nav-search .bib-search-clear {
+  position: absolute;
+  right: 20px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Desktop: tudo numa linha só */
+@media (min-width: 641px) {
+  .bib-nav { display: flex; align-items: stretch; overflow: hidden; }
+  /* min-width:0 é obrigatório para o flex child poder encolher e ativar overflow-x:auto */
+  .bib-nav-tabs { flex: 1 1 0; min-width: 0; border-bottom: none; }
+  .bib-nav-actions { flex-shrink: 0; border-top: none; }
+  .bib-nav-search { min-width: 180px; }
+}
+
+/* Mobile: duas linhas */
+@media (max-width: 640px) {
+  .bib-nav-tabs { border-bottom: 1px solid var(--faint); width: 100%; }
+  .bib-nav-actions { width: 100%; }
+  .bib-nav-search input { font-size: 13px; padding: 12px 28px 12px 30px; }
+}

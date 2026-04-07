@@ -131,7 +131,7 @@ export default async function PerfilBibliotecaPage() {
                     )}
 
                     {lastRead && (
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, color: 'var(--faint)' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, color: 'var(--cream-dim)' }}>
                         Último acesso: {lastRead}
                       </p>
                     )}

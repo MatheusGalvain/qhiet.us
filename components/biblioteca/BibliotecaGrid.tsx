@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-interface Book {
+export interface Book {
   id: string
   title: string
   author: string
@@ -19,6 +19,7 @@ interface Props {
   hasAccess: boolean
   userId: string | null
   progress: Record<string, { current_page: number; total_pages: number }>
+  search?: string
 }
 
 const ERA_COLORS: Record<string, string> = {
@@ -37,28 +38,33 @@ const CAT_SYMBOLS: Record<string, string> = {
   rosacruz:    '△',
 }
 
-export default function BibliotecaGrid({ books, hasAccess, userId, progress }: Props) {
-  const [hoveredId, setHoveredId] = useState<string | null>(null)
+export default function BibliotecaGrid({ books, hasAccess, userId, progress, search = '' }: Props) {
+  const [hoveredId,      setHoveredId]      = useState<string | null>(null)
   const [showUpgradeFor, setShowUpgradeFor] = useState<string | null>(null)
 
-  if (books.length === 0) {
-    return (
-      <div style={{ padding: '64px 0', textAlign: 'center' }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
-          Nenhuma obra nesta categoria ainda.
-        </p>
-      </div>
-    )
-  }
+  const filtered = search.trim()
+    ? books.filter(b =>
+        b.title.toLowerCase().includes(search.toLowerCase()) ||
+        b.author.toLowerCase().includes(search.toLowerCase())
+      )
+    : books
 
   return (
     <>
+      {filtered.length === 0 && (
+        <div style={{ padding: '48px 0', textAlign: 'center' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
+            {search ? `Nenhum resultado para "${search}"` : 'Nenhuma obra nesta categoria ainda.'}
+          </p>
+        </div>
+      )}
+
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
         gap: 24,
       }}>
-        {books.map((book) => {
+        {filtered.map((book) => {
           const prog = progress[book.id]
           const isHovered = hoveredId === book.id
           const catKey = book.category?.toLowerCase() ?? ''
@@ -85,7 +91,6 @@ export default function BibliotecaGrid({ books, hasAccess, userId, progress }: P
                     <BookCard book={book} prog={undefined} isHovered={isHovered} catSym={catSym} eraColor={eraColor} hasAccess={false} />
                   </div>
 
-                  {/* Upgrade modal */}
                   {showUpgradeFor === book.id && (
                     <div
                       style={{

@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-const CATEGORIES = ['Hermetismo', 'Cabala', 'Gnosticismo', 'Alquimia', 'Tarot', 'Rosacruz', 'Maçonaria', 'Magia', 'Astrologia', 'Teosofia']
 const ERAS = ['Antiguidade', 'Medieval', 'Renascimento', 'Moderno', 'Contemporâneo']
 
 interface FormFields {
@@ -19,11 +18,20 @@ interface FormFields {
 
 export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
   const router = useRouter()
+  const [categories, setCategories] = useState<string[]>([])
+
+  useEffect(() => {
+    fetch('/api/admin/biblioteca/categorias')
+      .then(r => r.json())
+      .then((rows: { name: string }[]) => setCategories(rows.map(r => r.name)))
+      .catch(() => {})
+  }, [])
+
   const [form, setForm] = useState<FormFields>({
     title:        initial?.title ?? '',
     author:       initial?.author ?? '',
     year:         String(initial?.year ?? ''),
-    category:     initial?.category ?? 'Hermetismo',
+    category:     initial?.category ?? '',
     era:          initial?.era ?? 'Moderno',
     description:  initial?.description ?? '',
     is_published: initial?.is_published ?? false,
@@ -165,7 +173,8 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
         <div>
           <label style={labelSt}>Categoria</label>
           <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="form-input" style={{ width: '100%' }}>
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            <option value="">— Selecione —</option>
+            {categories.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div>

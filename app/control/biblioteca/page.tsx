@@ -40,9 +40,22 @@ export default async function AdminBibliotecaPage() {
             BIBLIOTECA
           </h1>
         </div>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)' }}>
-          {books.length} obra{books.length !== 1 ? 's' : ''}
-        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)' }}>
+            {books.length} obra{books.length !== 1 ? 's' : ''}
+          </p>
+          <Link
+            href="/control/biblioteca/categorias"
+            style={{
+              fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2,
+              textTransform: 'uppercase', color: 'var(--gold)',
+              textDecoration: 'none', border: '1px solid var(--gold-dim)',
+              padding: '5px 12px', whiteSpace: 'nowrap',
+            }}
+          >
+            ◈ Gerenciar Categorias
+          </Link>
+        </div>
       </div>
 
       {/* Book list */}
