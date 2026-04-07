@@ -238,7 +238,7 @@ function BookCard({ book, prog, isHovered, catSym, eraColor, hasAccess }: {
             </span>
           )}
         </div>
-        <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 14, color: !hasAccess ? 'var(--faint)' : 'var(--cream)', marginBottom: 4, lineHeight: 1.4 }}>
+        <p style={{ fontFamily: 'var(--font-serif)', fontSize: 14, color: !hasAccess ? 'var(--faint)' : 'var(--cream)', marginBottom: 4, lineHeight: 1.4 }}>
           {book.title}
         </p>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>

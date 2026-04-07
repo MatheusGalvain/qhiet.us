@@ -115,7 +115,7 @@ export default async function PerfilBibliotecaPage() {
 
                   {/* Info */}
                   <div style={{ flex: 1, minWidth: 200 }}>
-                    <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 17, color: 'var(--cream)', marginBottom: 4 }}>{book.title}</p>
+                    <p style={{ fontFamily: 'var(--font-serif)', fontSize: 17, color: 'var(--cream)', marginBottom: 4 }}>{book.title}</p>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>{book.author}</p>
 
                     {/* Progress bar */}
