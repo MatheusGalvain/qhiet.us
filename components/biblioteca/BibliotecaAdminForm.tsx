@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 const CATEGORIES = ['Hermetismo', 'Cabala', 'Gnosticismo', 'Alquimia', 'Tarot', 'Rosacruz', 'Maçonaria', 'Magia', 'Astrologia', 'Teosofia']
 const ERAS = ['Antiguidade', 'Medieval', 'Renascimento', 'Moderno', 'Contemporâneo']
 
-interface FormData {
+interface FormFields {
   title: string
   author: string
   year: string
@@ -19,7 +19,7 @@ interface FormData {
 
 export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
   const router = useRouter()
-  const [form, setForm] = useState<FormData>({
+  const [form, setForm] = useState<FormFields>({
     title:        initial?.title ?? '',
     author:       initial?.author ?? '',
     year:         String(initial?.year ?? ''),
@@ -34,10 +34,45 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
   const [coverUrl,   setCoverUrl]   = useState<string>(initial?.cover_url ?? '')
   const [coverMode,  setCoverMode]  = useState<'file' | 'url'>('file')
   const [saving,     setSaving]     = useState(false)
+  const [uploadPct,  setUploadPct]  = useState<number | null>(null)
   const [error,      setError]      = useState<string | null>(null)
   const [success,    setSuccess]    = useState(false)
   const pdfRef   = useRef<HTMLInputElement>(null)
   const coverRef = useRef<HTMLInputElement>(null)
+
+  /** Upload PDF directly to R2 via presigned URL — bypasses Next.js 4.5 MB body limit */
+  async function uploadPdfToR2(file: File): Promise<string> {
+    // 1. Get presigned URL from our API
+    const urlRes = await fetch(
+      `/api/admin/biblioteca/upload-url?filename=${encodeURIComponent(file.name)}&type=${encodeURIComponent(file.type || 'application/pdf')}`
+    )
+    if (!urlRes.ok) {
+      const j = await urlRes.json().catch(() => ({}))
+      throw new Error((j as any).error ?? 'Erro ao obter URL de upload.')
+    }
+    const { presignedUrl, key } = await urlRes.json()
+
+    // 2. PUT file directly to R2 (XHR for progress tracking)
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('PUT', presignedUrl)
+      xhr.setRequestHeader('Content-Type', file.type || 'application/pdf')
+
+      xhr.upload.onprogress = (ev) => {
+        if (ev.lengthComputable) {
+          setUploadPct(Math.round((ev.loaded / ev.total) * 100))
+        }
+      }
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) resolve()
+        else reject(new Error(`Upload falhou: ${xhr.status} ${xhr.statusText}`))
+      }
+      xhr.onerror = () => reject(new Error('Erro de rede ao enviar o arquivo.'))
+      xhr.send(file)
+    })
+
+    return key
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -47,14 +82,23 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
     setSaving(true)
     setError(null)
     setSuccess(false)
+    setUploadPct(null)
 
     try {
+      // Step 1: upload PDF to R2 if a file was selected
+      let fileKey: string | null = null
+      if (pdfFile) {
+        setUploadPct(0)
+        fileKey = await uploadPdfToR2(pdfFile)
+        setUploadPct(100)
+      }
+
+      // Step 2: send metadata (+ optional cover image) to our API
       const fd = new FormData()
       Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)))
-      if (pdfFile) fd.append('pdf', pdfFile)
+      if (fileKey) fd.append('file_key', fileKey)
       if (initial?.id) fd.append('id', initial.id)
 
-      // Cover: file takes precedence over URL
       if (coverMode === 'file' && coverFile) {
         fd.append('cover', coverFile)
       } else if (coverMode === 'url' && coverUrl.trim()) {
@@ -67,7 +111,7 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
       })
 
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Erro ao salvar.')
+      if (!res.ok) throw new Error((json as any).error ?? 'Erro ao salvar.')
 
       setSuccess(true)
       if (!initial) {
@@ -80,13 +124,14 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
       }
       router.refresh()
     } catch (err: any) {
-      setError(err.message)
+      setError((err as Error).message)
     } finally {
       setSaving(false)
+      setUploadPct(null)
     }
   }
 
-  const field = (label: string, key: keyof FormData, type = 'text', placeholder = '') => (
+  const field = (label: string, key: keyof FormFields, type = 'text', placeholder = '') => (
     <div>
       <label style={labelSt}>{label}</label>
       <input
@@ -168,6 +213,28 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>
             {pdfFile.name} · {(pdfFile.size / 1024 / 1024).toFixed(1)} MB
           </p>
+        )}
+
+        {/* Upload progress bar */}
+        {uploadPct !== null && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{
+              height: 3,
+              background: 'var(--faint)',
+              borderRadius: 2,
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                height: '100%',
+                width: `${uploadPct}%`,
+                background: 'var(--gold)',
+                transition: 'width 0.2s ease',
+              }} />
+            </div>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--gold)', marginTop: 4 }}>
+              Enviando PDF… {uploadPct}%
+            </p>
+          </div>
         )}
       </div>
 
@@ -278,7 +345,12 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
 
       <div>
         <button type="submit" disabled={saving} className="btn-primary" style={{ opacity: saving ? 0.7 : 1 }}>
-          {saving ? 'Salvando…' : initial ? 'Atualizar obra' : 'Criar obra'}
+          {saving
+            ? uploadPct !== null && uploadPct < 100
+              ? `Enviando PDF… ${uploadPct}%`
+              : 'Salvando…'
+            : initial ? 'Atualizar obra' : 'Criar obra'
+          }
         </button>
       </div>
     </form>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient, createClient } from '@/lib/supabase/server'
-import { uploadToR2, deleteFromR2 } from '@/lib/r2'
+import { deleteFromR2 } from '@/lib/r2'
 
 async function checkAdmin() {
   const supabase = await createClient()
@@ -15,8 +15,9 @@ async function checkAdmin() {
  * POST — create a new biblioteca entry
  * Accepts multipart/form-data:
  *   title, author, year, category, era, description, is_published, order_index
- *   pdf     (File)  — required
- *   cover   (File)  — optional
+ *   file_key  (string) — R2 key returned by /api/admin/biblioteca/upload-url
+ *   cover     (File)   — optional image
+ *   cover_url_input (string) — optional cover URL
  */
 export async function POST(request: NextRequest) {
   const admin = await checkAdmin()
@@ -37,27 +38,21 @@ export async function POST(request: NextRequest) {
   const description  = (formData.get('description') as string) ?? ''
   const is_published = formData.get('is_published') === 'true'
   const order_index  = formData.get('order_index') ? Number(formData.get('order_index')) : 0
-  const pdfFile       = formData.get('pdf') as File | null
-  const coverFile     = formData.get('cover') as File | null
+  const fileKey      = (formData.get('file_key') as string)?.trim()
+  const coverFile    = formData.get('cover') as File | null
   const coverUrlInput = (formData.get('cover_url_input') as string)?.trim() || null
 
   if (!title || !author) {
     return NextResponse.json({ error: 'Título e autor são obrigatórios.' }, { status: 400 })
   }
-  if (!pdfFile) {
-    return NextResponse.json({ error: 'Arquivo PDF obrigatório.' }, { status: 400 })
+  if (!fileKey) {
+    return NextResponse.json({ error: 'Arquivo PDF obrigatório (file_key ausente).' }, { status: 400 })
   }
 
-  // Upload PDF to R2
-  const pdfBuffer  = Buffer.from(await pdfFile.arrayBuffer())
-  const safeName   = pdfFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-  const pdfKey     = `biblioteca/${Date.now()}-${safeName}`
-  await uploadToR2(pdfKey, pdfBuffer, 'application/pdf')
-
   // Cover: prefer file upload, fall back to URL string
+  const service = createServiceClient()
   let cover_url: string | null = null
   if (coverFile && coverFile.size > 0) {
-    const service = createServiceClient()
     const coverBuffer = Buffer.from(await coverFile.arrayBuffer())
     const coverName   = `${Date.now()}-${coverFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
     const { data: coverData, error: coverErr } = await service.storage
@@ -71,7 +66,6 @@ export async function POST(request: NextRequest) {
     cover_url = coverUrlInput
   }
 
-  const service = createServiceClient()
   const { data, error } = await service
     .from('biblioteca')
     .insert({
@@ -83,7 +77,7 @@ export async function POST(request: NextRequest) {
       description,
       is_published,
       order_index,
-      file_url: pdfKey,   // R2 key — never a real URL
+      file_url: fileKey,   // R2 key stored in file_url column
       cover_url,
     })
     .select()
@@ -91,7 +85,7 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     // Clean up uploaded PDF if insert fails
-    await deleteFromR2(pdfKey).catch(() => {})
+    await deleteFromR2(fileKey).catch(() => {})
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
@@ -101,7 +95,7 @@ export async function POST(request: NextRequest) {
 /**
  * PATCH — update an existing biblioteca entry
  * Accepts multipart/form-data: same fields as POST, plus `id`
- * pdf and cover are optional (only replace if provided)
+ * file_key and cover are optional (only replace if provided)
  */
 export async function PATCH(request: NextRequest) {
   const admin = await checkAdmin()
@@ -152,18 +146,14 @@ export async function PATCH(request: NextRequest) {
   const order_index = formData.get('order_index')
   if (order_index !== null && order_index !== '') updates.order_index = Number(order_index)
 
-  // Replace PDF if provided
-  const pdfFile = formData.get('pdf') as File | null
-  if (pdfFile && pdfFile.size > 0) {
+  // Replace PDF if a new R2 key is provided
+  const newFileKey = (formData.get('file_key') as string)?.trim()
+  if (newFileKey) {
     // Delete old R2 key
     if ((existing as any).file_url) {
       await deleteFromR2((existing as any).file_url).catch(() => {})
     }
-    const pdfBuffer = Buffer.from(await pdfFile.arrayBuffer())
-    const safeName  = pdfFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-    const pdfKey    = `biblioteca/${Date.now()}-${safeName}`
-    await uploadToR2(pdfKey, pdfBuffer, 'application/pdf')
-    updates.file_url = pdfKey
+    updates.file_url = newFileKey
   }
 
   // Replace cover if provided (file or URL)
@@ -218,6 +208,5 @@ export async function DELETE(request: NextRequest) {
 
   const { error } = await service.from('biblioteca').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
   return NextResponse.json({ ok: true })
 }
