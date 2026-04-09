@@ -12,6 +12,7 @@ export interface Book {
   era: string | null
   description: string | null
   cover_url: string | null
+  created_at?: string
 }
 
 interface Props {

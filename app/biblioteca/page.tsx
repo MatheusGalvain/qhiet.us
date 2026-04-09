@@ -8,7 +8,7 @@ import BibliotecaShell from '@/components/biblioteca/BibliotecaShell'
 export const revalidate = 0
 export const metadata: Metadata = { title: 'Biblioteca', description: 'Acervo de livros esotéricos em PDF — Hermetismo, Cabala, Alquimia, Tarot e mais.' }
 
-async function getData(category?: string) {
+async function getData() {
   const supabase = await createClient()
   const service  = createServiceClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -22,23 +22,20 @@ async function getData(category?: string) {
     hasAccess = canAccessAny(activePlans, 'acervo')
   }
 
-  let query = service
+  // Fetch all published books
+  const { data: allBooksRaw } = await service
     .from('biblioteca')
-    .select('id, title, author, year, category, era, description, cover_url, is_published')
+    .select('id, title, author, year, category, era, description, cover_url, created_at')
     .eq('is_published', true)
+    .order('order_index', { ascending: true })
+    .order('created_at', { ascending: false })
 
-  if (category && category !== 'Todos' && category !== 'Recentes') {
-    query = query.ilike('category', category)
-  }
+  const allBooks = allBooksRaw ?? []
 
-  let books: any[]
-  if (category === 'Recentes') {
-    const { data } = await query.order('created_at', { ascending: false }).limit(5)
-    books = data ?? []
-  } else {
-    const { data } = await query.order('order_index', { ascending: true }).order('created_at', { ascending: false })
-    books = data ?? []
-  }
+  // Recent: last 5 by created_at
+  const recentBooks = [...allBooks]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 5)
 
   let progress: Record<string, { current_page: number; total_pages: number }> = {}
   if (userId && hasAccess) {
@@ -59,12 +56,7 @@ async function getData(category?: string) {
     .order('name', { ascending: true })
   const categories = (catRows ?? []).map((r: any) => r.name as string)
 
-  const { count: totalBooks } = await service
-    .from('biblioteca')
-    .select('*', { count: 'exact', head: true })
-    .eq('is_published', true)
-
-  return { books, hasAccess, userId, progress, totalBooks: totalBooks ?? 0, categories }
+  return { allBooks, recentBooks, hasAccess, userId, progress, categories }
 }
 
 export default async function BibliotecaPage({
@@ -73,7 +65,9 @@ export default async function BibliotecaPage({
   searchParams: { cat?: string }
 }) {
   const category = searchParams?.cat ?? 'Todos'
-  const { books, hasAccess, userId, progress, totalBooks, categories } = await getData(category)
+  const { allBooks, recentBooks, hasAccess, userId, progress, categories } = await getData()
+
+  const totalBooks = allBooks.length
 
   return (
     <>
@@ -94,7 +88,6 @@ export default async function BibliotecaPage({
           </div>
         </div>
 
-        {/* Plan gate banner */}
         {!hasAccess && (
           <div style={{
             padding: '16px 20px', marginBottom: 24,
@@ -119,14 +112,13 @@ export default async function BibliotecaPage({
         )}
       </div>
 
-      {/* NAV + SEARCH + GRID — client shell (compartilha estado de busca) */}
       <BibliotecaShell
-        books={books}
+        allBooks={allBooks}
+        recentBooks={recentBooks}
         hasAccess={hasAccess}
         userId={userId}
         progress={progress}
         category={category}
-        isRecentes={category === 'Recentes'}
         categories={categories}
       />
 

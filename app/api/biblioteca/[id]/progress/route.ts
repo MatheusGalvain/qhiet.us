@@ -39,6 +39,26 @@ export async function POST(
   return NextResponse.json({ ok: true })
 }
 
+/** Remove book from reading list */
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const service = createServiceClient()
+  const { error } = await service
+    .from('biblioteca_progress')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('book_id', params.id)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
+}
+
 /** Get reading progress */
 export async function GET(
   request: NextRequest,

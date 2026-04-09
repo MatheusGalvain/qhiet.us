@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { canAccess, canAccessAny, resolvePlans } from '@/lib/plans'
+import { canAccessAny, resolvePlans } from '@/lib/plans'
 import ProfileSidebar from '@/components/perfil/ProfileSidebar'
+import BibliotecaProgressList from '@/components/perfil/BibliotecaProgressList'
 import { getRank } from '@/lib/utils'
-import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const revalidate = 0
@@ -28,7 +28,6 @@ async function getData() {
     redirect('/membros?upgrade=acervo')
   }
 
-  // Books the user has opened (has progress entry)
   const { data: progressRows } = await service
     .from('biblioteca_progress')
     .select('book_id, current_page, total_pages, last_read_at')
@@ -44,6 +43,8 @@ async function getData() {
       .in('id', bookIds)
       .eq('is_published', true)
     books = data ?? []
+    // preserve last_read_at order
+    books.sort((a, b) => bookIds.indexOf(a.id) - bookIds.indexOf(b.id))
   }
 
   const progressMap: Record<string, { current_page: number; total_pages: number; last_read_at: string }> = {}
@@ -71,88 +72,35 @@ export default async function PerfilBibliotecaPage() {
       />
 
       <div style={{ padding: 'clamp(28px,4vw,48px) var(--px)', minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, borderBottom: '1px solid var(--faint)', paddingBottom: 16, marginBottom: 32 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,5vw,48px)', letterSpacing: 3, color: 'var(--cream)' }}>
-            ◈ BIBLIOTECA
-          </h2>
-          <Link href="/biblioteca" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', textDecoration: 'none' }}>
-            Ver acervo completo →
-          </Link>
+
+        {/* Header */}
+        <div style={{ borderBottom: '1px solid var(--faint)', paddingBottom: 20, marginBottom: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px,5vw,48px)', letterSpacing: 3, color: 'var(--cream)' }}>
+              ◈ EM LEITURA
+            </h2>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase' }}>
+              {books.length} {books.length === 1 ? 'obra' : 'obras'}
+            </span>
+          </div>
+
+          {/* Ver acervo completo — destaque (via BibliotecaProgressList que é client) */}
+          <a
+            href="/biblioteca"
+            className="btn-acervo-gold"
+          >
+            <span style={{ fontSize: 14 }}>◈</span>
+            Ver acervo completo
+            <span style={{ fontSize: 13 }}>→</span>
+          </a>
         </div>
 
-        {books.length === 0 ? (
-          <div style={{ padding: '48px 0' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 16 }}>
-              Nenhum livro aberto ainda.
-            </p>
-            <Link href="/biblioteca" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, color: 'var(--red)', textTransform: 'uppercase', textDecoration: 'none' }}>
-              Explorar biblioteca →
-            </Link>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {books.map((book: any) => {
-              const prog = progressMap[book.id]
-              const pct = prog?.total_pages > 0
-                ? Math.round((prog.current_page / prog.total_pages) * 100)
-                : 0
-              const lastRead = prog?.last_read_at
-                ? new Date(prog.last_read_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
-                : ''
+        {/* Reading list */}
+        <BibliotecaProgressList
+          initialBooks={books}
+          initialProgress={progressMap}
+        />
 
-              return (
-                <div key={book.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 20, padding: '20px 0',
-                  borderBottom: '1px solid var(--faint)', flexWrap: 'wrap',
-                }}>
-                  {/* Cover */}
-                  <div style={{ width: 52, height: 72, flexShrink: 0, overflow: 'hidden', background: 'var(--surface)', border: '1px solid var(--faint)' }}>
-                    {book.cover_url
-                      ? <img src={book.cover_url} alt={book.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 16, color: 'var(--faint)' }}>◉</div>
-                    }
-                  </div>
-
-                  {/* Info */}
-                  <div style={{ flex: 1, minWidth: 200 }}>
-                    <p style={{ fontFamily: 'var(--font-serif)', fontSize: 17, color: 'var(--cream)', marginBottom: 4 }}>{book.title}</p>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>{book.author}</p>
-
-                    {/* Progress bar */}
-                    {prog?.total_pages > 0 && (
-                      <div style={{ marginBottom: 6 }}>
-                        <div style={{ height: 2, background: 'var(--faint)', borderRadius: 1, overflow: 'hidden', maxWidth: 240 }}>
-                          <div style={{ width: `${pct}%`, height: '100%', background: 'var(--red)' }} />
-                        </div>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, color: 'var(--muted)', marginTop: 4 }}>
-                          Pág. {prog.current_page} de {prog.total_pages} · {pct}%
-                        </p>
-                      </div>
-                    )}
-
-                    {lastRead && (
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 1, color: 'var(--cream-dim)' }}>
-                        Último acesso: {lastRead}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* CTA */}
-                  <Link
-                    href={`/biblioteca/${book.id}`}
-                    style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 3, textTransform: 'uppercase',
-                      padding: '10px 18px', border: '1px solid var(--red-dim)', color: 'var(--red)',
-                      textDecoration: 'none', flexShrink: 0, whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {prog?.current_page > 1 ? 'Continuar lendo →' : 'Começar leitura →'}
-                  </Link>
-                </div>
-              )
-            })}
-          </div>
-        )}
       </div>
     </div>
   )
