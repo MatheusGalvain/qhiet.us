@@ -43,6 +43,7 @@ export async function openBillingPortal(): Promise<{ url: string } | { error: st
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.qhiethus.com.br'
+  const service = createServiceClient()
 
   try {
     const session = await createPortalSession({
@@ -51,7 +52,43 @@ export async function openBillingPortal(): Promise<{ url: string } | { error: st
     })
     return { url: session.url }
   } catch (err: any) {
-    // Expõe a mensagem real da Stripe para diagnóstico
-    return { error: `Stripe: ${err?.message ?? JSON.stringify(err)}` }
+    const msg: string = err?.message ?? String(err)
+
+    // Detecta customer de test mode sendo usado em live mode (ou vice-versa)
+    // Tenta recuperar buscando o cliente pelo e-mail do usuário no modo correto
+    if (msg.includes('similar object exists in test mode') || msg.includes('similar object exists in live mode')) {
+      try {
+        const { data: userData } = await supabase.auth.getUser()
+        const email = userData.user?.email
+        if (email) {
+          const customers = await stripe.customers.list({ email, limit: 1 })
+          const liveCustomer = customers.data[0]
+          if (liveCustomer) {
+            // Salva o customer correto e tenta criar a sessão
+            await service
+              .from('profiles')
+              .update({ stripe_customer_id: liveCustomer.id })
+              .eq('id', userData.user!.id)
+
+            const session = await createPortalSession({
+              customerId: liveCustomer.id,
+              returnUrl: `${appUrl}/perfil`,
+            })
+            return { url: session.url }
+          }
+        }
+        // Customer não existe em live mode — limpa o ID inválido
+        await service
+          .from('profiles')
+          .update({ stripe_customer_id: null })
+          .eq('id', (await supabase.auth.getUser()).data.user!.id)
+
+        return { error: 'Sua assinatura foi cadastrada em ambiente de testes e não existe em produção. Entre em contato pelo suporte para regularizar.' }
+      } catch (inner: any) {
+        return { error: `Erro ao recuperar cliente Stripe: ${inner?.message ?? String(inner)}` }
+      }
+    }
+
+    return { error: `Stripe: ${msg}` }
   }
 }

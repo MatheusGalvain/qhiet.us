@@ -28,6 +28,8 @@ function LoginContent() {
       : null
   )
   const [, startTransition] = useTransition()
+  const [loadingLogin,    setLoadingLogin]    = useState(false)
+  const [loadingRegister, setLoadingRegister] = useState(false)
   const [showLoginPwd, setShowLoginPwd]       = useState(false)
   const [showRegisterPwd, setShowRegisterPwd] = useState(false)
 
@@ -35,22 +37,31 @@ function LoginContent() {
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (loadingLogin) return
     const form = new FormData(e.currentTarget)
     setError(null)
+    setLoadingLogin(true)
     const { error } = await supabase.auth.signInWithPassword({
       email: form.get('email') as string,
       password: form.get('password') as string,
     })
-    if (error) { setError(error.message); return }
+    if (error) {
+      setError(error.message)
+      setLoadingLogin(false)
+      return
+    }
+    // Mantém loading=true durante a navegação — botão permanece bloqueado
     router.push(redirect)
     router.refresh()
   }
 
   async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (loadingRegister) return
     const form = new FormData(e.currentTarget)
     setError(null)
     setSuccess(null)
+    setLoadingRegister(true)
 
     const { data, error } = await supabase.auth.signUp({
       email: form.get('email') as string,
@@ -62,6 +73,7 @@ function LoginContent() {
         },
       },
     })
+
     if (error) {
       const msg = error.message.toLowerCase()
       if (msg.includes('user already registered') || msg.includes('already been registered') || msg.includes('already exists')) {
@@ -71,6 +83,7 @@ function LoginContent() {
       } else {
         setError(error.message)
       }
+      setLoadingRegister(false)
       return
     }
 
@@ -78,6 +91,7 @@ function LoginContent() {
     // data.user with identities=[] (no error). Detect this case.
     if (data.user && data.user.identities && data.user.identities.length === 0) {
       setError('Este e-mail já possui uma conta. Faça login ou use outro endereço.')
+      setLoadingRegister(false)
       return
     }
 
@@ -85,10 +99,12 @@ function LoginContent() {
     // If there's no session yet, the user needs to confirm their email first.
     if (data.user && !data.session) {
       setSuccess('Conta criada! Verifique seu e-mail e clique no link de confirmação para ativar o acesso.')
+      setLoadingRegister(false)
       return
     }
 
     // Session created immediately (email confirmation disabled in Supabase)
+    // Mantém loading=true durante a navegação — botão permanece bloqueado
     if (plan === 'iniciado') {
       router.push('/api/checkout')
     } else {
@@ -246,8 +262,8 @@ function LoginContent() {
                 Esqueci minha senha →
               </button>
             </div>
-            <button type="submit" className="btn-primary" style={{ marginTop: 8, width: '100%' }}>
-              Entrar no portal →
+            <button type="submit" disabled={loadingLogin} className="btn-primary" style={{ marginTop: 8, width: '100%', opacity: loadingLogin ? 0.7 : 1, cursor: loadingLogin ? 'not-allowed' : 'pointer' }}>
+              {loadingLogin ? 'Entrando…' : 'Entrar no portal →'}
             </button>
             <Divider />
             {/* <GoogleButton onClick={handleGoogle} label="Continuar com Google" /> */}
@@ -291,8 +307,8 @@ function LoginContent() {
                 </button>
               </div>
             </div>
-            <button type="submit" className="btn-primary" style={{ marginTop: 8, width: '100%' }}>
-              Iniciar jornada →
+            <button type="submit" disabled={loadingRegister} className="btn-primary" style={{ marginTop: 8, width: '100%', opacity: loadingRegister ? 0.7 : 1, cursor: loadingRegister ? 'not-allowed' : 'pointer' }}>
+              {loadingRegister ? 'Cadastrando…' : 'Iniciar jornada →'}
             </button>
             <Divider />
             {/* <GoogleButton onClick={handleGoogle} label="Cadastrar com Google" /> */}

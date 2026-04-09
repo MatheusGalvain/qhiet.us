@@ -361,9 +361,7 @@ function MembershipSection() {
       features: [
         { on: true, text: 'Tudo do plano Iniciado' },
         { on: true, text: 'Acervo completo de livros PDF' },
-        { on: true, text: 'Leitor PDF inline com anotações' },
         { on: true, text: 'Progresso de leitura salvo' },
-        { on: true, text: 'Hermetismo, Cabala, Alquimia…' },
         { on: true, text: 'Suporte prioritário' },
       ],
     },
@@ -373,7 +371,6 @@ function MembershipSection() {
       features: [
         { on: true,  text: 'Transmissões de Leitura Livre' },
         { on: true,  text: 'Acervo completo de livros PDF' },
-        { on: true,  text: 'Leitor PDF inline com anotações' },
         { on: true,  text: 'Progresso de leitura salvo' },
         { on: true,  text: 'Grimório Digital' },
         { on: false, text: 'Transmissões exclusivas' },

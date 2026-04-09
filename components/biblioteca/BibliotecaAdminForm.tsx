@@ -37,16 +37,83 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
     is_published: initial?.is_published ?? false,
     order_index:  String(initial?.order_index ?? 0),
   })
-  const [pdfFile,    setPdfFile]    = useState<File | null>(null)
-  const [coverFile,  setCoverFile]  = useState<File | null>(null)
-  const [coverUrl,   setCoverUrl]   = useState<string>(initial?.cover_url ?? '')
-  const [coverMode,  setCoverMode]  = useState<'file' | 'url'>('file')
-  const [saving,     setSaving]     = useState(false)
-  const [uploadPct,  setUploadPct]  = useState<number | null>(null)
-  const [error,      setError]      = useState<string | null>(null)
-  const [success,    setSuccess]    = useState(false)
+  const [pdfFile,        setPdfFile]        = useState<File | null>(null)
+  const [coverFile,      setCoverFile]      = useState<File | null>(null)
+  const [coverUrl,       setCoverUrl]       = useState<string>(initial?.cover_url ?? '')
+  const [coverMode,      setCoverMode]      = useState<'file' | 'url' | 'auto'>('file')
+  const [autoCoverBlob,  setAutoCoverBlob]  = useState<File | null>(null)
+  const [autoCoverPrev,  setAutoCoverPrev]  = useState<string | null>(null)
+  const [autoLoading,    setAutoLoading]    = useState(false)
+  const [saving,         setSaving]         = useState(false)
+  const [uploadPct,      setUploadPct]      = useState<number | null>(null)
+  const [error,          setError]          = useState<string | null>(null)
+  const [success,        setSuccess]        = useState(false)
   const pdfRef   = useRef<HTMLInputElement>(null)
   const coverRef = useRef<HTMLInputElement>(null)
+
+  /** Carrega pdf.js do CDN (uma vez) — mesma lógica do PdfReader */
+  async function loadPdfJs(): Promise<any> {
+    if ((window as any).pdfjsLib) return (window as any).pdfjsLib
+    const V = '3.11.174'
+    const CDNS = [
+      `https://cdn.jsdelivr.net/npm/pdfjs-dist@${V}/build/pdf.min.js`,
+      `https://unpkg.com/pdfjs-dist@${V}/build/pdf.min.js`,
+    ]
+    for (const src of CDNS) {
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const s = document.createElement('script')
+          s.src     = src
+          s.onload  = () => resolve()
+          s.onerror = () => reject()
+          document.head.appendChild(s)
+        })
+        if ((window as any).pdfjsLib) break
+      } catch { /* tenta próximo CDN */ }
+    }
+    if (!(window as any).pdfjsLib) throw new Error('Não foi possível carregar o leitor de PDF.')
+    ;(window as any).pdfjsLib.GlobalWorkerOptions.workerSrc =
+      `https://cdn.jsdelivr.net/npm/pdfjs-dist@${V}/build/pdf.worker.min.js`
+    return (window as any).pdfjsLib
+  }
+
+  /** Extrai a 1ª página do PDF como File JPEG */
+  async function extractCoverFromPdf(file: File): Promise<File> {
+    const lib    = await loadPdfJs()
+    const buf    = await file.arrayBuffer()
+    const pdf    = await lib.getDocument({ data: buf }).promise
+    const page   = await pdf.getPage(1)
+    const vp     = page.getViewport({ scale: 2.0 })
+    const canvas = document.createElement('canvas')
+    canvas.width  = vp.width
+    canvas.height = vp.height
+    await page.render({ canvasContext: canvas.getContext('2d')!, viewport: vp }).promise
+    return new Promise<File>((resolve, reject) => {
+      canvas.toBlob(blob => {
+        if (!blob) { reject(new Error('Falha ao gerar imagem')); return }
+        resolve(new File([blob], 'capa-auto.jpg', { type: 'image/jpeg' }))
+      }, 'image/jpeg', 0.92)
+    })
+  }
+
+  /** Quando o PDF muda e o modo é "auto", gera a capa automaticamente */
+  useEffect(() => {
+    if (coverMode !== 'auto' || !pdfFile) return
+    let cancelled = false
+    setAutoLoading(true)
+    setAutoCoverBlob(null)
+    setAutoCoverPrev(null)
+    extractCoverFromPdf(pdfFile)
+      .then(f => {
+        if (cancelled) return
+        setAutoCoverBlob(f)
+        setAutoCoverPrev(URL.createObjectURL(f))
+      })
+      .catch(err => { if (!cancelled) setError('Erro ao extrair capa: ' + err.message) })
+      .finally(() => { if (!cancelled) setAutoLoading(false) })
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pdfFile, coverMode])
 
   /** Upload PDF directly to R2 via presigned URL — bypasses Next.js 4.5 MB body limit */
   async function uploadPdfToR2(file: File): Promise<string> {
@@ -111,6 +178,8 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
         fd.append('cover', coverFile)
       } else if (coverMode === 'url' && coverUrl.trim()) {
         fd.append('cover_url_input', coverUrl.trim())
+      } else if (coverMode === 'auto' && autoCoverBlob) {
+        fd.append('cover', autoCoverBlob)
       }
 
       const res  = await fetch('/api/admin/biblioteca', {
@@ -127,6 +196,8 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
         setPdfFile(null)
         setCoverFile(null)
         setCoverUrl('')
+        setAutoCoverBlob(null)
+        setAutoCoverPrev(null)
         if (pdfRef.current)   pdfRef.current.value = ''
         if (coverRef.current) coverRef.current.value = ''
       }
@@ -252,7 +323,11 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <label style={{ ...labelSt, marginBottom: 0 }}>Capa (opcional)</label>
           <div style={{ display: 'flex', gap: 4 }}>
-            {(['file', 'url'] as const).map(m => (
+            {([
+              ['file', 'Arquivo'],
+              ['url',  'URL'],
+              ['auto', '◎ Auto PDF'],
+            ] as const).map(([m, label]) => (
               <button
                 key={m}
                 type="button"
@@ -260,19 +335,19 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
                 style={{
                   fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, textTransform: 'uppercase',
                   padding: '3px 10px', border: '1px solid',
-                  borderColor: coverMode === m ? 'rgba(255,255,255,0.30)' : 'var(--faint)',
-                  color: coverMode === m ? 'var(--cream)' : 'var(--muted)',
-                  background: coverMode === m ? 'rgba(255,255,255,0.06)' : 'transparent',
+                  borderColor: coverMode === m ? (m === 'auto' ? 'var(--gold)' : 'rgba(255,255,255,0.30)') : 'var(--faint)',
+                  color: coverMode === m ? (m === 'auto' ? 'var(--gold)' : 'var(--cream)') : 'var(--muted)',
+                  background: coverMode === m ? (m === 'auto' ? 'rgba(212,175,55,0.08)' : 'rgba(255,255,255,0.06)') : 'transparent',
                   cursor: 'pointer', transition: 'all .15s',
                 }}
               >
-                {m === 'file' ? 'Arquivo' : 'URL'}
+                {label}
               </button>
             ))}
           </div>
         </div>
 
-        {coverMode === 'file' ? (
+        {coverMode === 'file' && (
           <>
             <input
               ref={coverRef}
@@ -288,7 +363,9 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
               </p>
             )}
           </>
-        ) : (
+        )}
+
+        {coverMode === 'url' && (
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
             <input
               type="url"
@@ -310,7 +387,56 @@ export default function BibliotecaAdminForm({ initial }: { initial?: any }) {
           </div>
         )}
 
-        {initial?.cover_url && !coverFile && !coverUrl && (
+        {coverMode === 'auto' && (
+          <div style={{ marginTop: 4 }}>
+            {!pdfFile ? (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', letterSpacing: 1 }}>
+                ↑ Selecione o arquivo PDF acima — a capa será gerada automaticamente.
+              </p>
+            ) : autoLoading ? (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--gold)', letterSpacing: 1 }}>
+                ◌ Extraindo primeira página…
+              </p>
+            ) : autoCoverPrev ? (
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 4 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={autoCoverPrev}
+                  alt="capa gerada"
+                  style={{ width: 64, height: 90, objectFit: 'cover', border: '1px solid var(--gold)', flexShrink: 0 }}
+                />
+                <div>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--gold)', letterSpacing: 1, marginBottom: 6 }}>
+                    ✦ Capa extraída da 1ª página do PDF
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAutoCoverBlob(null)
+                      setAutoCoverPrev(null)
+                      if (pdfFile) {
+                        setAutoLoading(true)
+                        extractCoverFromPdf(pdfFile)
+                          .then(f => { setAutoCoverBlob(f); setAutoCoverPrev(URL.createObjectURL(f)) })
+                          .catch(err => setError('Erro ao extrair capa: ' + err.message))
+                          .finally(() => setAutoLoading(false))
+                      }
+                    }}
+                    style={{
+                      fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, textTransform: 'uppercase',
+                      padding: '3px 10px', border: '1px solid var(--faint)',
+                      color: 'var(--muted)', background: 'transparent', cursor: 'pointer',
+                    }}
+                  >
+                    Regenerar
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        {initial?.cover_url && coverMode === 'file' && !coverFile && (
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--muted)', marginTop: 6 }}>
             Capa atual mantida · deixe vazio para não alterar
           </p>

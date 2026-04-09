@@ -170,6 +170,8 @@ function BookCard({ book, prog, isHovered, catSym, eraColor, hasAccess }: {
       borderColor: isHovered && hasAccess ? 'var(--cream-dim)' : 'var(--faint)',
       transform: isHovered && hasAccess ? 'translateY(-2px)' : 'none',
       overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
     }}>
       {/* Cover */}
       <div style={{
@@ -227,27 +229,32 @@ function BookCard({ book, prog, isHovered, catSym, eraColor, hasAccess }: {
       </div>
 
       {/* Info */}
-      <div style={{ padding: '12px 12px 14px' }}>
+      <div style={{ padding: '12px 12px 14px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>
             {book.category}
           </span>
           {book.era && (
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1, color: eraColor, textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 1, color: eraColor, textTransform: 'uppercase', whiteSpace: 'nowrap', marginLeft: 4 }}>
               {book.era}
             </span>
           )}
         </div>
-        <p style={{ fontFamily: 'var(--font-serif)', fontSize: 14, color: !hasAccess ? 'var(--faint)' : 'var(--cream)', marginBottom: 4, lineHeight: 1.4 }}>
+        <p style={{
+          fontFamily: 'var(--font-serif)', fontSize: 14, color: !hasAccess ? 'var(--faint)' : 'var(--cream)',
+          marginBottom: 4, lineHeight: 1.4,
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+          minHeight: '2.8em',
+        }}>
           {book.title}
         </p>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--muted)', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {book.author}{book.year ? ` · ${book.year}` : ''}
         </p>
 
         {/* Progress bar */}
         {prog && prog.total_pages > 0 && hasAccess && (
-          <div style={{ marginTop: 8 }}>
+          <div style={{ marginTop: 'auto', paddingTop: 8 }}>
             <div style={{ height: 2, background: 'var(--faint)', borderRadius: 1, overflow: 'hidden' }}>
               <div style={{ width: `${progressPct}%`, height: '100%', background: 'var(--red)', transition: 'width .3s' }} />
             </div>
@@ -259,7 +266,7 @@ function BookCard({ book, prog, isHovered, catSym, eraColor, hasAccess }: {
 
         {/* Access badge */}
         {!hasAccess && (
-          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ marginTop: 'auto', paddingTop: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: 'var(--gold)', textTransform: 'uppercase' }}>✦ Acervo/Adepto</span>
           </div>
         )}

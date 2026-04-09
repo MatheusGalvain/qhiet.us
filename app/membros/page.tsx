@@ -82,7 +82,6 @@ const PLANS: Array<{
     features: [
       { on: true, text: 'Tudo do plano Iniciado' },
       { on: true, text: '<strong>Acervo completo</strong> de livros PDF' },
-      { on: true, text: 'Leitor PDF inline com anotações' },
       { on: true, text: 'Progresso de leitura salvo' },
       { on: true, text: 'Hermetismo, Cabala, Alquimia, Tarot…' },
       { on: true, text: 'Suporte prioritário' },
@@ -96,7 +95,6 @@ const PLANS: Array<{
     features: [
       { on: true, text: 'Transmissões de Leitura Livre' },
       { on: true, text: '<strong>Acervo completo</strong> de livros PDF' },
-      { on: true, text: 'Leitor PDF inline com anotações' },
       { on: true, text: 'Progresso de leitura salvo' },
       { on: true, text: 'Grimório Digital' },
       { on: false, text: 'Transmissões exclusivas' },

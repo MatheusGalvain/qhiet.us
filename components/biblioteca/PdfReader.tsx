@@ -60,9 +60,20 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
   const [scale,       setScale]       = useState(1.0)   // will be overridden by fit-width
   const [fitScale,    setFitScale]    = useState(1.0)   // scale that fits container width
   const [zoomPct,     setZoomPct]     = useState(100)   // display value in %
+  const [zoomInput,   setZoomInput]   = useState('100')   // string para o input editável
   const [noteOpen,    setNoteOpen]    = useState(false)
   const [note,        setNote]        = useState('')
+  const [isMobile,    setIsMobile]    = useState(false)
+  const [floatOpen,   setFloatOpen]   = useState(false)   // mobile: mini-menu aberto
   const progressTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Detecta mobile e atualiza no resize
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   // ── Load PDF ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -156,19 +167,29 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
   // ── Helpers ───────────────────────────────────────────────────────────────
   const goTo = (n: number) => setCurrentPage(Math.max(1, Math.min(totalPages, n)))
 
-  const zoom = (delta: number) => {
-    const newPct   = Math.max(15, Math.min(300, zoomPct + delta))
-    const newScale = fitScale * (newPct / 100)
-    setZoomPct(newPct)
-    setScale(newScale)
+  const applyZoomPct = (pct: number) => {
+    const clamped = Math.max(15, Math.min(300, Math.round(pct)))
+    setZoomPct(clamped)
+    setZoomInput(String(clamped))
+    setScale(fitScale * (clamped / 100))
+  }
+
+  const zoom = (delta: number) => applyZoomPct(zoomPct + delta)
+
+  const commitZoomInput = () => {
+    const n = parseInt(zoomInput, 10)
+    if (!isNaN(n)) applyZoomPct(n)
+    else setZoomInput(String(zoomPct))
   }
 
   const resetZoom = () => {
     const isMobile = window.innerWidth <= 768
     const defaultPct = isMobile ? 120 : 30
-    setScale(fitScale * (defaultPct / 100))
-    setZoomPct(defaultPct)
+    applyZoomPct(defaultPct)
   }
+
+  // Sincroniza zoomInput quando zoomPct muda via computeFitScale
+  useEffect(() => { setZoomInput(String(zoomPct)) }, [zoomPct])
 
   const progressPct = totalPages > 0 ? (currentPage / totalPages) * 100 : 0
 
@@ -312,6 +333,72 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
         />
       </div>
 
+      {/* ── Floating controls: desktop = coluna direita, mobile = pill central ── */}
+      {!isMobile ? (
+        /* DESKTOP: 4 botões verticais na direita */
+        <div style={{
+          position: 'fixed',
+          right: noteOpen ? 316 : 16,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+          zIndex: 185,
+          transition: 'right .2s ease',
+        }}>
+          <button onClick={() => window.scrollBy({ top: -380, behavior: 'smooth' })} style={roundBtn} title="Rolar para cima">↑</button>
+          <button onClick={() => goTo(currentPage - 1)}  disabled={currentPage <= 1}          style={{ ...roundBtn, opacity: currentPage <= 1 ? 0.3 : 1 }}          title="Página anterior">‹</button>
+          <button onClick={() => goTo(currentPage + 1)}  disabled={currentPage >= totalPages}  style={{ ...roundBtn, opacity: currentPage >= totalPages ? 0.3 : 1 }}  title="Próxima página">›</button>
+          <button onClick={() => window.scrollBy({ top: 380, behavior: 'smooth' })}  style={roundBtn} title="Rolar para baixo">↓</button>
+        </div>
+      ) : (
+        /* MOBILE: botão ⊕ fixo no canto + menu radial que expande para cima */
+        <div style={{ position: 'fixed', bottom: 100, right: 16, zIndex: 185 }}>
+
+          {/* Ações expandidas — aparecem acima do gatilho */}
+          {floatOpen && (
+            <div style={{
+              position: 'absolute', bottom: 60, right: 0,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+              animation: 'fadeSlideUp .18s ease',
+            }}>
+              <button onClick={() => { window.scrollBy({ top: -380, behavior: 'smooth' }); setFloatOpen(false) }} style={roundBtn} title="Rolar para cima">↑</button>
+              <button
+                onClick={() => { goTo(currentPage - 1); setFloatOpen(false) }}
+                disabled={currentPage <= 1}
+                style={{ ...roundBtn, opacity: currentPage <= 1 ? 0.3 : 1 }}
+                title="Página anterior"
+              >‹</button>
+              <button
+                onClick={() => { goTo(currentPage + 1); setFloatOpen(false) }}
+                disabled={currentPage >= totalPages}
+                style={{ ...roundBtn, opacity: currentPage >= totalPages ? 0.3 : 1 }}
+                title="Próxima página"
+              >›</button>
+              <button onClick={() => { window.scrollBy({ top: 380, behavior: 'smooth' }); setFloatOpen(false) }} style={roundBtn} title="Rolar para baixo">↓</button>
+            </div>
+          )}
+
+          {/* Botão gatilho */}
+          <button
+            onClick={() => setFloatOpen(o => !o)}
+            style={{
+              ...roundBtn,
+              background: floatOpen ? 'rgba(212,175,55,0.18)' : 'rgba(8,5,3,0.92)',
+              borderColor: floatOpen ? 'var(--gold)' : 'rgba(255,255,255,0.22)',
+              color: floatOpen ? 'var(--gold)' : 'var(--cream)',
+              fontSize: 22,
+              transform: floatOpen ? 'rotate(45deg)' : 'none',
+              transition: 'all .2s ease',
+            }}
+            title="Navegação"
+          >
+            +
+          </button>
+        </div>
+      )}
+
       {/* ── Bottom nav bar ── */}
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: noteOpen ? 300 : 0,
@@ -364,15 +451,36 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
         <div style={{ width: 1, height: 24, background: 'rgba(255,255,255,0.10)', margin: '0 6px' }} />
 
         {/* Zoom controls */}
-        <button onClick={() => zoom(-10)} style={ctrlBtn} title="Diminuir zoom">−</button>
+        <button onClick={() => zoom(-1)} style={ctrlBtn} title="Diminuir zoom">−</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <input
+            type="number"
+            min={15}
+            max={300}
+            value={zoomInput}
+            onChange={e => setZoomInput(e.target.value)}
+            onBlur={commitZoomInput}
+            onKeyDown={e => { if (e.key === 'Enter') { commitZoomInput(); (e.target as HTMLInputElement).blur() } }}
+            style={{
+              width: 48, textAlign: 'center',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              color: 'var(--cream)',
+              fontFamily: 'var(--font-mono)', fontSize: 12,
+              padding: '5px 0', outline: 'none',
+              MozAppearance: 'textfield',
+            } as React.CSSProperties}
+          />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted)', letterSpacing: 1 }}>%</span>
+        </div>
+        <button onClick={() => zoom(+1)} style={ctrlBtn} title="Aumentar zoom">+</button>
         <button
           onClick={resetZoom}
-          title="Ajustar à largura da tela"
-          style={{ ...ctrlBtn, minWidth: 54, fontSize: 10, letterSpacing: 1 }}
+          title="Restaurar zoom padrão"
+          style={{ ...ctrlBtn, fontSize: 9, letterSpacing: 1, padding: '6px 8px', color: 'var(--faint)' }}
         >
-          {zoomPct}%
+          ↺
         </button>
-        <button onClick={() => zoom(+10)} style={ctrlBtn} title="Aumentar zoom">+</button>
       </div>
     </div>
   )
@@ -391,4 +499,23 @@ const ctrlBtn: React.CSSProperties = {
   justifyContent: 'center',
   letterSpacing: 1,
   transition: 'color .15s, border-color .15s, background .15s',
+}
+
+const roundBtn: React.CSSProperties = {
+  width: 50,
+  height: 50,
+  borderRadius: '50%',
+  background: 'rgba(8,5,3,0.88)',
+  border: '1px solid rgba(255,255,255,0.14)',
+  color: 'var(--cream)',
+  fontFamily: 'var(--font-mono)',
+  fontSize: 20,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backdropFilter: 'blur(10px)',
+  boxShadow: '0 4px 16px rgba(0,0,0,0.55)',
+  transition: 'border-color .15s, background .15s',
+  flexShrink: 0,
 }
