@@ -101,7 +101,7 @@ export default async function TrailDetailPage({ params }: { params: { id: string
         </h1>
 
         {trail.description && (
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--muted)', lineHeight: 1.7 }}>
+          <p style={{ fontFamily: 'var(--font-body-article)', fontSize: 15, color: 'var(--muted)', lineHeight: 1.7 }}>
             {trail.description}
           </p>
         )}

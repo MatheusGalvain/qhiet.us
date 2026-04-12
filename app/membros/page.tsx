@@ -334,9 +334,9 @@ function CheckoutButton({ plan, label, fullWidth = false, featured = false, disa
         width: fullWidth ? '100%' : 'auto',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: fullWidth ? '13px' : '10px 16px',
-        border: '1px solid var(--faint)',
+        border: '1px solid var(--cream-dim)',
         fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 3,
-        textTransform: 'uppercase', color: 'var(--faint)',
+        textTransform: 'uppercase', color: 'var(--cream-dim)',
         cursor: 'default', userSelect: 'none',
       }}>
         ◉ {label}

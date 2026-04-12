@@ -72,14 +72,14 @@ export default function LegalLayout({ label, title, date, intro, children }: Pro
         marginTop: 64, paddingTop: 24,
         borderTop: '1px solid var(--faint)',
         fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3,
-        color: 'var(--faint)', textTransform: 'uppercase',
+        color: 'var(--cream-dim)', textTransform: 'uppercase',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
       }}>
         <span>© MMXXVI · QHIETHUS · Todos os mistérios reservados</span>
         <div style={{ display: 'flex', gap: 24 }}>
-          <Link href="/politica-de-privacidade" style={{ color: 'var(--faint)', textDecoration: 'none' }}>Privacidade</Link>
-          <Link href="/termos-de-uso" style={{ color: 'var(--faint)', textDecoration: 'none' }}>Termos</Link>
-          <Link href="/politica-de-assinatura" style={{ color: 'var(--faint)', textDecoration: 'none' }}>Assinatura</Link>
+          <Link href="/politica-de-privacidade" style={{ color: 'var(--cream-dim)', textDecoration: 'none' }}>Privacidade</Link>
+          <Link href="/termos-de-uso" style={{ color: 'var(--cream-dim)', textDecoration: 'none' }}>Termos</Link>
+          <Link href="/politica-de-assinatura" style={{ color: 'var(--cream-dim)', textDecoration: 'none' }}>Assinatura</Link>
         </div>
       </div>
     </div>

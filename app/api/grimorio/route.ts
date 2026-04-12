@@ -1,81 +1,84 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { canAccessAny, resolvePlans } from '@/lib/plans'
 
-const PER_TRAIL_LIMIT = 7500
+const PER_TX_LIMIT = 1000
 
-async function getSubscriberProfile(userId: string) {
+async function canUseGrimoire(userId: string): Promise<boolean> {
   const service = createServiceClient()
   const { data } = await service
     .from('profiles')
-    .select('is_subscriber, is_admin')
+    .select('plan, plans, is_admin')
     .eq('id', userId)
     .single()
-  return data
+  if (!data) return false
+  if ((data as any).is_admin) return true
+  const activePlans = resolvePlans((data as any).plans, (data as any).plan)
+  return canAccessAny(activePlans, 'grimorio')
 }
 
-// ─── PUT — salva anotação do grimório por trilha ──────────────
+// ─── PUT — salva/atualiza anotação por trilha ─────────────────
 // Body: { trail_id: string, content: string }
 export async function PUT(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const profile = await getSubscriberProfile(user.id)
-  if (!profile?.is_subscriber && !profile?.is_admin) {
+  const allowed = await canUseGrimoire(user.id)
+  if (!allowed) {
     return NextResponse.json({ error: 'Exclusivo para Iniciados.' }, { status: 403 })
   }
 
   const service = createServiceClient()
   const body = await request.json()
+
+  // Aceita trail_id (obrigatório) e tx_id (ignorado por ora — DB ainda não tem a coluna)
   const trail_id: string | null = body.trail_id ?? null
-  const content: string = body.content ?? ''
+  const content: string = (body.content ?? '').slice(0, PER_TX_LIMIT)
 
   if (!trail_id) {
     return NextResponse.json({ error: 'trail_id obrigatório.' }, { status: 400 })
   }
 
-  if (content.length > PER_TRAIL_LIMIT) {
-    return NextResponse.json({
-      error: `Máximo ${PER_TRAIL_LIMIT} caracteres por trilha.`,
-    }, { status: 400 })
-  }
-
-  // Upsert por trilha
+  // Busca registro existente
   const { data: existing } = await service
     .from('user_grimoire')
     .select('id')
     .eq('user_id', user.id)
     .eq('trail_id', trail_id)
-    .single()
+    .maybeSingle()
 
-  let upsertError: any = null
+  let dbError: any = null
   if (existing) {
     const { error } = await service
       .from('user_grimoire')
       .update({ content, updated_at: new Date().toISOString() })
       .eq('id', existing.id)
-    upsertError = error
+    dbError = error
   } else {
     const { error } = await service
       .from('user_grimoire')
       .insert({ user_id: user.id, trail_id, content, updated_at: new Date().toISOString() })
-    upsertError = error
+    dbError = error
   }
 
-  if (upsertError) return NextResponse.json({ error: upsertError.message }, { status: 500 })
+  if (dbError) {
+    console.error('[grimorio PUT]', dbError)
+    return NextResponse.json({ error: dbError.message }, { status: 500 })
+  }
 
-  return NextResponse.json({ success: true, chars_used: content.length, limit: PER_TRAIL_LIMIT })
+  return NextResponse.json({ success: true, chars_used: content.length, limit: PER_TX_LIMIT })
 }
 
-// ─── GET — busca anotação de uma trilha específica ────────────
+// ─── GET — busca anotação de uma trilha ──────────────────────
 // Query: trail_id=<uuid>
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const profile = await getSubscriberProfile(user.id)
-  if (!profile?.is_subscriber && !profile?.is_admin) {
+  const allowed = await canUseGrimoire(user.id)
+  if (!allowed) {
     return NextResponse.json({ error: 'Exclusivo para Iniciados.' }, { status: 403 })
   }
 
@@ -92,12 +95,12 @@ export async function GET(request: NextRequest) {
     .select('content, updated_at')
     .eq('user_id', user.id)
     .eq('trail_id', trail_id)
-    .single()
+    .maybeSingle()
 
   return NextResponse.json({
     content: data?.content ?? '',
     updated_at: data?.updated_at ?? null,
     chars_used: data?.content?.length ?? 0,
-    limit: PER_TRAIL_LIMIT,
+    limit: PER_TX_LIMIT,
   })
 }

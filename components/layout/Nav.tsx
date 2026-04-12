@@ -215,9 +215,23 @@ export default function Nav({ profile }: NavProps) {
             </Link>
           ))}
           {profile && (
-            <Link href="/perfil" className={`mobile-drawer-link ${pathname === '/perfil' ? 'active' : ''}`}>
-              Meu Perfil
-            </Link>
+            <>
+              <Link href="/perfil" className={`mobile-drawer-link ${pathname === '/perfil' ? 'active' : ''}`}>
+                Meu Perfil
+              </Link>
+              {/* Sub-links do perfil */}
+              <div style={{ borderLeft: '1px solid var(--cream-dim)', marginLeft: 32, paddingLeft: 0, display: 'flex', flexDirection: 'column' }}>
+                <Link href="/perfil/grimorio" className={`mobile-drawer-link mobile-drawer-sublink ${pathname.startsWith('/perfil/grimorio') ? 'active' : ''}`}>
+                  ◈ Grimório
+                </Link>
+                <Link href="/perfil/trilhas" className={`mobile-drawer-link mobile-drawer-sublink ${pathname.startsWith('/perfil/trilhas') ? 'active' : ''}`}>
+                  ◎ Trilhas
+                </Link>
+                <Link href="/perfil/biblioteca" className={`mobile-drawer-link mobile-drawer-sublink ${pathname.startsWith('/perfil/biblioteca') ? 'active' : ''}`}>
+                  ✦ Acervo
+                </Link>
+              </div>
+            </>
           )}
         </nav>
 

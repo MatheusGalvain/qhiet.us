@@ -354,7 +354,7 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
         </div>
       ) : (
         /* MOBILE: botão ⊕ fixo no canto + menu radial que expande para cima */
-        <div style={{ position: 'fixed', bottom: 100, right: 16, zIndex: 185 }}>
+        <div style={{ position: 'fixed', bottom: 140, right: 16, zIndex: 185 }}>
 
           {/* Ações expandidas — aparecem acima do gatilho */}
           {floatOpen && (

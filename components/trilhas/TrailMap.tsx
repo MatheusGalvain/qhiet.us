@@ -201,6 +201,7 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
   const [localCompleted, setLocalCompleted] = useState<Set<string>>(new Set(completedSet))
   const [trailDone, setTrailDone] = useState(isTrailCompleted)
   const [layout, setLayout] = useState<'spiral' | 'constellation'>('spiral')
+  const [svgZoom, setSvgZoom] = useState(1)
   const router = useRouter()
 
   const totalTx = sorted.length
@@ -368,7 +369,7 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
               fontFamily: 'var(--font-mono)',
               fontSize: 12,
               letterSpacing: 1,
-              color: unlocked ? (done ? '#c8960a' : '#9a8878') : '#3a3228',
+              color: unlocked ? (done ? '#c8960a' : '#9a8878') : 'var(--cream-dim)',
               textTransform: 'uppercase',
               textAlign: 'center',
               lineHeight: 1.4,
@@ -470,18 +471,46 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
       <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
         {/* Map */}
         <div style={{ flex: '1 1 300px', minWidth: 0, position: 'relative' }}>
-          <div style={{ border: '1px solid var(--faint)', background: 'var(--surface)', overflow: 'hidden' }}>
+          {/* Zoom overlay — fora do overflow:auto para não ser cortado */}
+          <div style={{
+            position: 'absolute', bottom: 18, right: 8, zIndex: 10,
+            display: 'flex', alignItems: 'center', gap: 2,
+            background: 'rgba(8,5,3,0.88)', backdropFilter: 'blur(6px)',
+            border: '1px solid var(--faint)',
+            padding: '3px 5px',
+          }}>
+            <button
+              onClick={() => setSvgZoom(z => Math.max(0.4, parseFloat((z - 0.1).toFixed(1))))}
+              style={zoomCtrlBtn}
+              title="Diminuir zoom"
+            >−</button>
+            <span
+              onClick={() => setSvgZoom(1)}
+              title="Resetar"
+              style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--faint)', minWidth: 30, textAlign: 'center', cursor: 'pointer', letterSpacing: 1 }}
+            >{Math.round(svgZoom * 100)}%</span>
+            <button
+              onClick={() => setSvgZoom(z => Math.min(2.5, parseFloat((z + 0.1).toFixed(1))))}
+              style={zoomCtrlBtn}
+              title="Aumentar zoom"
+            >+</button>
+          </div>
+
+          <div style={{ border: '1px solid var(--faint)', background: 'var(--surface)', overflow: 'auto' }}>
             <div style={{ height: 2, background: 'var(--faint)' }}>
               <div style={{
                 height: '100%', width: `${totalTx > 0 ? (completedTx / totalTx) * 100 : 0}%`,
                 background: trailDone ? '#c8960a' : '#b02a1e', transition: 'width .5s ease',
               }} />
             </div>
-            <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: 'auto' }}>
-              {renderCenter()}
-              {renderLines()}
-              {renderNodes()}
-            </svg>
+            {/* Wrapper que escala o SVG horizontalmente */}
+            <div style={{ width: `${svgZoom * 100}%` }}>
+              <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: 'auto' }}>
+                {renderCenter()}
+                {renderLines()}
+                {renderNodes()}
+              </svg>
+            </div>
           </div>
 
           {/* Legend */}
@@ -546,10 +575,10 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               minHeight: 280, textAlign: 'center',
             }}>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 12 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 12 }}>
                 {trailDone ? '✦ Trilha concluída' : 'Selecione um nó no mapa'}
               </p>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--cream)', lineHeight: 1.6 }}>
+              <p style={{ fontFamily: 'var(--font-body-article)', fontSize: 13, color: 'var(--cream)', lineHeight: 1.6 }}>
                 {trailDone
                   ? `Você obteve ${trail.xp_reward} XP por completar esta trilha.`
                   : sections.some(s => s.transmissions.length > 1)
@@ -578,4 +607,20 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
       `}</style>
     </div>
   )
+}
+
+const zoomCtrlBtn: React.CSSProperties = {
+  background: 'transparent',
+  border: '1px solid var(--faint)',
+  color: 'var(--muted)',
+  fontFamily: 'var(--font-mono)',
+  fontSize: 13,
+  cursor: 'pointer',
+  width: 28,
+  height: 28,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  transition: 'border-color .15s, color .15s'
 }

@@ -582,6 +582,16 @@ body {
 }
 .mobile-drawer-link:hover,
 .mobile-drawer-link.active { color: var(--cream); background: rgba(176,42,30,.04); }
+/* Sub-links indentados abaixo de "Meu Perfil" */
+.mobile-drawer-sublink {
+  font-size: 10px !important;
+  letter-spacing: 3px !important;
+  padding: 11px 24px !important;
+  color: var(--cream-dim) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.03) !important;
+}
+.mobile-drawer-sublink:hover,
+.mobile-drawer-sublink.active { color: var(--gold) !important; background: rgba(212,175,55,0.04) !important; }
 .mobile-drawer-actions { padding: 24px 32px; display: flex; flex-direction: column; gap: 10px; }
 
 .hamburger-btn {
@@ -2046,4 +2056,45 @@ body {
 .btn-acervo-gold:hover {
   background: rgba(212,175,55,0.20);
   border-color: rgba(212,175,55,0.60);
+}
+
+/* ── TrailReader responsive ── */
+.trail-reader-content {
+  padding: 28px 32px 12px;
+}
+.trail-reader-footer {
+  border-top: 1px solid var(--faint);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.trail-complete-btn {
+  font-size: 11px;
+  padding: 8px 16px;
+}
+@media (max-width: 640px) {
+  .trail-reader-content {
+    padding: 24px 20px 12px;
+  }
+  .trail-reader-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+  .trail-reader-footer > div {
+    justify-content: center;
+    display: flex;
+    gap: 8px;
+  }
+  .trail-complete-btn {
+    width: 100%;
+    text-align: center;
+    font-size: 11px !important;
+    padding: 10px 16px;
+    box-sizing: border-box;
+  }
 }

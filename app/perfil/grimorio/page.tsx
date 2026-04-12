@@ -4,7 +4,7 @@ import Link from 'next/link'
 import GrimoireList from '@/components/trilhas/GrimoireList'
 import ProfileSidebar from '@/components/perfil/ProfileSidebar'
 import { getRank } from '@/lib/utils'
-import { canAccess, canAccessAny, resolvePlans } from '@/lib/plans'
+import { canAccessAny, resolvePlans } from '@/lib/plans'
 
 export const revalidate = 0
 
@@ -24,41 +24,36 @@ async function getData() {
   const activePlans = resolvePlans((profile as any)?.plans, (profile as any)?.plan)
   if (!canAccessAny(activePlans, 'grimorio') && !profile?.is_admin) redirect('/membros?upgrade=true')
 
-  // Trilhas que o usuário tem progresso
-  const { data: progressTrails } = await service
-    .from('user_trail_progress')
-    .select('trail_id')
-    .eq('user_id', user.id)
-
-  const trailIds = [...new Set((progressTrails ?? []).map((r: any) => r.trail_id))]
-
-  let trailsData: any[] = []
-  if (trailIds.length > 0) {
-    const { data } = await service
-      .from('trails')
-      .select('id, title')
-      .in('id', trailIds)
-    trailsData = data ?? []
-  }
-
-  // Anotações existentes
-  const { data: grimoireEntries } = await service
+  // Busca todas as anotações do usuário com info da trilha
+  const { data: grimoireRows } = await service
     .from('user_grimoire')
     .select('trail_id, content, updated_at')
     .eq('user_id', user.id)
-    .not('trail_id', 'is', null)  // apenas por trilha, sem geral
+    .not('content', 'eq', '')
+    .order('updated_at', { ascending: false })
 
-  const grimoireMap: Record<string, { content: string; updated_at: string | null }> = {}
-  for (const g of grimoireEntries ?? []) {
-    if (g.trail_id) grimoireMap[g.trail_id] = { content: g.content ?? '', updated_at: g.updated_at }
+  // Busca títulos das trilhas
+  const trailIds = [...new Set((grimoireRows ?? []).map((r: any) => r.trail_id).filter(Boolean))]
+
+  let trailTitles: Record<string, string> = {}
+  if (trailIds.length > 0) {
+    const { data: trails } = await service
+      .from('trails')
+      .select('id, title')
+      .in('id', trailIds)
+    for (const t of trails ?? []) {
+      trailTitles[t.id] = t.title
+    }
   }
 
-  const entries = trailsData.map((t: any) => ({
-    trail_id: t.id,
-    trail_title: t.title,
-    content: grimoireMap[t.id]?.content ?? '',
-    updated_at: grimoireMap[t.id]?.updated_at ?? null,
-  }))
+  const entries = (grimoireRows ?? [])
+    .filter((r: any) => r.trail_id && r.content?.trim())
+    .map((r: any) => ({
+      trail_id: r.trail_id,
+      trail_title: trailTitles[r.trail_id] ?? 'Trilha',
+      content: r.content ?? '',
+      updated_at: r.updated_at ?? null,
+    }))
 
   return { entries, profile, activePlans }
 }
@@ -101,7 +96,7 @@ export default async function GrimorioPage() {
             GRIMÓRIO
           </h1>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>
-            Suas anotações pessoais por trilha — até 7500 caracteres cada. Auto-salvo enquanto você digita.
+            Suas anotações pessoais por trilha — auto-salvo enquanto você digita.
           </p>
         </div>
 

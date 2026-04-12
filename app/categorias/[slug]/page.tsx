@@ -205,7 +205,7 @@ export default async function CategoriaPage({ params }: PageProps) {
                       }}>
                         {item?.title}
                       </p>
-                      <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--muted)', lineHeight: 1.7 }}>
+                      <p style={{ fontFamily: 'var(--font-body-article)', fontSize: 15, color: 'var(--muted)', lineHeight: 1.7 }}>
                         {item?.desc}
                       </p>
                     </div>
