@@ -10,6 +10,7 @@ import { PLAN_META } from '@/lib/plans'
 
 interface NavProps {
   profile?: Profile | null
+  canUseGrimorio?: boolean
 }
 
 const NAV_LINKS = [
@@ -19,7 +20,7 @@ const NAV_LINKS = [
   { href: '/membros',      label: 'Membros' },
 ]
 
-export default function Nav({ profile }: NavProps) {
+export default function Nav({ profile, canUseGrimorio = false }: NavProps) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
@@ -221,9 +222,11 @@ export default function Nav({ profile }: NavProps) {
               </Link>
               {/* Sub-links do perfil */}
               <div style={{ borderLeft: '1px solid var(--cream-dim)', marginLeft: 32, paddingLeft: 0, display: 'flex', flexDirection: 'column' }}>
-                <Link href="/perfil/grimorio" className={`mobile-drawer-link mobile-drawer-sublink ${pathname.startsWith('/perfil/grimorio') ? 'active' : ''}`}>
-                  ◈ Grimório
-                </Link>
+                {canUseGrimorio && (
+                  <Link href="/perfil/grimorio" className={`mobile-drawer-link mobile-drawer-sublink ${pathname.startsWith('/perfil/grimorio') ? 'active' : ''}`}>
+                    ◈ Grimório
+                  </Link>
+                )}
                 <Link href="/perfil/trilhas" className={`mobile-drawer-link mobile-drawer-sublink ${pathname.startsWith('/perfil/trilhas') ? 'active' : ''}`}>
                   ◎ Trilhas
                 </Link>

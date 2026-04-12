@@ -12,7 +12,7 @@ const AUTH_ROUTES = ['/perfil']
 const PLAN_ROUTES: Array<[string, string[]]> = [
   ['/biblioteca',        ['acervo', 'adepto']],
   ['/perfil/trilhas',    ['iniciado', 'adepto']],
-  ['/perfil/grimorio',   ['iniciado', 'adepto', 'acervo']],
+  ['/perfil/grimorio',   ['iniciado', 'adepto']],   // acervo NÃO tem grimório
   ['/perfil/biblioteca', ['acervo', 'adepto']],
 ]
 

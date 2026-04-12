@@ -4,6 +4,7 @@ import NoiseOverlay from '@/components/layout/NoiseOverlay'
 import Nav from '@/components/layout/Nav'
 import Footer from '@/components/layout/Footer'
 import { createClient } from '@/lib/supabase/server'
+import { canAccessAny, resolvePlans } from '@/lib/plans'
 import type { Profile } from '@/types'
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -32,18 +33,23 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Fetch user profile server-side for Nav
+  // Fetch minimal profile data needed for Nav (name, plan badge, grimório access)
   let profile: Profile | null = null
+  let canUseGrimorio = false
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       const { data } = await supabase
         .from('profiles')
-        .select('*')
+        .select('name, plan, plans, is_admin')
         .eq('id', user.id)
         .single()
-      profile = data
+      if (data) {
+        profile = data as unknown as Profile
+        const activePlans = resolvePlans((data as any).plans, (data as any).plan)
+        canUseGrimorio = (data as any).is_admin || canAccessAny(activePlans, 'grimorio')
+      }
     }
   } catch {
     // Not authenticated — render without profile
@@ -53,7 +59,7 @@ export default async function RootLayout({
     <html lang="pt-BR">
       <body>
         <NoiseOverlay />
-        <Nav profile={profile} />
+        <Nav profile={profile} canUseGrimorio={canUseGrimorio} />
         <main>{children}</main>
         <Footer />
       </body>

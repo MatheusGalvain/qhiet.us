@@ -26,8 +26,21 @@ export async function createClient() {
   )
 }
 
-/** Service-role client for admin/webhook routes only */
-export function createServiceClient() {
+/** Service-role client for admin/webhook routes only.
+ *
+ *  Typed as `any` because the project doesn't have a generated Supabase schema
+ *  (supabase gen types). Without the schema the typed client infers every table
+ *  as `never`, which breaks all insert/update/upsert calls at the TS level.
+ *  The service key itself has no per-user state, so caching it per module
+ *  instance is safe.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _serviceClient: any = null
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createServiceClient(): any {
+  if (_serviceClient) return _serviceClient
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!url || !key) {
@@ -36,6 +49,8 @@ export function createServiceClient() {
       'Add these in Vercel → Settings → Environment Variables.'
     )
   }
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { createClient } = require('@supabase/supabase-js')
-  return createClient(url, key)
+  _serviceClient = createClient(url, key)
+  return _serviceClient
 }
