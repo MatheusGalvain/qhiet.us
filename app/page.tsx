@@ -372,7 +372,7 @@ function MembershipSection() {
         { on: true,  text: 'Transmissões de Leitura Livre' },
         { on: true,  text: 'Acervo completo de livros PDF' },
         { on: true,  text: 'Progresso de leitura salvo' },
-        { on: true,  text: 'Grimório Digital' },
+        { on: false,  text: 'Grimório Digital' },
         { on: false, text: 'Transmissões exclusivas' },
         { on: false, text: 'Trilhas & XP bônus' },
       ],

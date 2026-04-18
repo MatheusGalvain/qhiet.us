@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Bloquear rotas privadas
+Disallow: /perfil/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /control/
+
+Sitemap: https://www.qhiethus.com.br/sitemap.xml

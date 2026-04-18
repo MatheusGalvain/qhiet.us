@@ -99,6 +99,7 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
   )
   const activeTab = searchParams.tab ?? 'free'
 
+  /** Monta URL de paginação preservando todos os filtros ativos */
   function pageUrl(p: number) {
     const params = new URLSearchParams()
     if (searchParams.tab)  params.set('tab',  searchParams.tab)
@@ -106,6 +107,17 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
     if (searchParams.q)    params.set('q',    searchParams.q)
     if (searchParams.sort) params.set('sort', searchParams.sort)
     params.set('page', String(p))
+    return `?${params.toString()}`
+  }
+
+  /** Monta URL de troca de tab preservando filtros mas resetando a página */
+  function tabUrl(tab: string) {
+    const params = new URLSearchParams()
+    params.set('tab', tab)
+    if (searchParams.cat)  params.set('cat',  searchParams.cat)
+    if (searchParams.q)    params.set('q',    searchParams.q)
+    if (searchParams.sort) params.set('sort', searchParams.sort)
+    // page não é preservado — troca de tab sempre volta à página 1
     return `?${params.toString()}`
   }
 
@@ -134,8 +146,8 @@ export default async function TransmisoesPage({ searchParams }: PageProps) {
         borderBottom: '1px solid var(--faint)',
         padding: '0 var(--px)', overflowX: 'auto', scrollbarWidth: 'none',
       }}>
-        <TabBtn href="?tab=free"   active={activeTab === 'free'}   label="◉ Leitura Livre" />
-        <TabBtn href="?tab=locked" active={activeTab === 'locked'} label="◈ Assinantes" />
+        <TabBtn href={tabUrl('free')}   active={activeTab === 'free'}   label="◉ Leitura Livre" />
+        <TabBtn href={tabUrl('locked')} active={activeTab === 'locked'} label="◈ Assinantes" />
       </div>
 
       {/* META */}

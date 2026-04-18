@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import TrailReader from './TrailReader'
 
@@ -20,10 +20,9 @@ interface Trail {
   duration_days: number
 }
 
-// A section is a named group of transmissions (or a single solo tx with no section_title)
 interface Section {
-  key: string            // unique key for this section
-  title: string | null   // null = solo tx (show tx title instead)
+  key: string
+  title: string | null
   transmissions: Tx[]
 }
 
@@ -42,9 +41,7 @@ function groupIntoSections(txList: Tx[]): Section[] {
 
   for (const tx of txList) {
     const sTitle = tx.section_title?.trim() || null
-
     if (sTitle === null) {
-      // Solo transmission — its own section node
       sections.push({ key: `solo_${tx.id}`, title: null, transmissions: [tx] })
     } else {
       if (seen.has(sTitle)) {
@@ -56,7 +53,6 @@ function groupIntoSections(txList: Tx[]): Section[] {
       }
     }
   }
-
   return sections
 }
 
@@ -64,9 +60,9 @@ function groupIntoSections(txList: Tx[]): Section[] {
 function spiralPositions(count: number, cx: number, cy: number) {
   if (count === 0) return []
   const positions: { x: number; y: number }[] = []
-  const PER_LAYER = 5
-  const BASE_RADIUS = 110
-  const RADIUS_STEP = 120
+  const PER_LAYER   = 4    // menos nós por anel → mais espaço angular entre eles
+  const BASE_RADIUS = 170  // raio da 1ª camada (maior = labels não se sobrepõem)
+  const RADIUS_STEP = 170  // incremento entre camadas
 
   for (let i = 0; i < count; i++) {
     const layer = Math.floor(i / PER_LAYER)
@@ -86,7 +82,7 @@ function constellationPositions(count: number, cx: number, cy: number) {
   if (count === 0) return []
   const positions: { x: number; y: number }[] = []
   const phi = Math.PI * (3 - Math.sqrt(5))
-  const MIN_R = 55, MAX_R = 250
+  const MIN_R = 90, MAX_R = 360
   for (let i = 0; i < count; i++) {
     const r = MIN_R + (MAX_R - MIN_R) * Math.sqrt((i + 0.5) / Math.max(count, 1))
     const t = i * phi
@@ -95,13 +91,9 @@ function constellationPositions(count: number, cx: number, cy: number) {
   return positions
 }
 
-// ─── Section panel (shown when clicking a multi-tx section) ───
+// ─── Section panel ─────────────────────────────────────────────
 function SectionPanel({
-  section,
-  completedIds,
-  isUnlocked,
-  onSelectTx,
-  onClose,
+  section, completedIds, isUnlocked, onSelectTx, onClose,
 }: {
   section: Section
   completedIds: Set<string>
@@ -109,22 +101,17 @@ function SectionPanel({
   onSelectTx: (tx: Tx) => void
   onClose: () => void
 }) {
-  const done = section.transmissions.filter(tx => completedIds.has(tx.id)).length
+  const done  = section.transmissions.filter(tx => completedIds.has(tx.id)).length
   const total = section.transmissions.length
-  const pct = total > 0 ? Math.round((done / total) * 100) : 0
+  const pct   = total > 0 ? Math.round((done / total) * 100) : 0
   const allDone = done === total
 
   return (
     <div style={{ border: '1px solid var(--faint)', display: 'flex', flexDirection: 'column', minHeight: 320 }}>
-      {/* Header */}
       <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--faint)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 4 }}>
-            Seção
-          </p>
-          <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)', letterSpacing: 1 }}>
-            {section.title}
-          </p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 3, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 4 }}>Seção</p>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)', letterSpacing: 1 }}>{section.title}</p>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: allDone ? 'var(--gold)' : 'var(--muted)', textTransform: 'uppercase' }}>
@@ -134,15 +121,13 @@ function SectionPanel({
         </div>
       </div>
 
-      {/* Progress bar */}
       <div style={{ height: 2, background: 'var(--faint)' }}>
         <div style={{ height: '100%', width: `${pct}%`, background: allDone ? 'var(--gold)' : 'var(--red)', transition: 'width .4s ease' }} />
       </div>
 
-      {/* Transmission list */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {section.transmissions.map((tx, i) => {
-          const txDone = completedIds.has(tx.id)
+          const txDone     = completedIds.has(tx.id)
           const txUnlocked = isUnlocked && (i === 0 || completedIds.has(section.transmissions[i - 1].id))
           return (
             <button
@@ -150,18 +135,11 @@ function SectionPanel({
               onClick={() => txUnlocked && onSelectTx(tx)}
               disabled={!txUnlocked}
               style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 14,
-                padding: '14px 20px',
-                background: 'none',
-                border: 'none',
+                width: '100%', display: 'flex', alignItems: 'center', gap: 14,
+                padding: '14px 20px', background: 'none', border: 'none',
                 borderBottom: i < section.transmissions.length - 1 ? '1px solid var(--faint)' : 'none',
-                cursor: txUnlocked ? 'pointer' : 'not-allowed',
-                textAlign: 'left',
-                opacity: txUnlocked ? 1 : 0.4,
-                transition: 'background .15s',
+                cursor: txUnlocked ? 'pointer' : 'not-allowed', textAlign: 'left',
+                opacity: txUnlocked ? 1 : 0.4, transition: 'background .15s',
               }}
               onMouseEnter={e => { if (txUnlocked) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.03)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'none' }}
@@ -173,14 +151,10 @@ function SectionPanel({
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: txDone ? '#c8960a' : 'var(--cream)', letterSpacing: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {tx.title}
                 </p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: 1, marginTop: 2 }}>
-                  ~{tx.read_time_minutes}min
-                </p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--muted)', letterSpacing: 1, marginTop: 2 }}>~{tx.read_time_minutes}min</p>
               </div>
               {txUnlocked && !txDone && (
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', flexShrink: 0 }}>
-                  Ler →
-                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', flexShrink: 0 }}>Ler →</span>
               )}
             </button>
           )
@@ -190,21 +164,36 @@ function SectionPanel({
   )
 }
 
-// ─── Main TrailMap component ───────────────────────────────────
+// ─── Main component ────────────────────────────────────────────
 export default function TrailMap({ trail, transmissoes, completedSet, isTrailCompleted, isSubscriber }: Props) {
-  const sorted = [...transmissoes].sort((a, b) => a.order_index - b.order_index)
+  const sorted   = [...transmissoes].sort((a, b) => a.order_index - b.order_index)
   const sections = groupIntoSections(sorted)
 
-  const [activeSection, setActiveSection] = useState<Section | null>(null)
-  const [activeTx, setActiveTx] = useState<Tx | null>(null)
-  const [toast, setToast] = useState<{ msg: string; type: 'xp' | 'done' } | null>(null)
-  const [localCompleted, setLocalCompleted] = useState<Set<string>>(new Set(completedSet))
-  const [trailDone, setTrailDone] = useState(isTrailCompleted)
-  const [layout, setLayout] = useState<'spiral' | 'constellation'>('spiral')
+  const [activeSection,   setActiveSection]   = useState<Section | null>(null)
+  const [activeTx,        setActiveTx]        = useState<Tx | null>(null)
+  const [toast,           setToast]           = useState<{ msg: string; type: 'xp' | 'done' } | null>(null)
+  const [localCompleted,  setLocalCompleted]  = useState<Set<string>>(new Set(completedSet))
+  const [trailDone,       setTrailDone]       = useState(isTrailCompleted)
+  const [layout,          setLayout]          = useState<'spiral' | 'constellation'>('spiral')
+
+  // ── Map viewport state ─────────────────────────────────────
   const [svgZoom, setSvgZoom] = useState(1)
+  const [pan,     setPan]     = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+
+  const mapRef    = useRef<HTMLDivElement>(null)
+  const svgRef    = useRef<SVGSVGElement>(null)
+  // Use a ref so event-handler closures always see the latest zoom
+  const zoomRef   = useRef(svgZoom)
+  zoomRef.current = svgZoom
+
+  // Track drag / pinch state without triggering re-renders
+  const drag  = useRef({ active: false, startX: 0, startY: 0, lastPanX: 0, lastPanY: 0, moved: false })
+  const pinch = useRef({ lastDist: null as number | null })
+
   const router = useRouter()
 
-  const totalTx = sorted.length
+  const totalTx     = sorted.length
   const completedTx = localCompleted.size
 
   const W = 700, H = 660, CX = W / 2, CY = H / 2
@@ -213,33 +202,129 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
     ? spiralPositions(sections.length, CX, CY)
     : constellationPositions(sections.length, CX, CY)
 
-  // A section is unlocked if all transmissions in the previous section are completed
-  function isSectionUnlocked(secIdx: number): boolean {
-    if (secIdx === 0) return true
-    const prev = sections[secIdx - 1]
-    return prev.transmissions.every(tx => localCompleted.has(tx.id))
+  // ── viewBox dinâmico — se expande para conter todos os nós ──
+  // Garante que nenhum nó fique cortado, independente da quantidade
+  const NODE_R_MAX = 24   // raio máximo de um nó (multi-tx)
+  const LABEL_H    = 80   // altura do foreignObject de label abaixo do nó
+  const VB_PAD     = 60   // margem extra nas bordas (acomoda labels laterais maiores)
+
+  const vbMinX = positions.length > 0
+    ? Math.min(0, ...positions.map(p => p.x - NODE_R_MAX - VB_PAD))
+    : 0
+  const vbMinY = positions.length > 0
+    ? Math.min(0, ...positions.map(p => p.y - NODE_R_MAX - VB_PAD))
+    : 0
+  const vbMaxX = positions.length > 0
+    ? Math.max(W, ...positions.map(p => p.x + NODE_R_MAX + VB_PAD))
+    : W
+  const vbMaxY = positions.length > 0
+    ? Math.max(H, ...positions.map(p => p.y + NODE_R_MAX + LABEL_H + VB_PAD))
+    : H
+
+  const viewBox    = `${vbMinX} ${vbMinY} ${vbMaxX - vbMinX} ${vbMaxY - vbMinY}`
+  // aspect ratio do container acompanha o viewBox para não haver letterbox
+  const mapAspect  = `${vbMaxX - vbMinX} / ${vbMaxY - vbMinY}`
+
+  // ── Non-passive wheel zoom (attached imperatively) ─────────
+  useEffect(() => {
+    const el = mapRef.current
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      setSvgZoom(z => Math.min(3, Math.max(0.3, z * (1 - e.deltaY * 0.0008))))
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [])
+
+  // ── Mouse drag ─────────────────────────────────────────────
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return
+    drag.current = { active: true, startX: e.clientX, startY: e.clientY, lastPanX: pan.x, lastPanY: pan.y, moved: false }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pan.x, pan.y])
+
+  const onMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!drag.current.active) return
+    const dx = e.clientX - drag.current.startX
+    const dy = e.clientY - drag.current.startY
+    if (!drag.current.moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+      drag.current.moved = true
+      setIsDragging(true)
+    }
+    if (drag.current.moved) {
+      setPan({ x: drag.current.lastPanX + dx / zoomRef.current, y: drag.current.lastPanY + dy / zoomRef.current })
+    }
+  }, [])
+
+  const onMouseUp = useCallback(() => {
+    drag.current.active = false
+    setIsDragging(false)
+  }, [])
+
+  // ── Touch pan + pinch zoom ─────────────────────────────────
+  function touchDist(t: React.TouchList) {
+    const dx = t[0].clientX - t[1].clientX
+    const dy = t[0].clientY - t[1].clientY
+    return Math.sqrt(dx * dx + dy * dy)
   }
 
-  function isSectionDone(section: Section): boolean {
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      drag.current = { active: true, startX: e.touches[0].clientX, startY: e.touches[0].clientY, lastPanX: pan.x, lastPanY: pan.y, moved: false }
+      pinch.current.lastDist = null
+    } else if (e.touches.length === 2) {
+      drag.current.active = false
+      pinch.current.lastDist = touchDist(e.touches)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pan.x, pan.y])
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault()
+    if (e.touches.length === 1 && drag.current.active) {
+      const dx = e.touches[0].clientX - drag.current.startX
+      const dy = e.touches[0].clientY - drag.current.startY
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) drag.current.moved = true
+      if (drag.current.moved) {
+        setPan({ x: drag.current.lastPanX + dx / zoomRef.current, y: drag.current.lastPanY + dy / zoomRef.current })
+      }
+    } else if (e.touches.length === 2 && pinch.current.lastDist !== null) {
+      const newDist = touchDist(e.touches)
+      const ratio   = newDist / pinch.current.lastDist
+      setSvgZoom(z => Math.min(3, Math.max(0.3, z * ratio)))
+      pinch.current.lastDist = newDist
+    }
+  }, [])
+
+  const onTouchEnd = useCallback(() => {
+    drag.current.active      = false
+    pinch.current.lastDist   = null
+  }, [])
+
+  // ── Helpers ────────────────────────────────────────────────
+  function isSectionUnlocked(idx: number): boolean {
+    if (idx === 0) return true
+    return sections[idx - 1].transmissions.every(tx => localCompleted.has(tx.id))
+  }
+  function isSectionDone(section: Section) {
     return section.transmissions.every(tx => localCompleted.has(tx.id))
   }
-
-  function sectionProgress(section: Section): { done: number; total: number } {
+  function sectionProgress(section: Section) {
     return {
-      done: section.transmissions.filter(tx => localCompleted.has(tx.id)).length,
+      done:  section.transmissions.filter(tx => localCompleted.has(tx.id)).length,
       total: section.transmissions.length,
     }
   }
 
   function handleNodeClick(idx: number) {
+    if (drag.current.moved) return   // swallow click if user was dragging
     if (!isSectionUnlocked(idx)) return
     const section = sections[idx]
     if (section.transmissions.length === 1) {
-      // Solo section — open reader directly
       setActiveSection(section)
       setActiveTx(section.transmissions[0])
     } else {
-      // Multi-tx section — show section overview
       setActiveSection(section)
       setActiveTx(null)
     }
@@ -248,7 +333,7 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
   const handleMarkComplete = useCallback(async (txId: string) => {
     if (localCompleted.has(txId)) return
     try {
-      const res = await fetch('/api/trilhas/progress', {
+      const res  = await fetch('/api/trilhas/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ trail_id: trail.id, transmissao_id: txId }),
@@ -272,25 +357,22 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
     } catch (_) {}
   }, [localCompleted, trail.id, totalTx, router])
 
-  // Get current tx index within its section for navigation
-  const sectionTxList = activeTx && activeSection ? activeSection.transmissions : []
-  const currentTxIdx = activeTx ? sectionTxList.findIndex(tx => tx.id === activeTx.id) : -1
+  const sectionTxList   = activeTx && activeSection ? activeSection.transmissions : []
+  const currentTxIdx    = activeTx ? sectionTxList.findIndex(tx => tx.id === activeTx.id) : -1
   const canNavigatePrev = currentTxIdx > 0
-  const canNavigateNext = currentTxIdx >= 0 && currentTxIdx < sectionTxList.length - 1
-    && localCompleted.has(sectionTxList[currentTxIdx].id)
+  const canNavigateNext = currentTxIdx >= 0 && currentTxIdx < sectionTxList.length - 1 && localCompleted.has(sectionTxList[currentTxIdx].id)
 
   function handleNavigate(dir: 'prev' | 'next') {
     const nextIdx = currentTxIdx + (dir === 'next' ? 1 : -1)
-    if (nextIdx >= 0 && nextIdx < sectionTxList.length) {
-      setActiveTx(sectionTxList[nextIdx])
-    }
+    if (nextIdx >= 0 && nextIdx < sectionTxList.length) setActiveTx(sectionTxList[nextIdx])
   }
 
+  // ── SVG renderers ──────────────────────────────────────────
   function renderLines() {
     return sections.map((_, i) => {
       if (i === 0) return null
-      const from = positions[i - 1]
-      const to = positions[i]
+      const from    = positions[i - 1]
+      const to      = positions[i]
       if (!from || !to) return null
       const prevDone = isSectionDone(sections[i - 1])
       return (
@@ -307,25 +389,25 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
 
   function renderNodes() {
     return sections.map((section, i) => {
-      const pos = positions[i]
+      const pos      = positions[i]
       if (!pos) return null
-      const done = isSectionDone(section)
+      const done     = isSectionDone(section)
       const unlocked = isSectionUnlocked(i)
       const isActive = activeSection?.key === section.key
       const { done: doneCount, total } = sectionProgress(section)
-      const isMulti = section.transmissions.length > 1
+      const isMulti  = section.transmissions.length > 1
 
-      const r = isMulti ? 24 : 20
-      const stroke = done ? '#c8960a' : unlocked ? '#b02a1e' : '#2a2218'
-      const fill = done ? 'rgba(200,150,10,0.15)' : unlocked ? 'rgba(176,42,30,0.12)' : 'rgba(0,0,0,0)'
+      const r         = isMulti ? 24 : 20
+      const stroke    = done ? '#c8960a' : unlocked ? '#b02a1e' : '#2a2218'
+      const fill      = done ? 'rgba(200,150,10,0.15)' : unlocked ? 'rgba(176,42,30,0.12)' : 'rgba(0,0,0,0)'
       const textColor = done ? '#c8960a' : unlocked ? '#e8d5b0' : '#3a3228'
 
-      // Node label: section title or tx title (solo)
-      const nodeLabel = section.title ?? section.transmissions[0]?.title ?? ''
-      const truncLabel = nodeLabel.length > 28 ? nodeLabel.slice(0, 28) + '…' : nodeLabel
+      const nodeLabel  = section.title ?? section.transmissions[0]?.title ?? ''
+      const truncLabel = nodeLabel.length > 34 ? nodeLabel.slice(0, 34) + '…' : nodeLabel
 
       return (
-        <g key={section.key} onClick={() => handleNodeClick(i)}
+        <g key={section.key}
+          onClick={() => handleNodeClick(i)}
           style={{ cursor: unlocked ? 'pointer' : 'not-allowed' }}
           className={unlocked ? 'trail-node' : ''}
         >
@@ -335,14 +417,11 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
               className="trail-node-pulse"
             />
           )}
-
           <circle cx={pos.x} cy={pos.y} r={r}
             fill={fill} stroke={stroke}
             strokeWidth={isActive ? 1.5 : 1}
             opacity={unlocked ? 1 : 0.35}
           />
-
-          {/* Inner ring for multi-tx sections */}
           {isMulti && (
             <circle cx={pos.x} cy={pos.y} r={r - 5}
               fill="none" stroke={stroke}
@@ -350,7 +429,6 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
               strokeDasharray="2 4"
             />
           )}
-
           <text x={pos.x} y={pos.y + 1}
             textAnchor="middle" dominantBaseline="middle"
             fontFamily="var(--font-mono)" fontSize={done ? 14 : 10}
@@ -358,23 +436,12 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
           >
             {done ? '✦' : unlocked ? (isMulti ? `${doneCount}/${total}` : String(i + 1).padStart(2, '0')) : '○'}
           </text>
-
-          {/* Label below node */}
-          <foreignObject
-            x={pos.x - 72} y={pos.y + r + 10}
-            width={144} height={52}
-            style={{ pointerEvents: 'none' }}
-          >
+          <foreignObject x={pos.x - 88} y={pos.y + r + 10} width={176} height={60} style={{ pointerEvents: 'none' }}>
             <div style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 12,
-              letterSpacing: 1,
+              fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: 1,
               color: unlocked ? (done ? '#c8960a' : '#9a8878') : 'var(--cream-dim)',
-              textTransform: 'uppercase',
-              textAlign: 'center',
-              lineHeight: 1.4,
-              wordBreak: 'break-word',
-              opacity: unlocked ? 1 : 0.35,
+              textTransform: 'uppercase', textAlign: 'center', lineHeight: 1.4,
+              wordBreak: 'break-word', opacity: unlocked ? 1 : 0.35,
             }}>
               {truncLabel}
               {isMulti && !done && (
@@ -421,22 +488,24 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
         {!trailDone && (
           <text x={CX} y={CY + 28} textAnchor="middle"
             fontFamily="var(--font-mono)" fontSize={8} fill="#c8960a" opacity={0.3} letterSpacing={1}
-          >
-            {completedTx}/{totalTx}
-          </text>
+          >{completedTx}/{totalTx}</text>
         )}
         {trailDone && (
           <text x={CX} y={CY + 32} textAnchor="middle"
             fontFamily="var(--font-mono)" fontSize={7} fill="#c8960a" opacity={0.7} letterSpacing={2}
             style={{ textTransform: 'uppercase' }}
-          >
-            CONCLUÍDA
-          </text>
+          >CONCLUÍDA</text>
         )}
       </g>
     )
   }
 
+  // ── Zoom control helpers ───────────────────────────────────
+  function zoomIn()    { setSvgZoom(z => Math.min(3, parseFloat((z + 0.2).toFixed(2)))) }
+  function zoomOut()   { setSvgZoom(z => Math.max(0.3, parseFloat((z - 0.2).toFixed(2)))) }
+  function zoomReset() { setSvgZoom(1); setPan({ x: 0, y: 0 }) }
+
+  // ── Render ─────────────────────────────────────────────────
   return (
     <div>
       {/* Toast */}
@@ -469,51 +538,88 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
       </div>
 
       <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
-        {/* Map */}
-        <div style={{ flex: '1 1 300px', minWidth: 0, position: 'relative' }}>
-          {/* Zoom overlay — fora do overflow:auto para não ser cortado */}
-          <div style={{
-            position: 'absolute', bottom: 18, right: 8, zIndex: 10,
-            display: 'flex', alignItems: 'center', gap: 2,
-            background: 'rgba(8,5,3,0.88)', backdropFilter: 'blur(6px)',
-            border: '1px solid var(--faint)',
-            padding: '3px 5px',
-          }}>
-            <button
-              onClick={() => setSvgZoom(z => Math.max(0.4, parseFloat((z - 0.1).toFixed(1))))}
-              style={zoomCtrlBtn}
-              title="Diminuir zoom"
-            >−</button>
-            <span
-              onClick={() => setSvgZoom(1)}
-              title="Resetar"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--faint)', minWidth: 30, textAlign: 'center', cursor: 'pointer', letterSpacing: 1 }}
-            >{Math.round(svgZoom * 100)}%</span>
-            <button
-              onClick={() => setSvgZoom(z => Math.min(2.5, parseFloat((z + 0.1).toFixed(1))))}
-              style={zoomCtrlBtn}
-              title="Aumentar zoom"
-            >+</button>
-          </div>
+        {/* ── Map ─────────────────────────────────────────── */}
+        <div style={{ flex: '1 1 300px', minWidth: 0 }}>
 
-          <div style={{ border: '1px solid var(--faint)', background: 'var(--surface)', overflow: 'auto' }}>
-            <div style={{ height: 2, background: 'var(--faint)' }}>
+          {/*
+           * Container estático — o quadrado nunca muda de tamanho.
+           * Todo zoom/pan é feito via CSS transform no SVG interno.
+           * overflow: hidden garante que o conteúdo ampliado não vaze.
+           */}
+          <div
+            ref={mapRef}
+            style={{
+              border: '1px solid var(--faint)',
+              background: 'var(--surface)',
+              overflow: 'hidden',
+              position: 'relative',
+              /* aspectRatio acompanha o viewBox dinâmico — nunca corta conteúdo */
+              aspectRatio: mapAspect,
+              cursor: isDragging ? 'grabbing' : 'grab',
+              touchAction: 'none',  /* impede scroll nativo durante o pan/pinch */
+              userSelect: 'none',
+            }}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUp}
+            onMouseLeave={onMouseUp}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
+            {/* Barra de progresso — z-index acima do SVG, não participa do zoom */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'var(--faint)', zIndex: 5, pointerEvents: 'none' }}>
               <div style={{
-                height: '100%', width: `${totalTx > 0 ? (completedTx / totalTx) * 100 : 0}%`,
-                background: trailDone ? '#c8960a' : '#b02a1e', transition: 'width .5s ease',
+                height: '100%',
+                width: `${totalTx > 0 ? (completedTx / totalTx) * 100 : 0}%`,
+                background: trailDone ? '#c8960a' : '#b02a1e',
+                transition: 'width .5s ease',
               }} />
             </div>
-            {/* Wrapper que escala o SVG horizontalmente */}
-            <div style={{ width: `${svgZoom * 100}%` }}>
-              <svg viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', width: '100%', height: 'auto' }}>
-                {renderCenter()}
-                {renderLines()}
-                {renderNodes()}
-              </svg>
+
+            {/* SVG — apenas este elemento escala; o container permanece estático */}
+            <svg
+              ref={svgRef}
+              viewBox={viewBox}
+              style={{
+                display: 'block',
+                width: '100%',
+                height: '100%',
+                transform: `translate(${pan.x}px, ${pan.y}px) scale(${svgZoom})`,
+                transformOrigin: 'center center',
+                willChange: 'transform',
+              }}
+            >
+              {renderCenter()}
+              {renderLines()}
+              {renderNodes()}
+            </svg>
+
+            {/* Controles de zoom — sobrepostos ao SVG, NÃO participam do transform */}
+            <div
+              style={{
+                position: 'absolute', bottom: 12, right: 10, zIndex: 10,
+                display: 'flex', alignItems: 'center', gap: 2,
+                background: 'rgba(8,5,3,0.90)', backdropFilter: 'blur(6px)',
+                border: '1px solid var(--faint)', padding: '3px 5px',
+              }}
+              /* impede que cliques nos botões disparem o drag do container */
+              onMouseDown={e => e.stopPropagation()}
+              onTouchStart={e => e.stopPropagation()}
+            >
+              <button onClick={zoomOut} style={zoomCtrlBtn} title="Diminuir zoom">−</button>
+              <span
+                onClick={zoomReset}
+                title="Resetar zoom e posição"
+                style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--faint)', minWidth: 32, textAlign: 'center', cursor: 'pointer', letterSpacing: 1 }}
+              >
+                {Math.round(svgZoom * 100)}%
+              </span>
+              <button onClick={zoomIn} style={zoomCtrlBtn} title="Aumentar zoom">+</button>
             </div>
           </div>
 
-          {/* Legend */}
+          {/* Legenda */}
           <div style={{ display: 'flex', gap: 20, marginTop: 16, fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'rgba(200,150,10,0.3)', border: '1px solid #c8960a', display: 'inline-block' }} />
@@ -530,10 +636,9 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
           </div>
         </div>
 
-        {/* Reader / Section panel */}
+        {/* ── Reader / Section panel ────────────────────── */}
         <div style={{ flex: 1, minWidth: 280 }}>
           {activeTx && activeSection ? (
-            // Reading a specific transmission
             <TrailReader
               tx={activeTx}
               trailId={trail.id}
@@ -542,12 +647,7 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
               onMarkComplete={handleMarkComplete}
               onClose={() => {
                 setActiveTx(null)
-                // If section has multiple tx, go back to section view
-                if (activeSection.transmissions.length > 1) {
-                  // stay in section view
-                } else {
-                  setActiveSection(null)
-                }
+                if (activeSection.transmissions.length <= 1) setActiveSection(null)
               }}
               totalCount={sectionTxList.length}
               currentIndex={currentTxIdx}
@@ -555,12 +655,10 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
               canNavigateNext={canNavigateNext}
               canNavigatePrev={canNavigatePrev}
               isSubscriber={isSubscriber}
-              // Show "back to section" if multi-tx
               sectionTitle={activeSection.transmissions.length > 1 ? activeSection.title : null}
               onBackToSection={activeSection.transmissions.length > 1 ? () => setActiveTx(null) : undefined}
             />
           ) : activeSection && activeSection.transmissions.length > 1 ? (
-            // Section overview (multi-tx)
             <SectionPanel
               section={activeSection}
               completedIds={localCompleted}
@@ -569,7 +667,6 @@ export default function TrailMap({ trail, transmissoes, completedSet, isTrailCom
               onClose={() => setActiveSection(null)}
             />
           ) : (
-            // Nothing selected
             <div style={{
               border: '1px solid var(--faint)', padding: '40px 32px',
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -622,5 +719,5 @@ const zoomCtrlBtn: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'center',
   flexShrink: 0,
-  transition: 'border-color .15s, color .15s'
+  transition: 'border-color .15s, color .15s',
 }

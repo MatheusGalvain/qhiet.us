@@ -38,6 +38,8 @@ export default function FilterBar({ categories }: FilterBarProps) {
       if (v) params.set(k, v)
       else params.delete(k)
     })
+    // Sempre volta pra página 1 ao mudar qualquer filtro
+    params.delete('page')
     startTransition(() => {
       router.push(`?${params.toString()}`, { scroll: false })
     })

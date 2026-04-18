@@ -55,16 +55,18 @@ async function getData() {
     progressMap[row.trail_id].add(row.transmissao_id)
   }
 
-  const completedTrails = new Set((completions ?? []).map((c: any) => c.trail_id))
+  const completedTrails   = new Set((completions ?? []).map((c: any) => c.trail_id))
+  // Mapa trail_id → detalhes de conclusão (xp_earned, completed_at)
+  const completionDetails = new Map<string, any>((completions ?? []).map((c: any) => [c.trail_id, c]))
 
   // Premium trails locked to non-subscribers
   const premiumLocked = !isSubscriber ? (allTrails ?? []).filter((t: any) => !t.is_free) : []
 
-  return { trails, progressMap, completedTrails, userId: user.id, isSubscriber, premiumLocked, profile }
+  return { trails, progressMap, completedTrails, completionDetails, userId: user.id, isSubscriber, premiumLocked, profile }
 }
 
 export default async function TrilhasPage() {
-  const { trails, progressMap, completedTrails, isSubscriber, premiumLocked, profile } = await getData()
+  const { trails, progressMap, completedTrails, completionDetails, isSubscriber, premiumLocked, profile } = await getData()
   const labelMap = await getCategoryLabelMap()
   const rank = getRank(profile?.xp_total ?? 0)
 
@@ -76,6 +78,10 @@ export default async function TrilhasPage() {
   const inProgressTrails = trails.filter((t: any) =>
     (progressMap[t.id]?.size ?? 0) > 0 && !completedTrails.has(t.id)
   )
+  const notStartedTrails = trails.filter((t: any) =>
+    (progressMap[t.id]?.size ?? 0) === 0 && !completedTrails.has(t.id)
+  )
+  const completedTrailsList = trails.filter((t: any) => completedTrails.has(t.id))
 
   return (
     <div className="profile-layout">
@@ -186,11 +192,13 @@ export default async function TrilhasPage() {
             </div>
           )}
 
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 20, letterSpacing: 3, color: 'var(--cream)', textTransform: 'uppercase', marginBottom: 16 }}>
-              — Trilhas Disponíveis
-          </p>
-          {/* Free + subscriber trails */}
-          {trails.map((trail: any) => {
+          {notStartedTrails.length > 0 && (
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 20, letterSpacing: 3, color: 'var(--cream)', textTransform: 'uppercase', marginBottom: 16 }}>
+              — Disponíveis
+            </p>
+          )}
+          {/* Not-started trails */}
+          {notStartedTrails.map((trail: any) => {
             const txList = trail.trail_transmissoes ?? []
             const total  = txList.length
             const done   = progressMap[trail.id]?.size ?? 0
@@ -314,6 +322,78 @@ export default async function TrilhasPage() {
             )
           })}
 
+          {/* ── Concluídas ── */}
+          {completedTrailsList.length > 0 && (
+            <div style={{ marginTop: 8 }}>
+              <div style={{ borderBottom: '1px solid var(--faint)', marginBottom: 28 }} />
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 20, letterSpacing: 3, color: 'var(--gold)', textTransform: 'uppercase', marginBottom: 16 }}>
+                — Concluídas
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {completedTrailsList.map((trail: any) => {
+                  const txList = trail.trail_transmissoes ?? []
+                  const total  = txList.length
+                  const cats   = allCategories(trail)
+                  const detail = completionDetails.get(trail.id)
+                  const xpEarned = detail?.xp_earned ?? trail.xp_reward ?? 0
+                  const completedAt = detail?.completed_at ? new Date(detail.completed_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                    : null
+                  return (
+                    <div
+                      key={trail.id}
+                      style={{
+                        border: '1px solid var(--gold-dim)',
+                        background: 'rgba(200,150,10,0.04)',
+                        padding: 'clamp(16px,2vw,24px)',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1, minWidth: 200 }}>
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 8 }}>
+                            {cats.map((cat: string) => (
+                              <span key={cat} style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase', border: '1px solid var(--faint)', padding: '2px 8px' }}>
+                                {resolveCategoryLabel(cat, labelMap)}
+                              </span>
+                            ))}
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--gold)', textTransform: 'uppercase', border: '1px solid var(--gold-dim)', padding: '2px 8px' }}>
+                              ✦ Concluída
+                            </span>
+                          </div>
+                          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(18px,2.5vw,24px)', letterSpacing: 2, color: 'var(--cream)', marginBottom: 10, lineHeight: 1.2 }}>
+                            {trail.title}
+                          </h3>
+                          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                            {completedAt && (
+                              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>
+                                Concluída em {completedAt}
+                              </span>
+                            )}
+                            {xpEarned > 0 && (
+                              <span style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 6,
+                                fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2,
+                                color: 'var(--gold)', textTransform: 'uppercase',
+                                border: '1px solid var(--gold-dim)', padding: '2px 10px',
+                              }}>
+                                ✦ {xpEarned} XP conquistados
+                              </span>
+                            )}
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: 2, color: 'var(--faint)', textTransform: 'uppercase' }}>
+                              {total} transmissões
+                            </span>
+                          </div>
+                        </div>
+                        <Link href={`/perfil/trilhas/${trail.id}`} className="btn-primary" style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
+                          Ver trilha →
+                        </Link>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Locked premium trails preview (non-subscribers) */}
           {premiumLocked.length > 0 && (
             <>
@@ -404,4 +484,3 @@ export default async function TrilhasPage() {
     </div>
   )
 }
-    

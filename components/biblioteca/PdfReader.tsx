@@ -61,11 +61,13 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
   const [fitScale,    setFitScale]    = useState(1.0)   // scale that fits container width
   const [zoomPct,     setZoomPct]     = useState(100)   // display value in %
   const [zoomInput,   setZoomInput]   = useState('100')   // string para o input editável
-  const [noteOpen,    setNoteOpen]    = useState(false)
-  const [note,        setNote]        = useState('')
-  const [isMobile,    setIsMobile]    = useState(false)
-  const [floatOpen,   setFloatOpen]   = useState(false)   // mobile: mini-menu aberto
+  const [noteOpen,      setNoteOpen]      = useState(false)
+  const [note,          setNote]          = useState('')
+  const [isMobile,      setIsMobile]      = useState(false)
+  const [floatOpen,     setFloatOpen]     = useState(false)   // mobile: mini-menu aberto
+  const [progressSaved, setProgressSaved] = useState(false)   // feedback "Salvo"
   const progressTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const savedTimeout    = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Detecta mobile e atualiza no resize
   useEffect(() => {
@@ -160,7 +162,13 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ current_page: currentPage, total_pages: totalPages }),
-      }).catch(() => {})
+      })
+        .then(() => {
+          setProgressSaved(true)
+          if (savedTimeout.current) clearTimeout(savedTimeout.current)
+          savedTimeout.current = setTimeout(() => setProgressSaved(false), 2500)
+        })
+        .catch(() => {})
     }, 800)
   }, [currentPage, totalPages, bookId, pdfDoc])
 
@@ -274,6 +282,25 @@ export default function PdfReader({ bookId, title, author, initialPage, initialT
         >
           ✎
         </button>
+
+        {/* Progress saved indicator */}
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 10,
+            letterSpacing: 2,
+            color: 'var(--gold)',
+            textTransform: 'uppercase',
+            marginLeft: 12,
+            opacity: progressSaved ? 1 : 0,
+            transition: 'opacity .4s ease',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            pointerEvents: 'none',
+          }}
+        >
+          ● Salvo
+        </span>
       </div>
 
       {/* ── Note drawer ── */}

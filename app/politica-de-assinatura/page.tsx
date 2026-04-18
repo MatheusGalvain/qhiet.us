@@ -12,21 +12,16 @@ export default function PoliticaAssinaturaPage() {
       label="Política de Assinatura"
       title="POLÍTICA DE ASSINATURA"
       date="Última atualização: Março de 2026"
-      intro="Esta política descreve como funciona o Plano Iniciado do QHIETHUS — cobrança, cancelamento, reembolso e tudo que você precisa saber antes de assinar."
+      intro="Esta política descreve como funcionam os planos pagos do QHIETHUS — cobrança, cancelamento, reembolso e tudo que você precisa saber antes de assinar."
     >
 
-      <LegalH2>Plano Iniciado</LegalH2>
-      <LegalP>
-        O Plano Iniciado dá acesso completo ao portal por uma assinatura mensal recorrente de{' '}
-        <S>R$19,99/mês</S>. Os benefícios incluem:
-      </LegalP>
+      <LegalH2>Planos disponíveis</LegalH2>
       <LegalUL>
-        <LegalLI>Acesso a todas as transmissões, incluindo conteúdo exclusivo para assinantes.</LegalLI>
-        <LegalLI>4 livros de domínio público por mês disponíveis na plataforma.</LegalLI>
-        <LegalLI>Sistema completo de XP, rank global e badges.</LegalLI>
-        <LegalLI>Quiz Hermes em todas as transmissões.</LegalLI>
-        <LegalLI>Trilhas de estudo por domínio.</LegalLI>
+        <LegalLI><S>Plano Iniciado — R$19,99/mês:</S> acesso completo à plataforma, transmissões exclusivas, trilhas, XP e rank global, grimório pessoal e badges.</LegalLI>
+        <LegalLI><S>Plano Adepto — R$27,90/mês:</S> tudo do Iniciado mais acesso completo à Biblioteca de livros com leitor PDF integrado e grimório na biblioteca.</LegalLI>
+        <LegalLI><S>Plano Acervo — R$19,99/mês:</S> acesso à Biblioteca completa de livros com leitor integrado e grimório. Não inclui transmissões exclusivas nem trilhas.</LegalLI>
       </LegalUL>
+      <LegalP>Todos os planos são cobrados mensalmente de forma recorrente. As regras de cobrança, cancelamento e reembolso abaixo aplicam-se a todos os planos pagos.</LegalP>
 
       <LegalH2>Cobrança</LegalH2>
       <LegalP>A assinatura é cobrada mensalmente de forma recorrente no cartão cadastrado:</LegalP>

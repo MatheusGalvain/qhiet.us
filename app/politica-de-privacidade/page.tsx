@@ -26,7 +26,7 @@ export default function PoliticaPrivacidadePage() {
       <LegalP>Coletamos apenas os dados necessários para o funcionamento do portal:</LegalP>
       <LegalUL>
         <LegalLI><S>Dados de cadastro:</S> nome e endereço de e-mail fornecidos no momento do registro.</LegalLI>
-        <LegalLI><S>Dados de uso:</S> histórico de leituras, XP acumulado, rank e progresso nas categorias.</LegalLI>
+        <LegalLI><S>Dados de uso:</S> histórico de leituras, XP acumulado, rank, progresso nas categorias, progresso de leitura na Biblioteca (página atual por livro) e anotações pessoais do Grimório.</LegalLI>
         <LegalLI><S>Dados de pagamento:</S> processados integralmente pelo Stripe. Não armazenamos dados de cartão de crédito.</LegalLI>
         <LegalLI><S>Dados técnicos:</S> endereço IP, tipo de navegador e dados de sessão para segurança e funcionamento do sistema.</LegalLI>
       </LegalUL>

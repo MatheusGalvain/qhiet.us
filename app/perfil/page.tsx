@@ -486,7 +486,7 @@ export default async function PerfilPage({
                 key={book.id}
                 href={book.file_key ? `/perfil/livros/${book.id}` : (book.file_url ?? '#')}
                 className="book-card-link"
-                style={isPremium ? { outline: '1px solid var(--gold)', outlineOffset: 2 } : {outline: '1px solid var(--red-dim)', outlineOffset: 2}}
+                style={isPremium ? { outline: '1px solid var(--gold-dim)', outlineOffset: 1 } : {outline: '1px solid var(--red-dim)', outlineOffset: 1}}
               >
                 {/* Badge premium */}
                 <p

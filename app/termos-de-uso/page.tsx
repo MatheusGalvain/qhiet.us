@@ -31,10 +31,12 @@ export default function TermosUsoPage() {
       </LegalUL>
 
       <LegalH2>Planos e acesso</LegalH2>
-      <LegalP>O portal oferece dois planos:</LegalP>
+      <LegalP>O portal oferece quatro planos:</LegalP>
       <LegalUL>
-        <LegalLI><S>Plano Profano (gratuito):</S> acesso às transmissões de leitura livre, 1 livro por mês.</LegalLI>
-        <LegalLI><S>Plano Iniciado (R$19,99/mês):</S> acesso completo a todas as transmissões, 4 livros por mês, XP completo, rank global e trilhas de estudo.</LegalLI>
+        <LegalLI><S>Plano Profano (gratuito):</S> acesso às transmissões de leitura livre, quiz básico e rank de XP básico.</LegalLI>
+        <LegalLI><S>Plano Iniciado (R$19,99/mês):</S> acesso completo a todas as transmissões, quiz completo, XP e rank global, trilhas de iniciação, grimório pessoal e badges.</LegalLI>
+        <LegalLI><S>Plano Adepto (R$27,90/mês):</S> tudo do plano Iniciado mais acesso completo à Biblioteca de livros com leitor integrado, grimório na biblioteca e badge exclusivo Adepto.</LegalLI>
+        <LegalLI><S>Plano Acervo (R$19,99/mês):</S> acesso à Biblioteca completa de livros com leitor integrado e grimório. Não inclui transmissões exclusivas, trilhas ou XP completo.</LegalLI>
       </LegalUL>
       <LegalP>Os benefícios de cada plano podem ser alterados mediante aviso prévio por e-mail.</LegalP>
 
