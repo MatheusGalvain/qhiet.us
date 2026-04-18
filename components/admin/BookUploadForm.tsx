@@ -99,23 +99,30 @@ export default function BookUploadForm({ onSaved }: Props) {
 
     setStatus('uploading'); setError(''); setProgress(0)
 
-    // 1. Upload PDF → R2
+    // 1. Obter URL presignada do R2 (upload direto browser → R2, sem limite de tamanho)
     let r2Key = ''
     try {
-      const form = new FormData()
-      form.append('file', file)
+      const metaRes = await fetch(
+        `/api/admin/livros?filename=${encodeURIComponent(file.name)}&type=${encodeURIComponent(file.type || 'application/pdf')}`,
+      )
+      if (!metaRes.ok) throw new Error('Erro ao gerar URL de upload.')
+      const { signedUrl, key } = await metaRes.json()
+      r2Key = key
+
+      // PUT direto ao R2 com rastreamento de progresso
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest()
-        xhr.open('POST', '/api/admin/livros/upload')
+        xhr.open('PUT', signedUrl)
+        xhr.setRequestHeader('Content-Type', file.type || 'application/pdf')
         xhr.upload.onprogress = ev => {
           if (ev.lengthComputable) setProgress(Math.round((ev.loaded / ev.total) * 100))
         }
         xhr.onload = () => {
-          if (xhr.status < 300) { r2Key = JSON.parse(xhr.responseText).key; resolve() }
-          else reject(new Error(`Upload falhou: ${xhr.status}`))
+          if (xhr.status < 300) resolve()
+          else reject(new Error(`Upload falhou: ${xhr.status} — verifique o CORS do bucket R2`))
         }
         xhr.onerror = () => reject(new Error('Erro de rede ao enviar o arquivo'))
-        xhr.send(form)
+        xhr.send(file)
       })
     } catch (err: any) {
       setError(err.message); setStatus('error'); return

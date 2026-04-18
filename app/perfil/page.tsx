@@ -73,6 +73,7 @@ async function getData(page: number) {
   const booksQuery = service
     .from('monthly_books')
     .select('*')
+    .order('order_index', { ascending: true, nullsFirst: false })
     .order('month', { ascending: false })
     .limit(12)
 

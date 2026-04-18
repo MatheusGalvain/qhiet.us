@@ -58,13 +58,14 @@ export async function PATCH(request: NextRequest) {
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
 
   const body = await request.json()
-  const { title, author, month, cover_url, plan } = body
+  const { title, author, month, cover_url, plan, order_index } = body
   const updates: Record<string, unknown> = {}
-  if (title     !== undefined) updates.title     = title
-  if (author    !== undefined) updates.author    = author
-  if (month     !== undefined) updates.month     = month
-  if (cover_url !== undefined) updates.cover_url = cover_url || null
-  if (plan      !== undefined) { updates.plan = plan; updates.plan_access = [plan] }
+  if (title       !== undefined) updates.title       = title
+  if (author      !== undefined) updates.author      = author
+  if (month       !== undefined) updates.month       = month
+  if (cover_url   !== undefined) updates.cover_url   = cover_url || null
+  if (order_index !== undefined) updates.order_index = order_index
+  if (plan        !== undefined) { updates.plan = plan; updates.plan_access = [plan] }
 
   const service = createServiceClient()
   const { data, error } = await service.from('monthly_books').update(updates).eq('id', id).select().single()

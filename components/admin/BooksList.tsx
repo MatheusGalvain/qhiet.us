@@ -11,6 +11,7 @@ interface Book {
   cover_url?: string | null
   plan?: string
   plan_access?: string[]
+  order_index?: number | null
 }
 
 const inputStyle: React.CSSProperties = {
@@ -43,11 +44,48 @@ function getPlan(book: Book): string {
 }
 
 export default function BooksList({ books: initial }: { books: Book[] }) {
-  const [books, setBooks] = useState(initial)
+  // Garante ordem por order_index (nulls vão pro final, fallback array index)
+  const sorted = [...initial].sort((a, b) => {
+    const ai = a.order_index ?? Infinity
+    const bi = b.order_index ?? Infinity
+    return ai - bi
+  })
+  const [books, setBooks] = useState(sorted)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [editing, setEditing] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [editError, setEditError] = useState('')
+  const [reordering, setReordering] = useState(false)
+
+  async function moveBook(id: string, dir: -1 | 1) {
+    const i = books.findIndex(b => b.id === id)
+    const j = i + dir
+    if (j < 0 || j >= books.length) return
+
+    // Renumera todos a partir da posição atual para evitar gaps
+    const reindexed = books.map((b, idx) => ({ ...b, order_index: idx }))
+    ;[reindexed[i], reindexed[j]] = [reindexed[j], reindexed[i]]
+    const result = reindexed.map((b, idx) => ({ ...b, order_index: idx }))
+    setBooks(result)
+
+    setReordering(true)
+    try {
+      await Promise.all([
+        fetch(`/api/admin/livros?id=${result[i].id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_index: i }),
+        }),
+        fetch(`/api/admin/livros?id=${result[j].id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_index: j }),
+        }),
+      ])
+    } finally {
+      setReordering(false)
+    }
+  }
 
   // edit form state
   const [editTitle, setEditTitle]     = useState('')
@@ -112,16 +150,18 @@ export default function BooksList({ books: initial }: { books: Book[] }) {
     )
   }
 
+  const COLS = '40px 1fr 150px 110px 90px 190px'
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
       {/* Header */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px 110px 90px 160px', gap: 16, padding: '10px 0', borderBottom: '1px solid var(--faint)' }}>
-        {['Título', 'Autor', 'Mês', 'Plano', ''].map(h => (
+      <div style={{ display: 'grid', gridTemplateColumns: COLS, gap: 16, padding: '10px 0', borderBottom: '1px solid var(--faint)' }}>
+        {['#', 'Título', 'Autor', 'Mês', 'Plano', ''].map(h => (
           <span key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--muted)', textTransform: 'uppercase' }}>{h}</span>
         ))}
       </div>
 
-      {books.map(book => {
+      {books.map((book, idx) => {
         const plan = getPlan(book)
         const isEditing = editing === book.id
 
@@ -186,7 +226,30 @@ export default function BooksList({ books: initial }: { books: Book[] }) {
         }
 
         return (
-          <div key={book.id} style={{ display: 'grid', gridTemplateColumns: '1fr 160px 110px 90px 160px', gap: 16, padding: '14px 0', borderBottom: '1px solid var(--faint)', alignItems: 'center' }}>
+          <div key={book.id} style={{ display: 'grid', gridTemplateColumns: COLS, gap: 16, padding: '14px 0', borderBottom: '1px solid var(--faint)', alignItems: 'center' }}>
+            {/* Ordem */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
+              <button
+                onClick={() => moveBook(book.id, -1)}
+                disabled={idx === 0 || reordering}
+                title="Mover para cima"
+                style={{ background: 'none', border: 'none', color: idx === 0 ? 'var(--faint)' : 'var(--muted)', cursor: idx === 0 ? 'default' : 'pointer', fontSize: 12, lineHeight: 1, padding: '2px 4px' }}
+              >
+                ▲
+              </button>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--faint)', letterSpacing: 1 }}>
+                {idx + 1}
+              </span>
+              <button
+                onClick={() => moveBook(book.id, 1)}
+                disabled={idx === books.length - 1 || reordering}
+                title="Mover para baixo"
+                style={{ background: 'none', border: 'none', color: idx === books.length - 1 ? 'var(--faint)' : 'var(--muted)', cursor: idx === books.length - 1 ? 'default' : 'pointer', fontSize: 12, lineHeight: 1, padding: '2px 4px' }}
+              >
+                ▼
+              </button>
+            </div>
+
             <div>
               <p style={{ fontFamily: 'var(--font-display)', fontSize: 16, letterSpacing: 1, color: 'var(--cream)', marginBottom: 2 }}>{book.title}</p>
               <a href={book.file_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--muted)', textDecoration: 'none', textTransform: 'uppercase' }}>

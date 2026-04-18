@@ -8,6 +8,7 @@ async function getBooks() {
   const { data } = await supabase
     .from('monthly_books')
     .select('*')
+    .order('order_index', { ascending: true, nullsFirst: false })
     .order('month', { ascending: false })
   return data ?? []
 }
