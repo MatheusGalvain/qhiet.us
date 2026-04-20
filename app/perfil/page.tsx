@@ -589,16 +589,16 @@ export default async function PerfilPage({
                       {pm.symbol} Plano {pm.label} ativo
                     </p>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 2, color: 'var(--cream)', textTransform: 'uppercase' }}>
-                      {profile.plan === 'adepto' ? 'Acesso total · transmissões + biblioteca' : 'Acesso completo · transmissões + livros'}
+                      {profile.plan === 'adepto' ? 'Acesso total · transmissões + biblioteca' : profile.plan === 'acervo' ? 'Acesso à biblioteca · livros mensais' : 'Acesso completo · transmissões + livros'}
                     </p>
                   </div>
                   <BillingPortalButton />
                 </div>
-                {profile.plan === 'iniciado' && (
-                  <form action="/api/checkout" method="POST" style={{ marginBottom: 16 }}>
+                {(profile.plan === 'iniciado' || profile.plan === 'acervo') && (
+                  <form action="/api/checkout/upgrade" method="POST" style={{ marginBottom: 16 }}>
                     <input type="hidden" name="plan" value="adepto" />
                     <button type="submit" style={{ display: 'block', width: '100%', padding: '12px', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--gold-dim)', color: 'var(--gold)', cursor: 'pointer' }}>
-                      ✦ Fazer upgrade para Adepto →
+                      ✦ Fazer upgrade para Adepto — pague só a diferença →
                     </button>
                   </form>
                 )}
@@ -629,4 +629,3 @@ function LogoutButton() {
       </button>
     </form>
   )
-}
