@@ -111,8 +111,7 @@ export async function POST(request: NextRequest) {
       break
     }
 
-    case 'customer.subscription.deleted':
-    case 'customer.subscription.paused': {
+    case 'customer.subscription.deleted': {
       // Remove the specific cancelled plan from plans[] instead of blowing everything away
       const subscription = event.data.object as Stripe.Subscription
       const customerId = subscription.customer as string
