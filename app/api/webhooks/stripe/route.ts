@@ -31,7 +31,7 @@ async function mergePlanForUser(
     .update({
       plan:         primaryPlan,
       plans:        mergedPlans,
-      is_subscriber: mergedPlans.includes('adepto') || mergedPlans.includes('iniciado'),
+      is_subscriber: mergedPlans.includes('adepto') || mergedPlans.includes('iniciado') || mergedPlans.includes('acervo'),
       ...extraFields,
     })
     .eq('id', userId)
@@ -65,7 +65,7 @@ async function mergePlanForCustomer(
     .update({
       plan:          primaryPlan,
       plans:         mergedPlans,
-      is_subscriber: mergedPlans.includes('adepto') || mergedPlans.includes('iniciado'),
+      is_subscriber: mergedPlans.includes('adepto') || mergedPlans.includes('iniciado') || mergedPlans.includes('acervo'),
     })
     .eq('stripe_customer_id', customerId)
 }
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
         .update({
           plan:          primaryPlan,
           plans:         newPlans,
-          is_subscriber: newPlans.includes('adepto') || newPlans.includes('iniciado'),
+          is_subscriber: newPlans.includes('adepto') || newPlans.includes('iniciado') || newPlans.includes('acervo'),
         })
         .eq('stripe_customer_id', customerId)
       break

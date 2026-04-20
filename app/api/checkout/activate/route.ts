@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       mergedPlans.includes('iniciado') ? 'iniciado' :
       mergedPlans.includes('acervo')   ? 'acervo'   : 'profano'
 
-    const isSubscriber = mergedPlans.includes('adepto') || mergedPlans.includes('iniciado')
+    const isSubscriber = mergedPlans.includes('adepto') || mergedPlans.includes('iniciado') || mergedPlans.includes('acervo')
 
     // ── 7. Persistir ──────────────────────────────────────────────────────
     const { error: updateError } = await service
