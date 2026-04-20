@@ -11,6 +11,7 @@ import ActivityHeatmap from '@/components/perfil/ActivityHeatmap'
 import NickForm from '@/components/perfil/NickForm'
 import ProfileSidebar from '@/components/perfil/ProfileSidebar'
 import BillingPortalButton from '@/components/perfil/BillingPortalButton'
+import UpgradeButton from '@/components/perfil/UpgradeButton'
 import DeleteAccountButton from '@/components/perfil/DeleteAccountButton'
 import DomainCarousel from '@/components/perfil/DomainCarousel'
 import TrailBadges from '@/components/perfil/TrailBadges'
@@ -595,12 +596,7 @@ export default async function PerfilPage({
                   <BillingPortalButton />
                 </div>
                 {(profile.plan === 'iniciado' || profile.plan === 'acervo') && (
-                  <form action="/api/checkout/upgrade" method="POST" style={{ marginBottom: 16 }}>
-                    <input type="hidden" name="plan" value="adepto" />
-                    <button type="submit" style={{ display: 'block', width: '100%', padding: '12px', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 3, textTransform: 'uppercase', background: 'transparent', border: '1px solid var(--gold-dim)', color: 'var(--gold)', cursor: 'pointer' }}>
-                      ✦ Fazer upgrade para Adepto — pague só a diferença →
-                    </button>
-                  </form>
+                  <UpgradeButton fromPlan={profile.plan as 'iniciado' | 'acervo'} />
                 )}
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: 1, color: 'var(--muted)', lineHeight: 1.9 }}>
                   Para cancelar, clique em &ldquo;Gerenciar assinatura&rdquo;. Você será redirecionado
@@ -629,4 +625,3 @@ function LogoutButton() {
       </button>
     </form>
   )
-}
