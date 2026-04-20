@@ -625,3 +625,4 @@ function LogoutButton() {
       </button>
     </form>
   )
+}
