@@ -8,6 +8,7 @@ import { canAccessAny, resolvePlans } from '@/lib/plans'
 import type { Profile } from '@/types'
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import Script from 'next/script'
 
 <link rel="icon" href="/favicon.ico" sizes="any" />
 
@@ -57,6 +58,19 @@ export default async function RootLayout({
 
   return (
     <html lang="pt-BR">
+      <head>
+        {/* Google tag (gtag.js) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-CBWMCP7HEE"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-CBWMCP7HEE');
+        `}</Script>
+      </head>
       <body>
         <NoiseOverlay />
         <Nav profile={profile} canUseGrimorio={canUseGrimorio} />

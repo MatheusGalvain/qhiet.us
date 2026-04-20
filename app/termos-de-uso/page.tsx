@@ -51,7 +51,6 @@ export default function TermosUsoPage() {
         <LegalLI>Fazer engenharia reversa da plataforma.</LegalLI>
         <LegalLI>Criar conteúdo derivado sem autorização.</LegalLI>
       </LegalUL>
-      <LegalP>Os livros distribuídos mensalmente são obras de domínio público e podem ser compartilhados livremente.</LegalP>
 
       <LegalH2>Conduta do usuário</LegalH2>
       <LegalP>Ao utilizar o portal, você concorda em não:</LegalP>

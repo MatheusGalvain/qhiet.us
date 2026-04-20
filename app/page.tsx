@@ -110,7 +110,7 @@ export default async function HomePage() {
 
       {/* QUOTE SECTION */}
       <section className="quote-section">
-        <div className="qs-left">
+        <div className="qs-left hidden lg:flex">
           <div className="qs-text">
             "Não busques a verdade fora de ti. O que procuras no mundo já habita, em silêncio, dentro de tua própria sombra."
           </div>
@@ -159,7 +159,7 @@ export default async function HomePage() {
       </section>
 
       {/* BANNER */}
-      <section className='w-full py-3 lg:py-5'>
+      <section className='hidden lg:flex w-full py-3 lg:py-5'>
         <Link href="/transmissoes" >
           <img src="/assets/banner-reduce.png"></img>
         </Link>

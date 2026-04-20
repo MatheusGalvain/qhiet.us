@@ -181,7 +181,7 @@ export default function AcervoGateway({ plan, plans, bookCount = 0, collapsed = 
           fontFamily: 'var(--font-mono)',
           fontSize: 9, letterSpacing: 4,
           textTransform: 'uppercase',
-          color: 'var(--faint)',
+          color: 'var(--cream-dim)',
           marginBottom: 5,
         }}>
           ◉ Acervo
@@ -197,7 +197,7 @@ export default function AcervoGateway({ plan, plans, bookCount = 0, collapsed = 
         <p style={{
           fontFamily: 'var(--font-mono)',
           fontSize: 9, letterSpacing: 1.5,
-          color: 'var(--faint)', marginTop: 10, lineHeight: 1.6,
+          color: 'var(--cream-dim)', marginTop: 10, lineHeight: 1.6,
         }}>
           Disponível nos planos<br />Adepto e Acervo
         </p>

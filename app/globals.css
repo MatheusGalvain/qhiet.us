@@ -1311,7 +1311,6 @@ body {
   .article-featured { grid-template-columns: 1fr; }
   .af-main { border-right: none; border-bottom: 1px solid var(--faint); padding-right: 0; }
   .af-side { padding-left: 0; }
-  .af-center-badge { display: none; }
 }
 
 /* ARTICLES GRID */

@@ -25,6 +25,7 @@ import { stripe } from '@/lib/stripe/client'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { addPlan, resolvePlans } from '@/lib/plans'
 import type { Plan } from '@/lib/plans'
+import { sendWelcomeEmail } from '@/lib/resend/client'
 
 const VALID_PLANS = ['iniciado', 'adepto', 'acervo'] as const
 type ValidPlan = typeof VALID_PLANS[number]
@@ -114,6 +115,21 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[activate] Plans activated: userId=${user.id} plans=${mergedPlans.join(',')} primary=${primaryPlan}`)
+
+    // Envia e-mail de boas-vindas para o plano recém-ativado (fire-and-forget)
+    const email = user.email
+    if (email && VALID_PLANS.includes(newPlan)) {
+      const { data: profileForEmail } = await service
+        .from('profiles')
+        .select('name')
+        .eq('id', user.id)
+        .single()
+      const name = (profileForEmail as any)?.name ?? email.split('@')[0]
+      sendWelcomeEmail({ to: email, name, plan: newPlan }).catch(err =>
+        console.error('[activate] welcome email error:', err)
+      )
+    }
+
     return NextResponse.json({ ok: true, plan: primaryPlan, plans: mergedPlans })
 
   } catch (err: any) {
