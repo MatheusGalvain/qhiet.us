@@ -76,6 +76,8 @@ export default async function RootLayout({
         <Nav profile={profile} canUseGrimorio={canUseGrimorio} />
         <main>{children}</main>
         <Footer />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
